@@ -8,6 +8,7 @@ class _ExtFileState extends State {
   String img = "https://proxy.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.tractionwise.com%2Fwp-content%2Fuploads%2F2016%2F04%2FIcon-Person.png&f=1&nofb=1";
   String name = "Tobias Seczer";
   String email = "tobias.seczer@gmail.com";
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -39,7 +40,7 @@ class _ExtFileState extends State {
             },
           ),
           ListTile(
-            leading: Icon(Icons.notifications_active),
+            leading: Icon(Icons.local_offer),
             title: Text("Angebote"),
             onTap: () {
               Navigator.pop(context);

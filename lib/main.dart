@@ -6,7 +6,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:shoppy/services/auth.dart';
-import 'package:shoppy/widgets/Sidebar.dart';
+import 'package:shoppy/widgets/sidebar.dart';
 
 // Run App
 void main() => runApp(MyApp());
