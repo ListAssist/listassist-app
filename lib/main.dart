@@ -4,7 +4,8 @@
 // opens a [SnackBar], while the second action navigates to a new page.
 
 import 'package:flutter/material.dart';
-
+import 'package:flutter_signin_button/button_list.dart';
+import 'package:flutter_signin_button/button_view.dart';
 import 'package:shoppy/services/auth.dart';
 
 // Run App
@@ -19,7 +20,9 @@ class MyApp extends StatelessWidget {
       title: "Shoppy",
       home: Scaffold(
         body: Center(
-            child: Column(
+            child: Container(
+              margin: EdgeInsets.all(50),
+              child: Column(
                children: <Widget>[
                  StreamBuilder(
                    stream: authService.user,
@@ -31,14 +34,31 @@ class MyApp extends StatelessWidget {
                      }
                    }
                  ),
+                 SignInButton(
+                   Buttons.Google,
+                   onPressed: () => authService.signIn(AuthenticationType.Google),
+                   text: "Sign in with Google",
+                 ),
+                 SignInButton(
+                   Buttons.Facebook,
+                   onPressed: () => authService.signIn(AuthenticationType.Facebook),
+                   text: "Sign in with Facebook",
+                 ),
+                 SignInButton(
+                   Buttons.Twitter,
+                   onPressed: () => authService.signIn(AuthenticationType.Twitter),
+                   text: "Sign in with Twitter",
+                 ),
                  MaterialButton(
-                   onPressed: () => authService.googleSignIn(),
-                   color: Colors.white,
+                   onPressed: () => authService.signOut(),
+                   color: Colors.red,
                    textColor: Colors.black,
-                   child: Text("Mit Google einloggen"),
-                 )
+                   child: Text("Logout"),
+                 ),
                ],
               mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+            )
             )
         )
       ),
