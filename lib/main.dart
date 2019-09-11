@@ -6,6 +6,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:shoppy/services/auth.dart';
+import 'package:shoppy/widgets/Sidebar.dart';
 
 // Run App
 void main() => runApp(MyApp());
@@ -17,6 +18,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: "Shoppy",
+      theme: ThemeData(
+        primarySwatch: Colors.indigo,
+      ),
       home: Scaffold(
         body: Center(
             child: Column(
@@ -40,7 +44,8 @@ class MyApp extends StatelessWidget {
                ],
               mainAxisAlignment: MainAxisAlignment.center,
             )
-        )
+        ),
+        drawer: Sidebar()
       ),
     );
   }
