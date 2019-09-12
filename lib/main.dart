@@ -19,6 +19,7 @@ class MyApp extends StatelessWidget {
       title: "Shoppy",
       home: Scaffold(
         /// Prevents resizing when opening keyboard: resizeToAvoidBottomInset: false,
+        resizeToAvoidBottomInset: false,
         body: Center(
             child: StreamBuilder(
                    stream: authService.user,
@@ -32,7 +33,7 @@ class MyApp extends StatelessWidget {
                            child: Text("Logout"),
                          );
                      } else {
-                       return Authentication();
+                       return AuthenticationPage();
                      }
                    }
                  ),

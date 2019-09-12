@@ -46,9 +46,21 @@ class AuthService {
     });
   }
 
-  Future<FirebaseUser> signUpWithMail(String email, String password, String username) {
+  /// Creates user with email and password
+  Future<FirebaseUser> signUpWithMail(String email, String password, String displayName) async {
+    /// TODO: Handle duplicate E-Mail error
+    FirebaseUser user = await _auth.createUserWithEmailAndPassword(email: email, password: password);
+    user.sendEmailVerification();
+    
+    DocumentReference userRef = _db.collection("users").document(user.uid);
+    userRef.setData({
+      "uid": user.uid,
+      "email": user.email,
+      "displayName": displayName,
+      "lastLogin": DateTime.now(),
+    }, merge: true);
 
-
+    return user;
   }
 
   /// Create a session for an user with email and password

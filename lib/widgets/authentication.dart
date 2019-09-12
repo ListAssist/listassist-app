@@ -4,7 +4,7 @@ import 'package:flutter_signin_button/button_view.dart';
 import 'package:shoppy/services/auth.dart';
 import 'package:email_validator/email_validator.dart';
 
-class Authentication extends StatelessWidget {
+class AuthenticationPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -28,18 +28,19 @@ class _LoginForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return
-      Column(
+    return Form(
+      key: _formKey,
+      child: Column(
           children: <Widget>[
             Container(
               margin: EdgeInsets.only(bottom: 20),
               child: Column(
                 children: <Widget>[
                   TextFormField(
-                    key: _formKey,
                     maxLines: 1,
+                    autovalidate: true,
                     keyboardType: TextInputType.emailAddress,
-                    validator: (value) => value.isEmpty ? "Bitte eine E-Mail eingeben!" : null,
+                    validator: (value) => EmailValidator.validate(value) ? null : "Bitte eine E-Mail eingeben.",
                     onSaved: (value) => _email = value,
                     decoration: InputDecoration(
                         hintText: "Email",
@@ -51,8 +52,9 @@ class _LoginForm extends StatelessWidget {
                   ),
                   TextFormField(
                       maxLines: 1,
+                      autovalidate: true,
                       obscureText: true,
-                      validator: (value) => "Your password needs to be at least 6 character big!",
+                      validator: (value) => value.length >= 6 ? null : "The password must be at least 6 characters long.",
                       onSaved: (value) => _password = value,
                       decoration: InputDecoration(
                           hintText: "Password",
@@ -76,13 +78,16 @@ class _LoginForm extends StatelessWidget {
               color: Colors.blueAccent,
             )
           ],
-      );
+      )
+    );
   }
 
   void submit() async {
-    print(_formKey.currentState.validate());
+    if (_formKey.currentState.validate()) {
+      _formKey.currentState.save();
 
-  authService.signInWithMail(_email, _password);
+      authService.signInWithMail(_email, _password);
+    }
   }
 
 }
