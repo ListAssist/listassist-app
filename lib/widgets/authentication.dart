@@ -1,119 +1,45 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_signin_button/button_list.dart';
-import 'package:flutter_signin_button/button_view.dart';
-import 'package:shoppy/services/auth.dart';
-import 'package:email_validator/email_validator.dart';
+import 'package:shoppy/widgets/pages/login.dart';
+import 'package:shoppy/widgets/pages/register.dart';
 
-class AuthenticationPage extends StatelessWidget {
+enum _AuthType {SignIn, SignUp}
+
+class AuthenticationPage extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
-    return Container(
-        margin: EdgeInsets.all(40),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: <Widget>[
-            _LoginForm(),
-            Divider(),
-            _SocialSignInButtons()
-          ],
-        )
-    );
-  }
+  _AuthenticationPageState createState() => _AuthenticationPageState();
 }
 
-class _LoginForm extends StatelessWidget {
-  final _formKey = new GlobalKey<FormState>();
-  String _email = "";
-  String _password = "";
+class _AuthenticationPageState extends State<AuthenticationPage> {
 
-  @override
-  Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: Column(
-          children: <Widget>[
-            Container(
-              margin: EdgeInsets.only(bottom: 20),
-              child: Column(
-                children: <Widget>[
-                  TextFormField(
-                    maxLines: 1,
-                    autovalidate: true,
-                    keyboardType: TextInputType.emailAddress,
-                    validator: (value) => EmailValidator.validate(value) ? null : "Bitte eine E-Mail eingeben.",
-                    onSaved: (value) => _email = value,
-                    decoration: InputDecoration(
-                        hintText: "Email",
-                        icon: Icon(
-                          Icons.mail_outline,
-                          color: Colors.black,
-                        )
-                    ),
-                  ),
-                  TextFormField(
-                      maxLines: 1,
-                      autovalidate: true,
-                      obscureText: true,
-                      validator: (value) => value.length >= 6 ? null : "The password must be at least 6 characters long.",
-                      onSaved: (value) => _password = value,
-                      decoration: InputDecoration(
-                          hintText: "Password",
-                          icon: Icon(
-                            Icons.lock_outline,
-                            color: Colors.black,
-                          )
-                      )
-                  ),
-                ],
-              ),
-            ),
-            MaterialButton(
-              child: Text(
-                "Log in",
-                style: TextStyle(
-                    color: Colors.white
-                ),
-              ),
-              onPressed: () => submit(),
-              color: Colors.blueAccent,
-            )
-          ],
-      )
-    );
-  }
+  _AuthType type = _AuthType.SignIn;
 
-  void submit() async {
-    if (_formKey.currentState.validate()) {
-      _formKey.currentState.save();
-
-      authService.signInWithMail(_email, _password);
-    }
-  }
-
-}
-
-class _SocialSignInButtons extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: <Widget>[
-        SignInButton(
-        Buttons.Google,
-        onPressed: () => authService.signIn(AuthenticationType.Google),
-        text: "Sign in with Google",
-        ),
-        SignInButton(
-          Buttons.Facebook,
-          onPressed: () => authService.signIn(AuthenticationType.Facebook),
-          text: "Sign in with Facebook",
-        ),
-        SignInButton(
-          Buttons.Twitter,
-          onPressed: () => authService.signIn(AuthenticationType.Twitter),
-          text: "Sign in with Twitter",
-        ),
+        getPage(),
+        GestureDetector(
+          onTap: () {
+            setState(() {
+              if (type == _AuthType.SignIn) {
+                type = _AuthType.SignUp;
+              } else {
+                type = _AuthType.SignIn;
+              }
+            });
+          },
+          child: Text(
+            getText(),
+            style: TextStyle(color: Colors.blueAccent),
+          ),
+        )
       ],
     );
   }
 
+  Widget getPage() => type == _AuthType.SignIn ? LoginPage() : RegisterPage();
+
+  String getText() => type == _AuthType.SignIn ? "Don't have an account yet? Create one here." : "Already have an account? Sign in here.";
 }
+
