@@ -46,7 +46,23 @@ class AuthService {
     });
   }
 
-  /// Create a session for an user with specific 3rd party login
+  Future<FirebaseUser> signUpWithMail(String email, String password, String username) {
+
+
+  }
+
+  /// Create a session for an user with email and password
+  Future<FirebaseUser> signInWithMail(String email, String password) async {
+    loading.add(true);
+
+    FirebaseUser user = await _auth.signInWithEmailAndPassword(email: email, password: password);
+    print(user.photoUrl);
+
+    loading.add(false);
+    return user;
+  }
+
+  /// Create a session for an user with specific login type
   Future<FirebaseUser> signIn(AuthenticationType type) async {
     loading.add(true);
 
