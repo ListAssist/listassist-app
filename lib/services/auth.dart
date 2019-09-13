@@ -1,13 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_twitter_login/flutter_twitter_login.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:shoppy/main.dart';
 
 enum AuthenticationType {Facebook, Google, Twitter}
 
 class AuthService {
+
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   final FacebookLogin _facebookSignIn = FacebookLogin();
   final TwitterLogin _twitterSignIn = TwitterLogin(
@@ -48,30 +52,39 @@ class AuthService {
 
   /// Creates user with email and password
   Future<FirebaseUser> signUpWithMail(String email, String password, String displayName) async {
-    /// TODO: Handle duplicate E-Mail error
-    FirebaseUser user = await _auth.createUserWithEmailAndPassword(email: email, password: password);
-    user.sendEmailVerification();
-    
-    DocumentReference userRef = _db.collection("users").document(user.uid);
-    userRef.setData({
-      "uid": user.uid,
-      "email": user.email,
-      "displayName": displayName,
-      "lastLogin": DateTime.now(),
-    }, merge: true);
+    try {
+      FirebaseUser user = await _auth.createUserWithEmailAndPassword(email: email, password: password);
+      user.sendEmailVerification();
 
-    return user;
+      DocumentReference userRef = _db.collection("users").document(user.uid);
+      userRef.setData({
+        "uid": user.uid,
+        "email": user.email,
+        "displayName": displayName,
+        "lastLogin": DateTime.now(),
+      }, merge: true);
+
+      loading.add(false);
+      return user;
+    } on PlatformException catch(e) {
+      handlePlatformException(e);
+      return null;
+    }
   }
 
   /// Create a session for an user with email and password
   Future<FirebaseUser> signInWithMail(String email, String password) async {
     loading.add(true);
 
-    FirebaseUser user = await _auth.signInWithEmailAndPassword(email: email, password: password);
-    print(user.photoUrl);
+    try {
+      FirebaseUser user = await _auth.signInWithEmailAndPassword(email: email, password: password);
 
-    loading.add(false);
-    return user;
+      loading.add(false);
+      return user;
+    } on PlatformException catch(e) {
+      handlePlatformException(e);
+      return null;
+    }
   }
 
   /// Create a session for an user with specific login type
@@ -83,9 +96,9 @@ class AuthService {
     switch (type) {
       case AuthenticationType.Facebook:
         /** Native Facebook login screen **/
-        FacebookLoginResult result = await _facebookSignIn.logInWithReadPermissions(['email']);
+        FacebookLoginResult result = await _facebookSignIn.logInWithReadPermissions(["email"]);
 
-        /// TODO: Could handle exit data for errors result.status to show in UI
+        if (_ResultHandler.handleFacebookResultError(result)) return null;
 
         credential = FacebookAuthProvider.getCredential(accessToken: result.accessToken.token);
         break;
@@ -102,21 +115,26 @@ class AuthService {
       case AuthenticationType.Twitter:
         TwitterLoginResult result = await _twitterSignIn.authorize();
 
-        /// TODO: Could handle exit data for errors result.status to show in UI
         /// Signing in with Twitter currently doesn't work. Created Issue at firebase_auth repo
+        if (_ResultHandler.handleTwitterResultError(result)) return null;
 
         credential = TwitterAuthProvider.getCredential(authToken: result.session.token, authTokenSecret: result.session.secret);
         break;
     }
 
-    /** Log into Firebase with gotten from above **/
-    FirebaseUser user = await _auth.signInWithCredential(credential);
+    try {
+      /** Log into Firebase with gotten from above **/
+      FirebaseUser user = await _auth.signInWithCredential(credential);
 
-    /** Update user data if the profile picture or the email changed for example **/
-    updateData(user);
+      /** Update user data if the profile picture or the email changed for example **/
+      updateData(user);
 
-    loading.add(false);
-    return user;
+      loading.add(false);
+      return user;
+    } on PlatformException catch (e) {
+      handlePlatformException(e);
+      return null;
+    }
   }
 
   /// Updates user data from 3rd party to firestore
@@ -138,8 +156,71 @@ class AuthService {
   void signOut() async {
     await _auth.signOut();
   }
+
+  void handlePlatformException(PlatformException e) {
+    if (e.code == "ERROR_ACCOUNT_EXISTS_WITH_DIFFERENT_CREDENTIAL" || e.code == "ERROR_EMAIL_ALREADY_IN_USE") {
+      scaffoldKey.currentState.showSnackBar(
+          SnackBar(
+            duration: Duration(seconds: 6),
+            content: Text("Ein Account mit dieser E-Mail Adresse existiert bereits. Haben Sie vielleicht einen anderen Login-typ verwendet?"),
+          )
+      );
+    } else {
+      print("UNHANDLED ERROR!!!!!!!!!!!!!!!!!!");
+      print(e.toString());
+    }
+    loading.add(false);
+  }
+
 }
 
 /// Expose to global namespace (not real singleton)
 final AuthService authService = AuthService();
 
+class _ResultHandler {
+  static bool handleFacebookResultError(FacebookLoginResult result) {
+    switch (result.status) {
+      case FacebookLoginStatus.loggedIn:
+        return false;
+      case FacebookLoginStatus.cancelledByUser:
+        scaffoldKey.currentState.showSnackBar(
+            SnackBar(
+              content: Text("Login abgebrochen, bitte versuchen Sie es erneut."),
+            )
+        );
+        break;
+      case FacebookLoginStatus.error:
+        scaffoldKey.currentState.showSnackBar(
+            SnackBar(
+              content: Text("Login fehlgeschlagen, bitte versuchen Sie es erneut."),
+            )
+        );
+        break;
+    }
+    authService.loading.add(false);
+    return true;
+  }
+
+  static bool handleTwitterResultError(TwitterLoginResult result) {
+    switch (result.status) {
+      case TwitterLoginStatus.loggedIn:
+        return false;
+      case TwitterLoginStatus.cancelledByUser:
+        scaffoldKey.currentState.showSnackBar(
+            SnackBar(
+              content: Text("Login abgebrochen, bitte versuchen Sie es erneut."),
+            )
+        );
+        break;
+      case TwitterLoginStatus.error:
+        scaffoldKey.currentState.showSnackBar(
+            SnackBar(
+              content: Text("Login fehlgeschlagen, bitte versuchen Sie es erneut."),
+            )
+        );
+        break;
+    }
+    authService.loading.add(false);
+    return true;
+  }
+}

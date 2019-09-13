@@ -10,6 +10,8 @@ import 'package:shoppy/widgets/authentication.dart';
 // Run App
 void main() => runApp(MyApp());
 
+final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+
 /// This Widget is the main application widget.
 class MyApp extends StatelessWidget {
 
@@ -18,6 +20,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: "Shoppy",
       home: Scaffold(
+        key: scaffoldKey,
         /// Prevents resizing when opening keyboard: resizeToAvoidBottomInset: false,
         resizeToAvoidBottomInset: false,
         body: Center(

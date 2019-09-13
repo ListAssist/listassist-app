@@ -14,10 +14,10 @@ class RegisterPage extends StatelessWidget {
           children: <Widget>[
             _RegisterForm(),
             Divider(),
-            SocialSignInButtons(prependedString: "Sign up",)
+            SocialSignInButtons(prependedString: "Registrieren",)
           ],
         )
-    );;
+    );
   }
 
 }
@@ -42,7 +42,15 @@ class _RegisterForm extends StatelessWidget {
                     maxLines: 1,
                     autovalidate: true,
                     keyboardType: TextInputType.emailAddress,
-                    validator: (value) => EmailValidator.validate(value) ? null : "Bitte eine E-Mail eingeben.",
+                    validator: (value) {
+                      if (value.isEmpty) {
+                        return "Bitte eine E-Mail eingeben.";
+                      } else if (!EmailValidator.validate(value)) {
+                        return "Bitte gültige E-Mail eingeben.";
+                      } else {
+                        return null;
+                      }
+                    },
                     onSaved: (value) => _email = value,
                     decoration: InputDecoration(
                         hintText: "Email",
@@ -66,13 +74,22 @@ class _RegisterForm extends StatelessWidget {
                     ),
                   ),
                   TextFormField(
+                      onFieldSubmitted: (_) => submit(),
                       maxLines: 1,
                       autovalidate: true,
                       obscureText: true,
-                      validator: (value) => value.length >= 6 ? null : "The password must be at least 6 characters long.",
+                      validator: (value) {
+                        if (value.isEmpty) {
+                          return "Bitte ein Passwort eingeben.";
+                        } else if (value.length < 6) {
+                          return "Das Passwort muss mindestens 6 Stellen lang sein.";
+                        } else {
+                          return null;
+                        }
+                      },
                       onSaved: (value) => _password = value,
                       decoration: InputDecoration(
-                          hintText: "Password",
+                          hintText: "Passwort",
                           icon: Icon(
                             Icons.lock_outline,
                             color: Colors.black,
@@ -84,7 +101,7 @@ class _RegisterForm extends StatelessWidget {
             ),
             MaterialButton(
               child: Text(
-                "Sign up",
+                "Registrieren",
                 style: TextStyle(
                     color: Colors.white
                 ),

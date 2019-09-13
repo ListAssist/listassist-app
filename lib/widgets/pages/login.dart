@@ -17,7 +17,7 @@ class LoginPage extends StatelessWidget {
             SocialSignInButtons()
           ],
         )
-    );;
+    );
   }
 
 }
@@ -52,13 +52,14 @@ class _LoginForm extends StatelessWidget {
                     ),
                   ),
                   TextFormField(
+                      onFieldSubmitted: (_) => submit(),
                       maxLines: 1,
                       autovalidate: true,
                       obscureText: true,
-                      validator: (value) => value.length >= 6 ? null : "The password must be at least 6 characters long.",
+                      validator: (value) => value.isEmpty ? "Bitte Ihr Passwort eingeben." : null,
                       onSaved: (value) => _password = value,
                       decoration: InputDecoration(
-                          hintText: "Password",
+                          hintText: "Passwort",
                           icon: Icon(
                             Icons.lock_outline,
                             color: Colors.black,
@@ -96,7 +97,7 @@ class _LoginForm extends StatelessWidget {
 class SocialSignInButtons extends StatelessWidget {
   final String prependedString;
 
-  SocialSignInButtons({this.prependedString = "Sign in"});
+  SocialSignInButtons({this.prependedString = "Einloggen"});
 
 
   @override
@@ -106,17 +107,17 @@ class SocialSignInButtons extends StatelessWidget {
         SignInButton(
           Buttons.Google,
           onPressed: () => authService.signIn(AuthenticationType.Google),
-          text: "$prependedString with Google",
+          text: "$prependedString mit Google",
         ),
         SignInButton(
           Buttons.Facebook,
           onPressed: () => authService.signIn(AuthenticationType.Facebook),
-          text: "$prependedString with Facebook",
+          text: "$prependedString mit Facebook",
         ),
         SignInButton(
           Buttons.Twitter,
           onPressed: () => authService.signIn(AuthenticationType.Twitter),
-          text: "$prependedString with Twitter",
+          text: "$prependedString mit Twitter",
         ),
       ],
     );

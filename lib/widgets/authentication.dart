@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shoppy/widgets/pages/login.dart';
 import 'package:shoppy/widgets/pages/register.dart';
@@ -31,7 +32,10 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
           },
           child: Text(
             getText(),
-            style: TextStyle(color: Colors.blueAccent),
+            style: TextStyle(
+                color: Colors.blueAccent,
+                decoration: TextDecoration.underline,
+            ),
           ),
         )
       ],
@@ -40,6 +44,6 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
 
   Widget getPage() => type == _AuthType.SignIn ? LoginPage() : RegisterPage();
 
-  String getText() => type == _AuthType.SignIn ? "Don't have an account yet? Create one here." : "Already have an account? Sign in here.";
+  String getText() => type == _AuthType.SignIn ? "Hast du noch kein Shoppy Konto? Erstelle hier einen!" : "Du hast bereits ein Shoppy Konto? Log dich hier ein!";
 }
 
