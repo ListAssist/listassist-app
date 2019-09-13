@@ -44,6 +44,5 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
 
   Widget getPage() => type == _AuthType.SignIn ? LoginPage() : RegisterPage();
 
-  String getText() => type == _AuthType.SignIn ? "Hast du noch kein Shoppy Konto? Erstelle hier einen!" : "Du hast bereits ein Shoppy Konto? Log dich hier ein!";
+  String getText() => type == _AuthType.SignIn ? "Hast du noch kein Shoppy Konto? Erstelle hier einen!" : "Du hast bereits ein Shoppy Konto? Logge dich hier ein!";
 }
-

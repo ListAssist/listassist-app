@@ -1,15 +1,10 @@
-// Flutter code sample for material.AppBar.1
-
-// This sample shows an [AppBar] with two simple actions. The first action
-// opens a [SnackBar], while the second action navigates to a new page.
-
 import 'package:flutter/material.dart';
 import 'package:shoppy/services/auth.dart';
 import 'package:shoppy/widgets/authentication.dart';
 
-// Run App
 void main() => runApp(MyApp());
 
+/// Scaffold key to create snackbar anywhere..
 final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
 
 /// This Widget is the main application widget.
@@ -39,9 +34,9 @@ class MyApp extends StatelessWidget {
                        return AuthenticationPage();
                      }
                    }
-                 ),
-            )
-            )
-        );
+            ),
+        )
+      )
+    );
   }
 }

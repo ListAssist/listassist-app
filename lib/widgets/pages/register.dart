@@ -1,7 +1,11 @@
-import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:shoppy/services/auth.dart';
+import 'package:shoppy/validators/email.dart';
+import 'package:shoppy/validators/password.dart';
+import 'package:shoppy/validators/username.dart';
 
+import '../formfield.dart';
 import 'login.dart';
 
 class RegisterPage extends StatelessWidget {
@@ -28,6 +32,7 @@ class _RegisterForm extends StatelessWidget {
   String _password = "";
   String _username = "";
 
+
   @override
   Widget build(BuildContext context) {
     return Form(
@@ -38,63 +43,35 @@ class _RegisterForm extends StatelessWidget {
               margin: EdgeInsets.only(bottom: 20),
               child: Column(
                 children: <Widget>[
-                  TextFormField(
-                    maxLines: 1,
-                    autovalidate: true,
-                    keyboardType: TextInputType.emailAddress,
-                    validator: (value) {
-                      if (value.isEmpty) {
-                        return "Bitte eine E-Mail eingeben.";
-                      } else if (!EmailValidator.validate(value)) {
-                        return "Bitte gültige E-Mail eingeben.";
-                      } else {
-                        return null;
-                      }
-                    },
+                  ReactiveTextInputFormField(
+                    validator: EmailValidator(),
                     onSaved: (value) => _email = value,
-                    decoration: InputDecoration(
-                        hintText: "Email",
-                        icon: Icon(
-                          Icons.mail_outline,
-                          color: Colors.black,
-                        )
+                    hintText: "Email",
+                    icon: Icon(
+                        Icons.mail_outline,
+                        color: Colors.black
                     ),
+                    keyboardType: TextInputType.emailAddress,
                   ),
-                  TextFormField(
-                    maxLines: 1,
-                    autovalidate: true,
-                    validator: (value) => value.isEmpty ? "Bitte einen Usernamen eingeben." : null,
+                  ReactiveTextInputFormField(
+                    validator: UsernameValidator(),
                     onSaved: (value) => _username = value,
-                    decoration: InputDecoration(
-                        hintText: "Username",
-                        icon: Icon(
-                          Icons.person_outline,
-                          color: Colors.black,
-                        )
+                    hintText: "Username",
+                    icon: Icon(
+                      Icons.person_outline,
+                      color: Colors.black,
                     ),
                   ),
-                  TextFormField(
-                      onFieldSubmitted: (_) => submit(),
-                      maxLines: 1,
-                      autovalidate: true,
-                      obscureText: true,
-                      validator: (value) {
-                        if (value.isEmpty) {
-                          return "Bitte ein Passwort eingeben.";
-                        } else if (value.length < 6) {
-                          return "Das Passwort muss mindestens 6 Stellen lang sein.";
-                        } else {
-                          return null;
-                        }
-                      },
-                      onSaved: (value) => _password = value,
-                      decoration: InputDecoration(
-                          hintText: "Passwort",
-                          icon: Icon(
-                            Icons.lock_outline,
-                            color: Colors.black,
-                          )
-                      )
+                  ReactiveTextInputFormField(
+                    validator: PasswordRegisterValidator(),
+                    onSaved: (value) => _password = value,
+                    hintText: "Passwort",
+                    icon: Icon(
+                      Icons.lock_outline,
+                      color: Colors.black,
+                    ),
+                    obscureText: true,
+                    onFieldSubmitted: (_) => submit(),
                   ),
                 ],
               ),

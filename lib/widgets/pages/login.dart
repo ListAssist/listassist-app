@@ -1,8 +1,10 @@
-import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_signin_button/button_view.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:shoppy/services/auth.dart';
+import 'package:shoppy/validators/email.dart';
+import 'package:shoppy/validators/password.dart';
+import '../formfield.dart';
 
 class LoginPage extends StatelessWidget {
   @override
@@ -37,34 +39,26 @@ class _LoginForm extends StatelessWidget {
               margin: EdgeInsets.only(bottom: 20),
               child: Column(
                 children: <Widget>[
-                  TextFormField(
-                    maxLines: 1,
-                    autovalidate: true,
-                    keyboardType: TextInputType.emailAddress,
-                    validator: (value) => EmailValidator.validate(value) ? null : "Bitte eine E-Mail eingeben.",
+                  ReactiveTextInputFormField(
+                    validator: EmailValidator(),
                     onSaved: (value) => _email = value,
-                    decoration: InputDecoration(
-                        hintText: "Email",
-                        icon: Icon(
-                          Icons.mail_outline,
-                          color: Colors.black,
-                        )
+                    hintText: "Email",
+                    icon: Icon(
+                        Icons.mail_outline,
+                        color: Colors.black
                     ),
+                    keyboardType: TextInputType.emailAddress,
                   ),
-                  TextFormField(
-                      onFieldSubmitted: (_) => submit(),
-                      maxLines: 1,
-                      autovalidate: true,
-                      obscureText: true,
-                      validator: (value) => value.isEmpty ? "Bitte Ihr Passwort eingeben." : null,
-                      onSaved: (value) => _password = value,
-                      decoration: InputDecoration(
-                          hintText: "Passwort",
-                          icon: Icon(
-                            Icons.lock_outline,
-                            color: Colors.black,
-                          )
-                      )
+                  ReactiveTextInputFormField(
+                    validator: PasswordValidator(),
+                    onSaved: (value) => _password = value,
+                    hintText: "Passwort",
+                    icon: Icon(
+                      Icons.lock_outline,
+                      color: Colors.black,
+                    ),
+                    obscureText: true,
+                    onFieldSubmitted: (_) => submit(),
                   ),
                 ],
               ),
