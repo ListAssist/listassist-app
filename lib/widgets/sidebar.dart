@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:shoppy/models/current-screen.dart';
+import 'package:shoppy/widgets/shopping-list.dart';
 
 class Sidebar extends StatefulWidget {
   @override
-  _ExtFileState createState() => _ExtFileState();
+  _Sidebar createState() => _Sidebar();
 }
-class _ExtFileState extends State {
+class _Sidebar extends State<Sidebar> {
   String img = "https://proxy.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.tractionwise.com%2Fwp-content%2Fuploads%2F2016%2F04%2FIcon-Person.png&f=1&nofb=1";
   String name = "Tobias Seczer";
   String email = "tobias.seczer@gmail.com";
@@ -13,7 +15,6 @@ class _ExtFileState extends State {
   Widget build(BuildContext context) {
     return Drawer(
       child: Column(
-//        padding: EdgeInsets.zero,
         children: <Widget>[
           UserAccountsDrawerHeader(
             decoration: BoxDecoration(
@@ -29,6 +30,7 @@ class _ExtFileState extends State {
             leading: Icon(Icons.list),
             title: Text("Einkaufslisten"),
             onTap: () {
+              ScreenModel.of(context).setIndex(1);
               Navigator.pop(context);
             },
           ),
@@ -46,6 +48,7 @@ class _ExtFileState extends State {
               Navigator.pop(context);
             },
           ),
+          Divider(),
           ListTile(
             leading: Icon(Icons.group),
             title: Text("Gruppen"),
@@ -60,6 +63,7 @@ class _ExtFileState extends State {
               Navigator.pop(context);
             },
           ),
+          Divider(),
           ListTile(
             leading: Icon(Icons.settings),
             title: Text("Einstellungen"),
