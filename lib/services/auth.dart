@@ -3,8 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
+import 'package:flutter_twitter/flutter_twitter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:flutter_twitter_login/flutter_twitter_login.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shoppy/main.dart';
 
@@ -53,7 +53,9 @@ class AuthService {
   /// Creates user with email and password
   Future<FirebaseUser> signUpWithMail(String email, String password, String displayName) async {
     try {
-      FirebaseUser user = await _auth.createUserWithEmailAndPassword(email: email, password: password);
+      AuthResult res = await _auth.createUserWithEmailAndPassword(email: email, password: password);
+      FirebaseUser user = res.user;
+
       user.sendEmailVerification();
 
       DocumentReference userRef = _db.collection("users").document(user.uid);
@@ -77,7 +79,8 @@ class AuthService {
     loading.add(true);
 
     try {
-      FirebaseUser user = await _auth.signInWithEmailAndPassword(email: email, password: password);
+      AuthResult res = await _auth.signInWithEmailAndPassword(email: email, password: password);
+      FirebaseUser user = res.user;
 
       loading.add(false);
       return user;
@@ -124,8 +127,8 @@ class AuthService {
 
     try {
       /** Log into Firebase with gotten from above **/
-      FirebaseUser user = await _auth.signInWithCredential(credential);
-
+      AuthResult res = await _auth.signInWithCredential(credential);
+      FirebaseUser user = res.user;
       /** Update user data if the profile picture or the email changed for example **/
       updateData(user);
 
