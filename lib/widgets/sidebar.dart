@@ -35,7 +35,7 @@ class _Sidebar extends State<Sidebar> {
             },
           ),
           ListTile(
-            leading: Icon(Icons.pie_chart),
+            leading: Icon(Icons.insert_chart),
             title: Text("Statistiken"),
             onTap: () {
               Navigator.pop(context);
@@ -57,7 +57,7 @@ class _Sidebar extends State<Sidebar> {
             },
           ),
           ListTile(
-            leading: Icon(Icons.inbox),
+            leading: Icon(Icons.mail),
             title: Text("Einladungen"),
             onTap: () {
               Navigator.pop(context);
