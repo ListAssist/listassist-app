@@ -1,15 +1,11 @@
-// Flutter code sample for material.AppBar.1
-
-// This sample shows an [AppBar] with two simple actions. The first action
-// opens a [SnackBar], while the second action navigates to a new page.
-
 import 'package:flutter/material.dart';
-import 'package:flutter_signin_button/button_list.dart';
-import 'package:flutter_signin_button/button_view.dart';
 import 'package:shoppy/services/auth.dart';
+import 'package:shoppy/widgets/authentication.dart';
 
-// Run App
 void main() => runApp(MyApp());
+
+/// Scaffold key to create snackbar anywhere..
+final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
 
 /// This Widget is the main application widget.
 class MyApp extends StatelessWidget {
@@ -19,49 +15,28 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: "Shoppy",
       home: Scaffold(
+        key: scaffoldKey,
+        /// Prevents resizing when opening keyboard: resizeToAvoidBottomInset: false,
+        resizeToAvoidBottomInset: false,
         body: Center(
-            child: Container(
-              margin: EdgeInsets.all(50),
-              child: Column(
-               children: <Widget>[
-                 StreamBuilder(
+            child: StreamBuilder(
                    stream: authService.user,
                    builder: (context, snapshot) {
                      if (snapshot.hasData) {
-                       return Text("logged in");
+                       return
+                         MaterialButton(
+                           onPressed: () => authService.signOut(),
+                           color: Colors.red,
+                           textColor: Colors.black,
+                           child: Text("Logout"),
+                         );
                      } else {
-                       return Text("not logged in");
+                       return AuthenticationPage();
                      }
                    }
-                 ),
-                 SignInButton(
-                   Buttons.Google,
-                   onPressed: () => authService.signIn(AuthenticationType.Google),
-                   text: "Sign in with Google",
-                 ),
-                 SignInButton(
-                   Buttons.Facebook,
-                   onPressed: () => authService.signIn(AuthenticationType.Facebook),
-                   text: "Sign in with Facebook",
-                 ),
-                 SignInButton(
-                   Buttons.Twitter,
-                   onPressed: () => authService.signIn(AuthenticationType.Twitter),
-                   text: "Sign in with Twitter",
-                 ),
-                 MaterialButton(
-                   onPressed: () => authService.signOut(),
-                   color: Colors.red,
-                   textColor: Colors.black,
-                   child: Text("Logout"),
-                 ),
-               ],
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-            )
-            )
+            ),
         )
-      ),
+      )
     );
   }
 }
