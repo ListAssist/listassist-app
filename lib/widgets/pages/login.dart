@@ -27,6 +27,8 @@ class LoginPage extends StatelessWidget {
 class _LoginForm extends StatelessWidget {
   final _formKey = new GlobalKey<FormState>();
   String _email = "";
+
+  final _passwordFocus = FocusNode();
   String _password = "";
 
   @override
@@ -48,8 +50,12 @@ class _LoginForm extends StatelessWidget {
                         color: Colors.black
                     ),
                     keyboardType: TextInputType.emailAddress,
+                    onFieldSubmitted: (_){
+                      FocusScope.of(context).requestFocus(_passwordFocus);
+                    },
                   ),
                   ReactiveTextInputFormField(
+                    focusNode: _passwordFocus,
                     validator: PasswordValidator(),
                     onSaved: (value) => _password = value,
                     hintText: "Passwort",

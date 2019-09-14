@@ -32,6 +32,9 @@ class _RegisterForm extends StatelessWidget {
   String _password = "";
   String _username = "";
 
+  final FocusNode _usernameFocus = FocusNode();
+  final FocusNode _passwordFocus = FocusNode();
+
 
   @override
   Widget build(BuildContext context) {
@@ -52,6 +55,9 @@ class _RegisterForm extends StatelessWidget {
                         color: Colors.black
                     ),
                     keyboardType: TextInputType.emailAddress,
+                    onFieldSubmitted: (_){
+                      FocusScope.of(context).requestFocus(_usernameFocus);
+                    },
                   ),
                   ReactiveTextInputFormField(
                     validator: UsernameValidator(),
@@ -61,6 +67,10 @@ class _RegisterForm extends StatelessWidget {
                       Icons.person_outline,
                       color: Colors.black,
                     ),
+                    onFieldSubmitted: (_) {
+                      FocusScope.of(context).requestFocus(_passwordFocus);
+                    },
+                    focusNode: _usernameFocus,
                   ),
                   ReactiveTextInputFormField(
                     validator: PasswordRegisterValidator(),
@@ -72,6 +82,7 @@ class _RegisterForm extends StatelessWidget {
                     ),
                     obscureText: true,
                     onFieldSubmitted: (_) => submit(),
+                    focusNode: _passwordFocus,
                   ),
                 ],
               ),

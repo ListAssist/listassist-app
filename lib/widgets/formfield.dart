@@ -12,6 +12,7 @@ class ReactiveTextInputFormField extends StatefulWidget {
   final bool obscureText;
   final ValueChanged<String> onFieldSubmitted;
   final TextInputType keyboardType;
+  final FocusNode focusNode;
 
 
   ReactiveTextInputFormField({
@@ -22,7 +23,8 @@ class ReactiveTextInputFormField extends StatefulWidget {
     @required this.onSaved,
     this.obscureText = false,
     this.onFieldSubmitted,
-    this.keyboardType
+    this.keyboardType,
+    this.focusNode
   }): super(key: key);
 
   @override
@@ -49,6 +51,7 @@ class _ReactiveTextInputFormFieldState extends State<ReactiveTextInputFormField>
           hintText: widget.hintText,
           icon: widget.icon
       ),
+      focusNode: widget.focusNode,
     );
   }
 }
