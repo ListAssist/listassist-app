@@ -20,7 +20,7 @@ class ShoppingListView extends StatelessWidget {
           leading: IconButton(
             icon: Icon(Icons.menu),
             tooltip: "Open navigation menu",
-            onPressed: () => mainScaffold.currentState.openDrawer(),
+            onPressed: () => mainScaffoldKey.currentState.openDrawer(),
           ),
         ),
         body: TabBarView(

@@ -8,8 +8,8 @@ import 'package:shoppy/widgets/authentication.dart';
 
 void main() => runApp(MyApp());
 
-final GlobalKey<ScaffoldState> mainScaffold = GlobalKey<ScaffoldState>();
-final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+final GlobalKey<ScaffoldState> mainScaffoldKey = GlobalKey<ScaffoldState>();
+final GlobalKey<ScaffoldState> authScaffoldKey = GlobalKey<ScaffoldState>();
 
 class MyApp extends StatelessWidget {
 
@@ -28,13 +28,14 @@ class MyApp extends StatelessWidget {
               if (snapshot.hasData) {
                 return
                   Scaffold(
-                    key: mainScaffold,
+                    key: mainScaffoldKey,
                     body: Body(),
                     drawer: Sidebar(),
                   );
               } else {
                 return Scaffold(
                   resizeToAvoidBottomInset: false,
+                  key: authScaffoldKey,
                   body: AuthenticationPage()
                 );
               }

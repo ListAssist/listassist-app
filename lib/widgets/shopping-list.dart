@@ -13,11 +13,11 @@ class ShoppingList extends StatelessWidget {
     return Container(
       child: Card(
         child: Container(
-          padding: EdgeInsets.all(10),
+          padding: EdgeInsets.all(20),
           child: Align(
             alignment: Alignment.centerLeft,
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(title, style: Theme.of(context).textTheme.title),
                 Text("$bought/$total eingekauft")

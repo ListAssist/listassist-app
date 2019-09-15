@@ -79,7 +79,7 @@ class _Sidebar extends State<Sidebar> {
             leading: Icon(Icons.arrow_back),
             title: Text("Logout"),
             onTap: () {
-              authService.logout();
+              authService.signOut();
               Navigator.pop(context);
             },
           ),

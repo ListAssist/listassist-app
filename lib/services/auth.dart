@@ -162,7 +162,7 @@ class AuthService {
 
   void handlePlatformException(PlatformException e) {
     if (e.code == "ERROR_ACCOUNT_EXISTS_WITH_DIFFERENT_CREDENTIAL" || e.code == "ERROR_EMAIL_ALREADY_IN_USE") {
-      scaffoldKey.currentState.showSnackBar(
+      authScaffoldKey.currentState.showSnackBar(
           SnackBar(
             duration: Duration(seconds: 6),
             content: Text("Ein Account mit dieser E-Mail Adresse existiert bereits. Haben Sie vielleicht einen anderen Login-typ verwendet?"),
@@ -186,14 +186,14 @@ class _ResultHandler {
       case FacebookLoginStatus.loggedIn:
         return false;
       case FacebookLoginStatus.cancelledByUser:
-        scaffoldKey.currentState.showSnackBar(
+        authScaffoldKey.currentState.showSnackBar(
             SnackBar(
               content: Text("Login abgebrochen, bitte versuchen Sie es erneut."),
             )
         );
         break;
       case FacebookLoginStatus.error:
-        scaffoldKey.currentState.showSnackBar(
+        authScaffoldKey.currentState.showSnackBar(
             SnackBar(
               content: Text("Login fehlgeschlagen, bitte versuchen Sie es erneut."),
             )
@@ -209,14 +209,14 @@ class _ResultHandler {
       case TwitterLoginStatus.loggedIn:
         return false;
       case TwitterLoginStatus.cancelledByUser:
-        scaffoldKey.currentState.showSnackBar(
+        authScaffoldKey.currentState.showSnackBar(
             SnackBar(
               content: Text("Login abgebrochen, bitte versuchen Sie es erneut."),
             )
         );
         break;
       case TwitterLoginStatus.error:
-        scaffoldKey.currentState.showSnackBar(
+        authScaffoldKey.currentState.showSnackBar(
             SnackBar(
               content: Text("Login fehlgeschlagen, bitte versuchen Sie es erneut."),
             )
