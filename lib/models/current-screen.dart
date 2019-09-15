@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:scoped_model/scoped_model.dart';
+import 'package:shoppy/widgets/shoppinglist-view.dart';
 
 class ScreenModel extends Model {
-  int _index = 0;
+  Widget _screen = ShoppingListView();
 
-  int get index => _index;
+  Widget get screen => _screen;
 
-  void setIndex(int id) {
-    // First, increment the counter
-    _index = id;
+  String _title = "Einkaufslisten";
 
-    // Then notify all the listeners.
+  String get title => _title;
+
+  void setScreen(Widget newScreen, String title) {
+    _screen = newScreen;
+    _title = title;
+
     notifyListeners();
   }
 

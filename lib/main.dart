@@ -15,6 +15,8 @@ import 'package:shoppy/widgets/sidebar.dart';
 // Run App
 void main() => runApp(MyApp());
 
+GlobalKey<ScaffoldState> mainScaffold = GlobalKey();
+
 /// This Widget is the main application widget.
 class MyApp extends StatelessWidget {
 
@@ -27,7 +29,16 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           primarySwatch: Colors.indigo,
         ),
-        home: Body()
+        home: Scaffold(
+          key: mainScaffold,
+          /*appBar: AppBar(
+            title: ScopedModelDescendant<ScreenModel>(
+                builder: (context, child, model) => Text(model.title)
+            ),
+          ),*/
+          body: Body(),
+          drawer: Sidebar(),
+        )
       )
     );
   }
@@ -39,15 +50,10 @@ class Body extends StatefulWidget {
 
 class _Body extends State<Body> {
 
-   var states = [
-    Login(),
-    ShoppingListView()
-  ];
-
   @override
   Widget build(BuildContext context) {
     return ScopedModelDescendant<ScreenModel>(
-      builder: (context, child, model) => states[model.index]
+      builder: (context, child, model) => model.screen
     );
   }
 }
@@ -55,9 +61,9 @@ class _Body extends State<Body> {
 class Login extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return /*Scaffold(
         drawer: Sidebar(),
-        body: Center(
+        body: */Center(
           child: Column(
             children: <Widget>[
               StreamBuilder(
@@ -78,7 +84,7 @@ class Login extends StatelessWidget {
               )
             ],
             mainAxisAlignment: MainAxisAlignment.center,
-          )
+         /* )*/
         )
     );
   }

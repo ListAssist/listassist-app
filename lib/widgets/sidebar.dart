@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shoppy/models/current-screen.dart';
-import 'package:shoppy/widgets/shopping-list.dart';
+import 'package:shoppy/widgets/shoppinglist-view.dart';
+
+import '../main.dart';
 
 class Sidebar extends StatefulWidget {
   @override
@@ -30,7 +32,7 @@ class _Sidebar extends State<Sidebar> {
             leading: Icon(Icons.list),
             title: Text("Einkaufslisten"),
             onTap: () {
-              ScreenModel.of(context).setIndex(1);
+              ScreenModel.of(context).setScreen(ShoppingListView(), "Einkaufslisten");
               Navigator.pop(context);
             },
           ),
@@ -76,6 +78,7 @@ class _Sidebar extends State<Sidebar> {
             leading: Icon(Icons.arrow_back),
             title: Text("Logout"),
             onTap: () {
+              ScreenModel.of(context).setScreen(Login(), "Login");
               Navigator.pop(context);
             },
           ),
