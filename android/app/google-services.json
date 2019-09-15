@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "1022797475435-4ionidpvr1mtmgfc5sngqhnr39bosiul.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "gq.shoppyy.www",
+            "certificate_hash": "ca7d70b131b5cca79266744b7005b2ade83ed02a"
+          }
+        },
+        {
           "client_id": "1022797475435-23b8nf6lmn1jqi1cr7o8hbsge3vcfuqo.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
