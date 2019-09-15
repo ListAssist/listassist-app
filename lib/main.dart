@@ -8,8 +8,6 @@ import 'package:scoped_model/scoped_model.dart';
 import 'package:shoppy/models/current-screen.dart';
 
 import 'package:shoppy/services/auth.dart';
-import 'package:shoppy/widgets/shopping-list.dart';
-import 'package:shoppy/widgets/shoppinglist-view.dart';
 import 'package:shoppy/widgets/sidebar.dart';
 
 // Run App
@@ -29,16 +27,23 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           primarySwatch: Colors.indigo,
         ),
-        home: Scaffold(
-          key: mainScaffold,
-          /*appBar: AppBar(
-            title: ScopedModelDescendant<ScreenModel>(
-                builder: (context, child, model) => Text(model.title)
-            ),
-          ),*/
-          body: Body(),
-          drawer: Sidebar(),
-        )
+        home: StreamBuilder(
+            stream: authService.user,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return
+                  Scaffold(
+                    key: mainScaffold,
+                    body: Body(),
+                    drawer: Sidebar(),
+                  );
+              } else {
+                return Scaffold(
+                  body: Login()
+                );
+              }
+            }
+        ),
       )
     );
   }

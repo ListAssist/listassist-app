@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shoppy/models/current-screen.dart';
+import 'package:shoppy/services/auth.dart';
 import 'package:shoppy/widgets/shoppinglist-view.dart';
 
 import '../main.dart';
@@ -78,7 +79,7 @@ class _Sidebar extends State<Sidebar> {
             leading: Icon(Icons.arrow_back),
             title: Text("Logout"),
             onTap: () {
-              ScreenModel.of(context).setScreen(Login(), "Login");
+              authService.logout();
               Navigator.pop(context);
             },
           ),
