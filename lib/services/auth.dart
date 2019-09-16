@@ -7,6 +7,7 @@ import 'package:flutter_twitter/flutter_twitter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shoppy/main.dart';
+import 'package:shoppy/widgets/authentication.dart';
 
 enum AuthenticationType {Facebook, Google, Twitter}
 
@@ -18,7 +19,6 @@ class AuthService {
     consumerKey: "nh0JWR84wnDzLDZaapWF69nrq",
     consumerSecret: "bEixX0AMS9JANn4ytlKxK3cUj2kNnILLiwE9felJY65MS2g3QT",
   );
-
 
   FirebaseAuth _auth = FirebaseAuth.instance;
   Firestore _db = Firestore.instance;
@@ -69,7 +69,7 @@ class AuthService {
       loading.add(false);
       return user;
     } on PlatformException catch(e) {
-      handlePlatformException(e);
+      _ResultHandler.handlePlatformException(e);
       return null;
     }
   }
@@ -85,7 +85,7 @@ class AuthService {
       loading.add(false);
       return user;
     } on PlatformException catch(e) {
-      handlePlatformException(e);
+      _ResultHandler.handlePlatformException(e);
       return null;
     }
   }
@@ -135,7 +135,7 @@ class AuthService {
       loading.add(false);
       return user;
     } on PlatformException catch (e) {
-      handlePlatformException(e);
+      _ResultHandler.handlePlatformException(e);
       return null;
     }
   }
@@ -159,22 +159,6 @@ class AuthService {
   void signOut() async {
     await _auth.signOut();
   }
-
-  void handlePlatformException(PlatformException e) {
-    if (e.code == "ERROR_ACCOUNT_EXISTS_WITH_DIFFERENT_CREDENTIAL" || e.code == "ERROR_EMAIL_ALREADY_IN_USE") {
-      authScaffoldKey.currentState.showSnackBar(
-          SnackBar(
-            duration: Duration(seconds: 6),
-            content: Text("Ein Account mit dieser E-Mail Adresse existiert bereits. Haben Sie vielleicht einen anderen Login-typ verwendet?"),
-          )
-      );
-    } else {
-      print("UNHANDLED ERROR!!!!!!!!!!!!!!!!!!");
-      print(e.toString());
-    }
-    loading.add(false);
-  }
-
 }
 
 /// Expose to global namespace (not real singleton)
@@ -186,18 +170,10 @@ class _ResultHandler {
       case FacebookLoginStatus.loggedIn:
         return false;
       case FacebookLoginStatus.cancelledByUser:
-        authScaffoldKey.currentState.showSnackBar(
-            SnackBar(
-              content: Text("Login abgebrochen, bitte versuchen Sie es erneut."),
-            )
-        );
+        showInfoSnackbar(Text("Login abgebrochen, bitte versuchen Sie es erneut."));
         break;
       case FacebookLoginStatus.error:
-        authScaffoldKey.currentState.showSnackBar(
-            SnackBar(
-              content: Text("Login fehlgeschlagen, bitte versuchen Sie es erneut."),
-            )
-        );
+        showError(Text("Login fehlgeschlagen"), Text("Login fehlgeschlagen, bitte versuchen Sie es erneut."));
         break;
     }
     authService.loading.add(false);
@@ -209,21 +185,65 @@ class _ResultHandler {
       case TwitterLoginStatus.loggedIn:
         return false;
       case TwitterLoginStatus.cancelledByUser:
-        authScaffoldKey.currentState.showSnackBar(
-            SnackBar(
-              content: Text("Login abgebrochen, bitte versuchen Sie es erneut."),
-            )
-        );
+        showInfoSnackbar(Text("Login abgebrochen, bitte versuchen Sie es erneut."));
         break;
       case TwitterLoginStatus.error:
-        authScaffoldKey.currentState.showSnackBar(
-            SnackBar(
-              content: Text("Login fehlgeschlagen, bitte versuchen Sie es erneut."),
-            )
-        );
+        showError(Text("Login fehlgeschlagen"), Text("Login fehlgeschlagen, bitte versuchen Sie es erneut."));
         break;
     }
     authService.loading.add(false);
     return true;
+  }
+
+  static void showInfoSnackbar(Text message, {Duration duration = const Duration(seconds: 4)}) {
+    authScaffoldKey.currentState.showSnackBar(
+        SnackBar(
+          duration: duration,
+          content: message
+        )
+    );
+  }
+
+  static Future showError(Text title, Text message) async {
+    await showDialog(
+      context: authContext,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: title,
+          content: message,
+          actions: <Widget>[
+            new FlatButton(
+              child: new Text("Schließen"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      }
+    );
+  }
+
+  static void handlePlatformException(PlatformException e) {
+    if (e.code == "ERROR_ACCOUNT_EXISTS_WITH_DIFFERENT_CREDENTIAL" || e.code == "ERROR_EMAIL_ALREADY_IN_USE") {
+      showInfoSnackbar(
+        Text("Ein Account mit dieser E-Mail Adresse existiert bereits. Haben Sie vielleicht einen anderen Login-typ verwendet?"),
+        duration: Duration(seconds: 6),
+      );
+    } else if (
+        e.code == "ERROR_USER_NOT_FOUND"
+        || e.code == "ERROR_WRONG_PASSWORD"
+        || e.code == "ERROR_TOO_MANY_REQUESTS"
+        || e.code == "ERROR_INVALID_CREDENTIAL"
+    ) {
+      showError(Text("Login fehlgeschlagen"), Text("Die E-Mail oder das Passwort sind fehlerhaft."));
+    } else if (e.code ==  "ERROR_DISABLED" || e.code == "ERROR_USER_DISABLED") {
+      showInfoSnackbar(Text("Dein Account ist derzeit deaktiviert."));
+    }
+    else {
+      print("UNHANDLED ERROR!!!!!!!!!!!!!!!!!!");
+      print(e.toString());
+    }
+    authService.loading.add(false);
   }
 }

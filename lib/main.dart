@@ -11,6 +11,7 @@ void main() => runApp(MyApp());
 final GlobalKey<ScaffoldState> mainScaffoldKey = GlobalKey<ScaffoldState>();
 final GlobalKey<ScaffoldState> authScaffoldKey = GlobalKey<ScaffoldState>();
 
+
 class MyApp extends StatelessWidget {
 
   @override

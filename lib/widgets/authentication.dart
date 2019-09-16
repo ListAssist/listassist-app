@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shoppy/widgets/pages/login.dart';
@@ -5,17 +6,19 @@ import 'package:shoppy/widgets/pages/register.dart';
 
 enum _AuthType {SignIn, SignUp}
 
+BuildContext authContext;
+
 class AuthenticationPage extends StatefulWidget {
   @override
   _AuthenticationPageState createState() => _AuthenticationPageState();
 }
 
 class _AuthenticationPageState extends State<AuthenticationPage> {
-
   _AuthType type = _AuthType.SignIn;
 
   @override
   Widget build(BuildContext context) {
+    authContext = context;
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: <Widget>[
