@@ -1,4 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:shoppy/models/current-screen.dart';
 import 'package:shoppy/services/auth.dart';
@@ -27,11 +29,13 @@ class MyApp extends StatelessWidget {
             stream: authService.user,
             builder: (context, snapshot) {
               if (snapshot.hasData) {
-                return
-                  Scaffold(
-                    key: mainScaffoldKey,
-                    body: Body(),
-                    drawer: Sidebar(),
+                return Provider<FirebaseUser>.value(
+                    value: snapshot.data,
+                    child: Scaffold(
+                      key: mainScaffoldKey,
+                      body: Body(),
+                      drawer: Sidebar(),
+                    )
                   );
               } else {
                 return Scaffold(

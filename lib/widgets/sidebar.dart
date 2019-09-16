@@ -1,4 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shoppy/models/current-screen.dart';
 import 'package:shoppy/services/auth.dart';
 import 'package:shoppy/widgets/shoppinglist-view.dart';
@@ -9,12 +11,12 @@ import 'package:shoppy/widgets/shoppinglist-view.dart';
 //}
 
 class Sidebar extends StatelessWidget {
-  String img = "https://proxy.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.tractionwise.com%2Fwp-content%2Fuploads%2F2016%2F04%2FIcon-Person.png&f=1&nofb=1";
-  String name = "Tobias Seczer";
-  String email = "tobias.seczer@gmail.com";
 
   @override
   Widget build(BuildContext context) {
+
+    var user = Provider.of<FirebaseUser>(context);
+
     return Drawer(
       child: Column(
         children: <Widget>[
@@ -22,10 +24,10 @@ class Sidebar extends StatelessWidget {
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.primary,
            ),
-            accountName: Text(name),
-            accountEmail: Text(email),
+            accountName: Text(user.displayName),
+            accountEmail: Text(user.email),
             currentAccountPicture: CircleAvatar(
-              backgroundImage: NetworkImage(img),
+              backgroundImage: NetworkImage(user.photoUrl),
             ),
           ),
           ListTile(
