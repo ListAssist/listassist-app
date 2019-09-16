@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:shoppy/widgets/shoppinglist-detail.dart';
 
 
 class ShoppingList extends StatelessWidget {
@@ -11,21 +12,27 @@ class ShoppingList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: Card(
-        child: Container(
-          padding: EdgeInsets.all(20),
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(title, style: Theme.of(context).textTheme.title),
-                Text("$bought/$total eingekauft")
-              ],
+      child: GestureDetector(
+        onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => ShoppingListDetail(title: title)),
+        ),
+        child: Card(
+          child: Container(
+            padding: EdgeInsets.all(20),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(title, style: Theme.of(context).textTheme.title),
+                  Text("$bought/$total eingekauft")
+                ],
+              ),
             ),
           ),
         ),
-      ),
+      )
     );
   }
 }

@@ -3,13 +3,12 @@ import 'package:shoppy/models/current-screen.dart';
 import 'package:shoppy/services/auth.dart';
 import 'package:shoppy/widgets/shoppinglist-view.dart';
 
-import '../main.dart';
+//class Sidebar extends StatefulWidget {
+//  @override
+//  _Sidebar createState() => _Sidebar();
+//}
 
-class Sidebar extends StatefulWidget {
-  @override
-  _Sidebar createState() => _Sidebar();
-}
-class _Sidebar extends State<Sidebar> {
+class Sidebar extends StatelessWidget {
   String img = "https://proxy.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.tractionwise.com%2Fwp-content%2Fuploads%2F2016%2F04%2FIcon-Person.png&f=1&nofb=1";
   String name = "Tobias Seczer";
   String email = "tobias.seczer@gmail.com";
