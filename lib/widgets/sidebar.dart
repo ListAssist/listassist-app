@@ -3,7 +3,6 @@ import 'package:shoppy/models/current-screen.dart';
 import 'package:shoppy/services/auth.dart';
 import 'package:shoppy/widgets/shoppinglist-view.dart';
 
-import '../main.dart';
 
 class Sidebar extends StatefulWidget {
   @override
