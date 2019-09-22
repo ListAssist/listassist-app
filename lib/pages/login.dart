@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_signin_button/button_view.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
-import 'package:shoppy/services/auth.dart';
-import 'package:shoppy/validators/email.dart';
-import 'package:shoppy/validators/password.dart';
-import 'package:shoppy/widgets/formfield.dart';
+import 'package:listassist/services/auth.dart';
+import 'package:listassist/validators/email.dart';
+import 'package:listassist/validators/password.dart';
+import 'package:listassist/widgets/formfield.dart';
 
 class LoginPage extends StatelessWidget {
   @override

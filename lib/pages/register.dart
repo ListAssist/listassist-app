@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:shoppy/services/auth.dart';
-import 'package:shoppy/validators/email.dart';
-import 'package:shoppy/validators/password.dart';
-import 'package:shoppy/validators/username.dart';
+import 'package:listassist/services/auth.dart';
+import 'package:listassist/validators/email.dart';
+import 'package:listassist/validators/password.dart';
+import 'package:listassist/validators/username.dart';
 
-import 'package:shoppy/widgets/formfield.dart';
+import 'package:listassist/widgets/formfield.dart';
 import 'login.dart';
 
 class RegisterPage extends StatelessWidget {

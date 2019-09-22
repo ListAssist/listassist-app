@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:shoppy/pages/login.dart';
-import 'package:shoppy/pages/register.dart';
+import 'package:listassist/pages/login.dart';
+import 'package:listassist/pages/register.dart';
 
 BuildContext authContext;
 enum _AuthType {SignIn, SignUp}

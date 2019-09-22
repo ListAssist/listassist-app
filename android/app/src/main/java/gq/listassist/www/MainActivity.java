@@ -1,6 +1,7 @@
-package gq.shoppyy.www;
+package gq.listassist.www;
 
 import android.os.Bundle;
+
 import io.flutter.app.FlutterActivity;
 import io.flutter.plugins.GeneratedPluginRegistrant;
 

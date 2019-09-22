@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:shoppy/main.dart';
-import 'package:shoppy/widgets/shopping-list.dart';
+import 'package:listassist/main.dart';
+import 'package:listassist/widgets/shopping-list.dart';
 
 class ShoppingListView extends StatelessWidget {
   @override

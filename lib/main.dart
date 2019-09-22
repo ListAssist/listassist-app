@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:listassist/models/current-screen.dart';
 import 'package:scoped_model/scoped_model.dart';
-import 'package:shoppy/models/current-screen.dart';
-import 'package:shoppy/services/auth.dart';
-import 'package:shoppy/widgets/sidebar.dart';
-import 'package:shoppy/widgets/authentication.dart';
+import 'package:listassist/services/auth.dart';
+import 'package:listassist/widgets/sidebar.dart';
+import 'package:listassist/widgets/authentication.dart';
+
 
 
 void main() => runApp(MyApp());
@@ -20,7 +21,7 @@ class MyApp extends StatelessWidget {
     return ScopedModel<ScreenModel>(
       model: ScreenModel(),
       child: MaterialApp(
-        title: "Shoppy",
+        title: "ListAssist",
         theme: ThemeData(
           primarySwatch: Colors.indigo,
         ),
