@@ -39,6 +39,7 @@ dependencies:
   rxdart:
   scoped_model:
   provider:
+  badges:
 
 dev_dependencies:
   flutter_test:

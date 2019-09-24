@@ -11,7 +11,6 @@ export const syncUser = functions.firestore
             let data = change.after.data();
             let pubData: any = {
                 displayName: data.displayName,
-                email: data.email,
                 uid: data.uid
             };
             if (data.photoURL) {
