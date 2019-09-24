@@ -1,5 +1,5 @@
-# Shoppy
+# ListAssist
 
-Shoppy - The intelligent shopping list
+ListAssist - The intelligent shopping list
 
 

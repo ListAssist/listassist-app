@@ -1,58 +1,58 @@
 {
   "project_info": {
-    "project_number": "1022797475435",
-    "firebase_url": "https://shoppy-b2a29.firebaseio.com",
-    "project_id": "shoppy-b2a29",
-    "storage_bucket": "shoppy-b2a29.appspot.com"
+    "project_number": "977251739072",
+    "firebase_url": "https://listassist-433b3.firebaseio.com",
+    "project_id": "listassist-433b3",
+    "storage_bucket": "listassist-433b3.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1022797475435:android:64bccbebd76c0d36964b2e",
+        "mobilesdk_app_id": "1:977251739072:android:739d877f7c5f1d8ed19425",
         "android_client_info": {
-          "package_name": "gq.shoppyy.www"
+          "package_name": "gq.listassist.www"
         }
       },
       "oauth_client": [
         {
-          "client_id": "1022797475435-4ionidpvr1mtmgfc5sngqhnr39bosiul.apps.googleusercontent.com",
+          "client_id": "977251739072-j1rlahclev8sdn14fif7cd8lbf3vbnq1.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "gq.shoppyy.www",
+            "package_name": "gq.listassist.www",
             "certificate_hash": "ca7d70b131b5cca79266744b7005b2ade83ed02a"
           }
         },
         {
-          "client_id": "1022797475435-23b8nf6lmn1jqi1cr7o8hbsge3vcfuqo.apps.googleusercontent.com",
+          "client_id": "977251739072-svqrvdighfdjtjm3b2k24ld14kvhs5p2.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "gq.shoppyy.www",
+            "package_name": "gq.listassist.www",
             "certificate_hash": "29f95d145aa5df9b4150c720b068fb060c077a31"
           }
         },
         {
-          "client_id": "1022797475435-csbf5in6nd61lmc8nd2p83l5fcnafkb3.apps.googleusercontent.com",
+          "client_id": "977251739072-j255v5k0ba5ru2eth57llpgp98jskgpe.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "gq.shoppyy.www",
+            "package_name": "gq.listassist.www",
             "certificate_hash": "05ecfadb7f783fe36b2c432fee43c7578851820d"
           }
         },
         {
-          "client_id": "1022797475435-fau9cj48qs5e3reg04hp50s2m1qbi6ct.apps.googleusercontent.com",
+          "client_id": "977251739072-3jq7djqm51rel5lasna34skdph6osk10.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyD_2cO6-Tvtox_YBcDK7hZ3TbcvTC49mQY"
+          "current_key": "AIzaSyAhQVJ467V9lQ3GdlV7hVYJSXBZZMb-7G8"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "1022797475435-fau9cj48qs5e3reg04hp50s2m1qbi6ct.apps.googleusercontent.com",
+              "client_id": "977251739072-3jq7djqm51rel5lasna34skdph6osk10.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

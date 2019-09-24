@@ -1,5 +1,5 @@
-name: shoppy
-description: Shoppy - The intelligent shopping list
+name: listassist
+description: ListAssist - The intelligent shopping list
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -31,7 +31,8 @@ dependencies:
   cloud_firestore:
 
   google_sign_in:
-  flutter_twitter:
+  flutter_twitter_login:
+    git: git://github.com/eudangeld/flutter_twitter_login.git
   flutter_facebook_login:
   flutter_signin_button:
 

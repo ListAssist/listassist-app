@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:shoppy/widgets/shoppinglist-detail.dart';
+import 'package:listassist/widgets/shoppinglist-detail.dart';
 
 
 class ShoppingList extends StatelessWidget {

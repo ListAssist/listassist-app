@@ -1,9 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shoppy/models/current-screen.dart';
-import 'package:shoppy/services/auth.dart';
-import 'package:shoppy/widgets/shoppinglist-view.dart';
+import 'package:listassist/models/current-screen.dart';
+import 'package:listassist/services/auth.dart';
+import 'package:listassist/widgets/shoppinglist-view.dart';
 
 //class Sidebar extends StatefulWidget {
 //  @override
