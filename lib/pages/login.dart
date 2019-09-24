@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:shoppy/services/auth.dart';
-import 'package:shoppy/validators/email.dart';
-import 'package:shoppy/validators/password.dart';
-import 'package:shoppy/validators/username.dart';
+import 'package:flutter_signin_button/button_view.dart';
+import 'package:flutter_signin_button/flutter_signin_button.dart';
+import 'package:listassist/services/auth.dart';
+import 'package:listassist/validators/email.dart';
+import 'package:listassist/validators/password.dart';
+import 'package:listassist/widgets/formfield.dart';
 
-import '../formfield.dart';
-import 'login.dart';
-
-class RegisterPage extends StatelessWidget {
+class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -16,9 +15,9 @@ class RegisterPage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
-            _RegisterForm(),
+            _LoginForm(),
             Divider(),
-            SocialSignInButtons(prependedString: "Registrieren",)
+            SocialSignInButtons()
           ],
         )
     );
@@ -26,15 +25,12 @@ class RegisterPage extends StatelessWidget {
 
 }
 
-class _RegisterForm extends StatelessWidget {
+class _LoginForm extends StatelessWidget {
   final _formKey = new GlobalKey<FormState>();
   String _email = "";
+
+  final _passwordFocus = FocusNode();
   String _password = "";
-  String _username = "";
-
-  final FocusNode _usernameFocus = FocusNode();
-  final FocusNode _passwordFocus = FocusNode();
-
 
   @override
   Widget build(BuildContext context) {
@@ -56,24 +52,12 @@ class _RegisterForm extends StatelessWidget {
                     ),
                     keyboardType: TextInputType.emailAddress,
                     onFieldSubmitted: (_){
-                      FocusScope.of(context).requestFocus(_usernameFocus);
-                    },
-                  ),
-                  ReactiveTextInputFormField(
-                    validator: UsernameValidator(),
-                    onSaved: (value) => _username = value,
-                    hintText: "Username",
-                    icon: Icon(
-                      Icons.person_outline,
-                      color: Colors.black,
-                    ),
-                    onFieldSubmitted: (_) {
                       FocusScope.of(context).requestFocus(_passwordFocus);
                     },
-                    focusNode: _usernameFocus,
                   ),
                   ReactiveTextInputFormField(
-                    validator: PasswordRegisterValidator(),
+                    focusNode: _passwordFocus,
+                    validator: PasswordValidator(),
                     onSaved: (value) => _password = value,
                     hintText: "Passwort",
                     icon: Icon(
@@ -82,14 +66,13 @@ class _RegisterForm extends StatelessWidget {
                     ),
                     obscureText: true,
                     onFieldSubmitted: (_) => submit(),
-                    focusNode: _passwordFocus,
                   ),
                 ],
               ),
             ),
             MaterialButton(
               child: Text(
-                "Registrieren",
+                "Log in",
                 style: TextStyle(
                     color: Colors.white
                 ),
@@ -106,9 +89,40 @@ class _RegisterForm extends StatelessWidget {
     if (_formKey.currentState.validate()) {
       _formKey.currentState.save();
 
-      await authService.signUpWithMail(_email, _password, _username);
+      authService.signInWithMail(_email, _password);
     }
   }
 
 }
 
+class SocialSignInButtons extends StatelessWidget {
+  final String prependedString;
+
+  SocialSignInButtons({this.prependedString = "Einloggen"});
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: <Widget>[
+        SignInButton(
+          Buttons.Google,
+          onPressed: () => authService.signIn(AuthenticationType.Google),
+          text: "$prependedString mit Google",
+        ),
+        SignInButton(
+          Buttons.Facebook,
+          onPressed: () => authService.signIn(AuthenticationType.Facebook),
+          text: "$prependedString mit Facebook",
+        ),
+        SignInButton(
+          Buttons.Twitter,
+          onPressed: () => authService.signIn(AuthenticationType.Twitter),
+          text: "$prependedString mit Twitter",
+        ),
+      ],
+    );
+  }
+
+
+}

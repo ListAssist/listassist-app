@@ -2,12 +2,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
-import 'package:flutter_twitter/flutter_twitter.dart';
+import 'package:flutter_twitter_login/flutter_twitter_login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:shoppy/main.dart';
-import 'package:shoppy/widgets/authentication.dart';
+import 'package:listassist/main.dart';
+import 'package:listassist/widgets/authentication.dart';
 
 enum AuthenticationType {Facebook, Google, Twitter}
 
@@ -58,7 +59,10 @@ class AuthService {
 
       user.sendEmailVerification();
 
-      DocumentReference userRef = _db.collection("users").document(user.uid);
+      DocumentReference userRef = _db
+          .collection("users")
+          .document(user.uid);
+
       userRef.setData({
         "uid": user.uid,
         "email": user.email,
@@ -236,6 +240,7 @@ class _ResultHandler {
         || e.code == "ERROR_TOO_MANY_REQUESTS"
         || e.code == "ERROR_INVALID_CREDENTIAL"
     ) {
+      print(e.toString());
       showError(Text("Login fehlgeschlagen"), Text("Die E-Mail oder das Passwort sind fehlerhaft."));
     } else if (e.code ==  "ERROR_DISABLED" || e.code == "ERROR_USER_DISABLED") {
       showInfoSnackbar(Text("Dein Account ist derzeit deaktiviert."));

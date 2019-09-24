@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:listassist/widgets/shoppinglist-view.dart';
 import 'package:scoped_model/scoped_model.dart';
-import 'package:shoppy/widgets/shoppinglist-view.dart';
 
 class ScreenModel extends Model {
   Widget _screen = ShoppingListView();
