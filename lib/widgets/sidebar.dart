@@ -32,22 +32,22 @@ class Sidebar extends StatelessWidget {
           ),
           ListTile(
             leading: Icon(Icons.list),
-            title: Text("Einkaufslisten"),
+            title: Text('Einkaufslisten'),
             onTap: () {
-              ScreenModel.of(context).setScreen(ShoppingListView(), "Einkaufslisten");
+              ScreenModel.of(context).setScreen(ShoppingListView(), 'Einkaufslisten');
               Navigator.pop(context);
             },
           ),
           ListTile(
             leading: Icon(Icons.insert_chart),
-            title: Text("Statistiken"),
+            title: Text('Statistiken'),
             onTap: () {
               Navigator.pop(context);
             },
           ),
           ListTile(
             leading: Icon(Icons.local_offer),
-            title: Text("Angebote"),
+            title: Text('Angebote'),
             onTap: () {
               Navigator.pop(context);
             },
@@ -55,14 +55,14 @@ class Sidebar extends StatelessWidget {
           Divider(),
           ListTile(
             leading: Icon(Icons.group),
-            title: Text("Gruppen"),
+            title: Text('Gruppen'),
             onTap: () {
               Navigator.pop(context);
             },
           ),
           ListTile(
             leading: Icon(Icons.mail),
-            title: Text("Einladungen"),
+            title: Text('Einladungen'),
             onTap: () {
               Navigator.pop(context);
             },
@@ -70,7 +70,7 @@ class Sidebar extends StatelessWidget {
           Divider(),
           ListTile(
             leading: Icon(Icons.settings),
-            title: Text("Einstellungen"),
+            title: Text('Einstellungen'),
             onTap: () {
               Navigator.pop(context);
             },
@@ -78,7 +78,7 @@ class Sidebar extends StatelessWidget {
           Spacer(),
           ListTile(
             leading: Icon(Icons.arrow_back),
-            title: Text("Logout"),
+            title: Text('Logout'),
             onTap: () {
               authService.signOut();
               Navigator.pop(context);
