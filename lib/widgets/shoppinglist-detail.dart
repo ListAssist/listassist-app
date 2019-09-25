@@ -12,7 +12,7 @@ class Item {
 
 class ShoppingListDetail extends StatefulWidget {
   final String title;
-  ShoppingListDetail({this.title = 'Einkaufsliste'});
+  ShoppingListDetail({this.title = "Einkaufsliste"});
 
   @override
   _ShoppingListDetail createState() => _ShoppingListDetail(title: title);
@@ -21,20 +21,20 @@ class ShoppingListDetail extends StatefulWidget {
 class _ShoppingListDetail extends State<ShoppingListDetail> {
 
   String title;
-  _ShoppingListDetail({this.title: 'Einkaufsliste'});
+  _ShoppingListDetail({this.title: "Einkaufsliste"});
 
   var inputs = [
-    new Item('Apfel', false),
-    new Item('Kekse', false),
-    new Item('Seife', true),
-    new Item('Öl', true),
-    new Item('Batterien', true),
-    new Item('Brot', false),
-    new Item('Brot', false),
-    new Item('Brot', false),
-    new Item('Brot', false),
-    new Item('Kakao', false),
-    new Item('Milch', false)];
+    new Item("Apfel", false),
+    new Item("Kekse", false),
+    new Item("Seife", true),
+    new Item("Öl", true),
+    new Item("Batterien", true),
+    new Item("Brot", false),
+    new Item("Brot", false),
+    new Item("Brot", false),
+    new Item("Brot", false),
+    new Item("Kakao", false),
+    new Item("Milch", false)];
 
   void itemChange(bool val, int index){
     setState(() {
@@ -48,7 +48,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Einkaufsliste abschließen'),
+          title: Text("Einkaufsliste abschließen"),
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
@@ -58,9 +58,9 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
                       color: Theme.of(context).textTheme.title.color,
                     ),
                     children: <TextSpan> [
-                      TextSpan(text: 'Sind Sie sicher, dass Sie die Einkaufsliste '),
-                      TextSpan(text: '${this.title}', style: TextStyle(fontWeight: FontWeight.bold)),
-                      TextSpan(text: ' abschließen möchten?')
+                      TextSpan(text: "Sind Sie sicher, dass Sie die Einkaufsliste "),
+                      TextSpan(text: "${this.title}", style: TextStyle(fontWeight: FontWeight.bold)),
+                      TextSpan(text: " abschließen möchten?")
                     ]
                   )
                 )
@@ -70,13 +70,13 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
           actions: <Widget>[
             FlatButton(
               textColor: Colors.red,
-              child: Text('Abbrechen'),
+              child: Text("Abbrechen"),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             FlatButton(
-              child: Text('Abschließen'),
+              child: Text("Abschließen"),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -99,7 +99,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
         children: <Widget>[
           Container(
             padding: EdgeInsets.all(10.0),
-            child: Text('${inputs.map((e) => e.checked ? 1 : 0).reduce((a, b) => a + b)} von ${inputs.length} Sachen gekauft', style: Theme.of(context).textTheme.headline)
+            child: Text("${inputs.map((e) => e.checked ? 1 : 0).reduce((a, b) => a + b)} von ${inputs.length} Sachen gekauft", style: Theme.of(context).textTheme.headline)
           ),
           Expanded(
             child: ListView.builder(
@@ -108,7 +108,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
                 return Container(
                   child: CheckboxListTile(
                     value: inputs[index].checked,
-                    title: new Text('${inputs[index].name}'),
+                    title: new Text("${inputs[index].name}"),
                     controlAffinity: ListTileControlAffinity.trailing,
                     onChanged: (bool val) { itemChange(val, index); }
                   )

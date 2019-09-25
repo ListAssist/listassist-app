@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
     return ScopedModel<ScreenModel>(
       model: ScreenModel(),
       child: MaterialApp(
-        title: "Shoppy",
+        title: "ListAssist",
         theme: ThemeData(
           primarySwatch: Colors.indigo,
         ),

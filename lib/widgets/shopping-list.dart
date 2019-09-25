@@ -7,7 +7,7 @@ class ShoppingList extends StatelessWidget {
   final String title;
   final int total;
   final int bought;
-  ShoppingList({this.title = 'Einkaufsliste', this.total = 10, this.bought = 7});
+  ShoppingList({this.title = "Einkaufsliste", this.total = 10, this.bought = 7});
 
   @override
   Widget build(BuildContext context) {
