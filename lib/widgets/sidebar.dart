@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:listassist/widgets/group-view.dart';
 import 'package:provider/provider.dart';
 import 'package:listassist/models/current-screen.dart';
 import 'package:listassist/services/auth.dart';
@@ -57,6 +58,7 @@ class Sidebar extends StatelessWidget {
             leading: Icon(Icons.group),
             title: Text("Gruppen"),
             onTap: () {
+              ScreenModel.of(context).setScreen(GroupView(), "Gruppen");
               Navigator.pop(context);
             },
           ),
