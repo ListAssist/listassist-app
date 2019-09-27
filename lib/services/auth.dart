@@ -229,23 +229,31 @@ class _ResultHandler {
   }
 
   static void handlePlatformException(PlatformException e) {
-    if (e.code == "ERROR_ACCOUNT_EXISTS_WITH_DIFFERENT_CREDENTIAL" || e.code == "ERROR_EMAIL_ALREADY_IN_USE") {
+    if (e.code == "ERROR_ACCOUNT_EXISTS_WITH_DIFFERENT_CREDENTIAL"
+        || e.code == "ERROR_EMAIL_ALREADY_IN_USE"
+    ) {
       showInfoSnackbar(
         Text("Ein Account mit dieser E-Mail Adresse existiert bereits. Haben Sie vielleicht einen anderen Login-typ verwendet?"),
         duration: Duration(seconds: 6),
       );
     } else if (
-        e.code == "ERROR_USER_NOT_FOUND"
+    e.code == "ERROR_USER_NOT_FOUND"
         || e.code == "ERROR_WRONG_PASSWORD"
         || e.code == "ERROR_TOO_MANY_REQUESTS"
         || e.code == "ERROR_INVALID_CREDENTIAL"
     ) {
-      print(e.toString());
       showError(Text("Login fehlgeschlagen"), Text("Die E-Mail oder das Passwort sind fehlerhaft."));
-    } else if (e.code ==  "ERROR_DISABLED" || e.code == "ERROR_USER_DISABLED") {
+    } else if (e.code ==  "ERROR_DISABLED"
+        || e.code == "ERROR_USER_DISABLED"
+    ) {
       showInfoSnackbar(Text("Dein Account ist derzeit deaktiviert."));
-    }
-    else {
+    } else if (
+    e.code == "ERROR_NETWORK_REQUEST_FAILED" ||
+        e.code == "ERROR_NETWORK_REQUEST_FAILED" ||
+        e.code == "AUTHENTICATION_FAILED"
+    ) {
+      showError(Text("Login fehlgeschlagen"), Text("Bitte überprüfen Sie Ihre Internetverbindung."));
+    } else {
       print("UNHANDLED ERROR!!!!!!!!!!!!!!!!!!");
       print(e.toString());
     }
