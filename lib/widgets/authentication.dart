@@ -11,7 +11,7 @@ class AuthenticationPage extends StatefulWidget {
   _AuthenticationPageState createState() => _AuthenticationPageState();
 }
 
-class _AuthenticationPageState extends State<AuthenticationPage> {
+class _AuthenticationPageState extends State<AuthenticationPage> with TickerProviderStateMixin {
   _AuthType type = _AuthType.SignIn;
   int elapsed = 0;
 
@@ -26,25 +26,24 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
       firstChild: FinalLoginPage(changeMainState: changeMainState),
       secondChild: FinalRegisterPage(changeMainState: changeMainState),
       crossFadeState: type == _AuthType.SignIn ? CrossFadeState.showFirst : CrossFadeState.showSecond,
-      layoutBuilder: (Widget topChild, Key topChildKey, Widget bottomChild, Key bottomChildKey) {
+      layoutBuilder: (topChild, topChildKey, bottomChild, bottomChildKey) {
         return Stack(
-        fit: StackFit.expand,
-        children: <Widget>[
-          Positioned(
-            key: bottomChildKey,
-            left: 0.0,
-            top: 0.0,
-            right: 0.0,
-            bottom: 0.0,
-            child: bottomChild,
-          ),
-          Positioned(
-            key: topChildKey,
-            child: topChild,
-          )
-        ],
-      );
-    },
+          children: <Widget>[
+            Positioned(
+              key: bottomChildKey,
+              left: 0.0,
+              top: 0.0,
+              right: 0.0,
+              bottom: 0.0,
+              child: bottomChild,
+            ),
+            Positioned(
+              key: topChildKey,
+              child: topChild,
+            ),
+          ],
+        );
+      },
     );
   }
 

@@ -26,7 +26,7 @@ class AuthService {
 
   Observable<FirebaseUser> user;
   Observable<Map<String, dynamic>> profile;
-  PublishSubject loading = PublishSubject();
+  BehaviorSubject loading = BehaviorSubject<bool>.seeded(false);
 
   AuthService() {
     /** Convert onAuthStateChanged Stream to normal Observable to **/
@@ -103,7 +103,7 @@ class AuthService {
     switch (type) {
       case AuthenticationType.Facebook:
         /** Native Facebook login screen **/
-        FacebookLoginResult result = await _facebookSignIn.logInWithReadPermissions(["email"]);
+        FacebookLoginResult result = await _facebookSignIn.logIn(["email"]);
 
         if (_ResultHandler.handleFacebookResultError(result)) return null;
 

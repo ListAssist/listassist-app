@@ -4,12 +4,12 @@ import {DocumentSnapshot} from "firebase-functions/lib/providers/firestore";
 
 const db = admin.firestore();
 
-export const syncUser = functions.firestore
+export const syncUser = functions.region("europe-west1").firestore
     .document("users/{userId}")
     .onWrite(async (change: functions.Change<DocumentSnapshot>, context) => {
         if (change.after.exists) {
-            let data = change.after.data();
-            let pubData: any = {
+            const data = change.after.data();
+            const pubData: any = {
                 displayName: data.displayName,
                 email: data.email,
                 uid: data.uid

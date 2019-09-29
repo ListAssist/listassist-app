@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:listassist/models/current-screen.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:listassist/services/auth.dart';
@@ -25,20 +26,32 @@ class MyApp extends StatelessWidget {
         home: StreamBuilder(
             stream: authService.user,
             builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                return
-                  Scaffold(
-                    key: mainScaffoldKey,
-                    body: Body(),
-                    drawer: Sidebar(),
-                  );
-              } else {
-                return Scaffold(
-                  resizeToAvoidBottomInset: false,
-                  key: authScaffoldKey,
-                  body: AuthenticationPage()
-                );
-              }
+              return AnimatedSwitcher(
+                  // TODO: Do another animation
+                  duration: const Duration(milliseconds: 600),
+                  child: snapshot.hasData
+                      ? Scaffold(
+                          key: mainScaffoldKey,
+                          body: Body(),
+                          drawer: Sidebar(),
+                        )
+                      : Scaffold(
+                          resizeToAvoidBottomInset: false,
+                          key: authScaffoldKey,
+                          body: StreamBuilder(
+                            initialData: false,
+                            stream: authService.loading,
+                            builder: (context, isLoadingSnapshot) {
+                              return AnimatedSwitcher(
+                                  duration: const Duration(milliseconds: 600),
+                                  child: isLoadingSnapshot.data
+                                      ? SpinKitDoubleBounce(color: Colors.blueAccent)
+                                      : AuthenticationPage()
+                              );
+                            },
+                          )
+                        )
+              );
             }
         ),
       )

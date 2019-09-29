@@ -32,12 +32,12 @@ dependencies:
 
   google_sign_in:
   flutter_twitter_login:
-    git: git://github.com/eudangeld/flutter_twitter_login.git
   flutter_facebook_login:
   flutter_signin_button:
 
   rxdart:
   scoped_model:
+  flutter_spinkit:
 
 dev_dependencies:
   flutter_test:

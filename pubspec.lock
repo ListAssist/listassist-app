@@ -63,7 +63,7 @@ packages:
       name: firebase_ml_vision
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.9.2+1"
+    version: "0.9.2+2"
   firebase_storage:
     dependency: "direct main"
     description:
@@ -82,7 +82,7 @@ packages:
       name: flutter_facebook_login
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.1"
+    version: "3.0.0"
   flutter_signin_button:
     dependency: "direct main"
     description:
@@ -90,6 +90,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.3.0"
+  flutter_spinkit:
+    dependency: "direct main"
+    description:
+      name: flutter_spinkit
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "4.0.0"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -98,11 +105,9 @@ packages:
   flutter_twitter_login:
     dependency: "direct main"
     description:
-      path: "."
-      ref: HEAD
-      resolved-ref: dd807741a3106759854c9f53eae84da3f0b22c7b
-      url: "git://github.com/eudangeld/flutter_twitter_login.git"
-    source: git
+      name: flutter_twitter_login
+      url: "https://pub.dartlang.org"
+    source: hosted
     version: "1.1.0"
   font_awesome_flutter:
     dependency: transitive
