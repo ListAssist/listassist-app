@@ -70,7 +70,10 @@ class _MainAppState extends State<MainApp> {
              :
            Scaffold(
              key: authScaffoldKey,
-             body: AuthenticationPage(),
+             body: AnimatedSwitcher(
+               duration: Duration(milliseconds: 600),
+               child: loading ? SpinKitDoubleBounce(color: Colors.blueAccent) : AuthenticationPage(),
+             ),
              resizeToAvoidBottomInset: false,
            )
         )
