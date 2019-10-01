@@ -24,32 +24,12 @@ class AuthService {
   FirebaseAuth _auth = FirebaseAuth.instance;
   Firestore _db = Firestore.instance;
 
-  Observable<FirebaseUser> user;
-  Observable<Map<String, dynamic>> profile;
-  BehaviorSubject loading = BehaviorSubject<bool>.seeded(false);
+  Future<FirebaseUser> get getUser => _auth.currentUser();
+  Stream<FirebaseUser> get user => _auth.onAuthStateChanged;
 
-  AuthService() {
-    /** Convert onAuthStateChanged Stream to normal Observable to **/
-    user = Observable(_auth.onAuthStateChanged);
+  BehaviorSubject<bool> loading = BehaviorSubject<bool>.seeded(false);
 
-    profile = user.switchMap((FirebaseUser u) {
-      /**
-       * Check if user is authenticated
-       *
-       * If so, get the user data by retrieving it from firestore
-       * Otherwise return empty Observable
-       */
-      if (u != null) {
-        return _db
-            .collection("users")
-            .document(u.uid)
-            .snapshots()
-            .map((snap) => snap.data);
-      } else {
-        return Observable.just({});
-      }
-    });
-  }
+  AuthService() {}
 
   /// Creates user with email and password
   Future<FirebaseUser> signUpWithMail(String email, String password, String displayName) async {

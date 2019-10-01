@@ -1,11 +1,16 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:listassist/models/current-screen.dart';
+import 'package:listassist/services/db.dart';
+import 'package:provider/provider.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:listassist/services/auth.dart';
 import 'package:listassist/widgets/sidebar.dart';
 import 'package:listassist/widgets/authentication.dart';
+
+import 'models/User.dart';
 
 void main() => runApp(MyApp());
 
@@ -18,47 +23,60 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ScopedModel<ScreenModel>(
       model: ScreenModel(),
-      child: MaterialApp(
-        title: "ListAssist",
-        theme: ThemeData(
-          primarySwatch: Colors.indigo,
-        ),
-        home: StreamBuilder(
-            stream: authService.user,
-            builder: (context, snapshot) {
-              return AnimatedSwitcher(
-                  // TODO: Do another animation
-                  duration: const Duration(milliseconds: 600),
-                  child: snapshot.hasData
-                      ? Scaffold(
-                          key: mainScaffoldKey,
-                          body: Body(),
-                          drawer: Sidebar(),
-                        )
-                      : Scaffold(
-                          resizeToAvoidBottomInset: false,
-                          key: authScaffoldKey,
-                          body: StreamBuilder(
-                            initialData: false,
-                            stream: authService.loading,
-                            builder: (context, isLoadingSnapshot) {
-                              return AnimatedSwitcher(
-                                  duration: const Duration(milliseconds: 600),
-                                  child: isLoadingSnapshot.data
-                                      ? SpinKitDoubleBounce(color: Colors.blueAccent)
-                                      : AuthenticationPage()
-                              );
-                            },
-                          )
-                        )
-              );
-            }
+      child: MultiProvider(
+        providers: [
+          StreamProvider<FirebaseUser>.value(value: authService.user,),
+          StreamProvider<bool>.value(value: authService.loading.asBroadcastStream())
+        ],
+        child: MaterialApp(
+            title: "ListAssist",
+            theme: ThemeData(
+              primarySwatch: Colors.indigo,
+            ),
+            home: MainApp()
         ),
       )
     );
   }
 }
 
+class MainApp extends StatefulWidget {
+  @override
+  _MainAppState createState() => _MainAppState();
+}
+
+class _MainAppState extends State<MainApp> {
+  @override
+  Widget build(BuildContext context) {
+    FirebaseUser user = Provider.of<FirebaseUser>(context);
+    bool loading = Provider.of<bool>(context);
+
+    return MaterialApp(
+        title: "ListAssist",
+        theme: ThemeData(
+          primarySwatch: Colors.indigo,
+        ),
+        home: AnimatedSwitcher(
+            duration: Duration(milliseconds: 600),
+            child: user != null ?
+            StreamProvider<User>.value(
+                value: databaseService.streamProfile(user),
+                child: Scaffold(
+                  key: mainScaffoldKey,
+                  body: Body(),
+                  drawer: Sidebar(),
+              )
+            )
+             :
+           Scaffold(
+             key: authScaffoldKey,
+             body: AuthenticationPage(),
+             resizeToAvoidBottomInset: false,
+           )
+        )
+    );
+  }
+}
 class Body extends StatefulWidget {
   createState() => _Body();
 }

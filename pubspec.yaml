@@ -39,6 +39,8 @@ dependencies:
   scoped_model:
   flutter_spinkit:
 
+  provider:
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
