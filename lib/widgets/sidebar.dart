@@ -1,7 +1,6 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:listassist/widgets/group-view.dart';
-import 'package:provider/provider.dart'
+import 'package:provider/provider.dart';
 import 'package:listassist/models/User.dart';
 import 'package:listassist/models/current-screen.dart';
 import 'package:listassist/services/auth.dart';
@@ -23,7 +22,7 @@ class _Sidebar extends State<Sidebar> {
           UserAccountsDrawerHeader(
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.primary,
-           ),
+            ),
             accountName: Text(user.displayName),
             accountEmail: Text(user.email),
             currentAccountPicture: CircleAvatar(
