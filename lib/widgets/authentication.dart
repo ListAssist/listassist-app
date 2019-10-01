@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:listassist/pages/login.dart';
 import 'package:listassist/pages/register.dart';
+import 'package:listassist/services/auth.dart';
+
+import 'package:listassist/main.dart';
 
 BuildContext authContext;
 enum _AuthType {SignIn, SignUp}
@@ -13,38 +16,36 @@ class AuthenticationPage extends StatefulWidget {
 
 class _AuthenticationPageState extends State<AuthenticationPage> {
   _AuthType type = _AuthType.SignIn;
-  int elapsed = 0;
 
   @override
   Widget build(BuildContext context) {
     authContext = context;
 
     return AnimatedCrossFade(
-      firstCurve: LinearHalfCurve(),
-      secondCurve: LinearHalfCurve().flipped,
-      duration: Duration(milliseconds: 600),
-      firstChild: FinalLoginPage(changeMainState: changeMainState),
-      secondChild: FinalRegisterPage(changeMainState: changeMainState),
-      crossFadeState: type == _AuthType.SignIn ? CrossFadeState.showFirst : CrossFadeState.showSecond,
-      layoutBuilder: (Widget topChild, Key topChildKey, Widget bottomChild, Key bottomChildKey) {
-        return Stack(
-        fit: StackFit.expand,
-        children: <Widget>[
-          Positioned(
-            key: bottomChildKey,
-            left: 0.0,
-            top: 0.0,
-            right: 0.0,
-            bottom: 0.0,
-            child: bottomChild,
-          ),
-          Positioned(
-            key: topChildKey,
-            child: topChild,
-          )
-        ],
-      );
-    },
+        firstCurve: LinearHalfCurve(),
+        secondCurve: LinearHalfCurve().flipped,
+        duration: Duration(milliseconds: 600),
+        firstChild: FinalLoginPage(changeMainState: changeMainState),
+        secondChild: FinalRegisterPage(changeMainState: changeMainState),
+        crossFadeState: type == _AuthType.SignIn ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+        layoutBuilder: (topChild, topChildKey, bottomChild, bottomChildKey) {
+          return Stack(
+            children: <Widget>[
+              Positioned(
+                key: bottomChildKey,
+                left: 0.0,
+                top: 0.0,
+                right: 0.0,
+                bottom: 0.0,
+                child: bottomChild,
+              ),
+              Positioned(
+                key: topChildKey,
+                child: topChild,
+              ),
+            ],
+          );
+        },
     );
   }
 

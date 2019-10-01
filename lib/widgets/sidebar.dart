@@ -1,23 +1,22 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:listassist/widgets/group-view.dart';
-import 'package:provider/provider.dart';
+import 'package:provider/provider.dart'
+import 'package:listassist/models/User.dart';
 import 'package:listassist/models/current-screen.dart';
 import 'package:listassist/services/auth.dart';
 import 'package:listassist/widgets/shoppinglist-view.dart';
 
-//class Sidebar extends StatefulWidget {
-//  @override
-//  _Sidebar createState() => _Sidebar();
-//}
-
-class Sidebar extends StatelessWidget {
+class Sidebar extends StatefulWidget {
+  @override
+  _Sidebar createState() => _Sidebar();
+}
+class _Sidebar extends State<Sidebar> {
 
   @override
   Widget build(BuildContext context) {
-
-    var user = Provider.of<FirebaseUser>(context);
-
+    User user = Provider.of<User>(context);
+    
     return Drawer(
       child: Column(
         children: <Widget>[
