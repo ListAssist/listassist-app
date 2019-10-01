@@ -77,7 +77,7 @@ class FinalLoginPage extends StatelessWidget {
         GestureDetector(
           onTap: () => changeMainState(),
           child: Text(
-            "Hast du noch kein ListAssist Konto? Erstelle hier einen!",
+            "Hast du noch kein ListAssist Konto? Erstelle hier eines!",
             style: TextStyle(
               color: Colors.blueAccent,
               decoration: TextDecoration.underline,

@@ -1,11 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:listassist/widgets/group-view.dart';
+import 'package:provider/provider.dart'
 import 'package:listassist/models/User.dart';
 import 'package:listassist/models/current-screen.dart';
 import 'package:listassist/services/auth.dart';
 import 'package:listassist/widgets/shoppinglist-view.dart';
-import 'package:provider/provider.dart';
-
 
 class Sidebar extends StatefulWidget {
   @override
@@ -16,14 +16,14 @@ class _Sidebar extends State<Sidebar> {
   @override
   Widget build(BuildContext context) {
     User user = Provider.of<User>(context);
-
+    
     return Drawer(
       child: Column(
         children: <Widget>[
           UserAccountsDrawerHeader(
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.primary,
-            ),
+           ),
             accountName: Text(user.displayName),
             accountEmail: Text(user.email),
             currentAccountPicture: CircleAvatar(
@@ -57,6 +57,7 @@ class _Sidebar extends State<Sidebar> {
             leading: Icon(Icons.group),
             title: Text("Gruppen"),
             onTap: () {
+              ScreenModel.of(context).setScreen(GroupView(), "Gruppen");
               Navigator.pop(context);
             },
           ),

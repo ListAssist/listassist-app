@@ -13,7 +13,6 @@ export const syncUser = functions.region("europe-west1").firestore
                 
                 const pubData: any = {
                     displayName: data.displayName,
-                    email: data.email,
                     uid: data.uid
                 };
                 if (data.photoURL) {

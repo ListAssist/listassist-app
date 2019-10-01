@@ -35,11 +35,13 @@ dependencies:
   flutter_facebook_login:
   flutter_signin_button:
 
-  rxdart:
   scoped_model:
-  flutter_spinkit:
 
+  rxdart:  
   provider:
+  
+  badges:
+  flutter_spinkit:
 
 dev_dependencies:
   flutter_test:
