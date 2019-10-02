@@ -43,7 +43,7 @@ class AuthService {
           .collection("users")
           .document(user.uid);
 
-      userRef.setData({
+      await userRef.setData({
         "uid": user.uid,
         "email": user.email,
         "displayName": displayName,
@@ -71,7 +71,7 @@ class AuthService {
           .collection("users")
           .document(user.uid);
 
-      userRef.setData({
+      await userRef.setData({
         "lastLogin": DateTime.now(),
       }, merge: true);
 
@@ -139,7 +139,7 @@ class AuthService {
     DocumentReference userRef = _db.collection("users").document(user.uid);
 
     /** Update user data with new 3rd party data **/
-    return userRef.setData({
+    return await userRef.setData({
       "uid": user.uid,
       "email": user.email,
       "photoURL": user.photoUrl,
@@ -159,6 +159,8 @@ final AuthService authService = AuthService();
 
 class _ResultHandler {
   static bool handleFacebookResultError(FacebookLoginResult result) {
+    authService.loading.add(false);
+
     switch (result.status) {
       case FacebookLoginStatus.loggedIn:
         return false;
@@ -169,11 +171,13 @@ class _ResultHandler {
         showError(Text("Login fehlgeschlagen"), Text("Login fehlgeschlagen, bitte versuchen Sie es erneut."));
         break;
     }
-    authService.loading.add(false);
+
     return true;
   }
 
   static bool handleTwitterResultError(TwitterLoginResult result) {
+    authService.loading.add(false);
+
     switch (result.status) {
       case TwitterLoginStatus.loggedIn:
         return false;
@@ -184,12 +188,12 @@ class _ResultHandler {
         showError(Text("Login fehlgeschlagen"), Text("Login fehlgeschlagen, bitte versuchen Sie es erneut."));
         break;
     }
-    authService.loading.add(false);
     return true;
   }
 
-  static void showInfoSnackbar(Text message, {Duration duration = const Duration(seconds: 4)}) {
-    authScaffoldKey.currentState.showSnackBar(
+  static void showInfoSnackbar(Text message, {Duration duration = const Duration(seconds: 4), bool auth = true}) {
+    var key = auth ? authScaffoldKey : mainScaffoldKey;
+    key.currentState.showSnackBar(
         SnackBar(
           duration: duration,
           content: message
@@ -218,34 +222,39 @@ class _ResultHandler {
   }
 
   static void handlePlatformException(PlatformException e) {
-    if (e.code == "ERROR_ACCOUNT_EXISTS_WITH_DIFFERENT_CREDENTIAL"
-        || e.code == "ERROR_EMAIL_ALREADY_IN_USE"
+    authService.loading.add(false);
+
+    if (
+        e.code == "ERROR_ACCOUNT_EXISTS_WITH_DIFFERENT_CREDENTIAL" ||
+        e.code == "ERROR_EMAIL_ALREADY_IN_USE"
     ) {
       showInfoSnackbar(
         Text("Ein Account mit dieser E-Mail Adresse existiert bereits. Haben Sie vielleicht einen anderen Login-typ verwendet?"),
         duration: Duration(seconds: 6),
       );
     } else if (
-    e.code == "ERROR_USER_NOT_FOUND"
-        || e.code == "ERROR_WRONG_PASSWORD"
-        || e.code == "ERROR_TOO_MANY_REQUESTS"
-        || e.code == "ERROR_INVALID_CREDENTIAL"
+        e.code == "ERROR_USER_NOT_FOUND" ||
+        e.code == "ERROR_WRONG_PASSWORD" ||
+        e.code == "ERROR_TOO_MANY_REQUESTS" ||
+        e.code == "ERROR_INVALID_CREDENTIAL"
     ) {
       showError(Text("Login fehlgeschlagen"), Text("Die E-Mail oder das Passwort sind fehlerhaft."));
-    } else if (e.code ==  "ERROR_DISABLED"
-        || e.code == "ERROR_USER_DISABLED"
+    } else if (
+        e.code ==  "ERROR_DISABLED" ||
+        e.code == "ERROR_USER_DISABLED"
     ) {
       showInfoSnackbar(Text("Dein Account ist derzeit deaktiviert."));
     } else if (
-    e.code == "ERROR_NETWORK_REQUEST_FAILED" ||
+        e.code == "ERROR_NETWORK_REQUEST_FAILED" ||
         e.code == "ERROR_NETWORK_REQUEST_FAILED" ||
         e.code == "AUTHENTICATION_FAILED"
     ) {
       showError(Text("Login fehlgeschlagen"), Text("Bitte überprüfen Sie Ihre Internetverbindung."));
+    } else if (e.code.contains("Error performing")) {
+      showInfoSnackbar(Text("Please verify your email by clicking on the link which was sent to your email you entered."), auth: false);
     } else {
-      print("UNHANDLED ERROR!!!!!!!!!!!!!!!!!!");
-      print(e.toString());
+        print("UNHANDLED ERROR!!!!!!!!!!!!!!!!!!");
+        print(e.toString());
     }
-    authService.loading.add(false);
   }
 }
