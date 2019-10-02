@@ -66,6 +66,15 @@ class AuthService {
       AuthResult res = await _auth.signInWithEmailAndPassword(email: email, password: password);
       FirebaseUser user = res.user;
 
+      //TODO: Email verify error
+      DocumentReference userRef = _db
+          .collection("users")
+          .document(user.uid);
+
+      userRef.setData({
+        "lastLogin": DateTime.now(),
+      }, merge: true);
+
       loading.add(false);
       return user;
     } on PlatformException catch(e) {
