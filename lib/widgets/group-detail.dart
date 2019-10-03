@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:listassist/models/Group.dart';
+import 'package:listassist/services/db.dart';
+import 'package:listassist/widgets/group-userlist.dart';
+import 'package:provider/provider.dart';
 
 import '../main.dart';
 
@@ -18,7 +21,9 @@ class _GroupDetail extends State<GroupDetail> {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
+    return StreamProvider<Group>.value(
+      value: databaseService.streamGroupsFromUser(),
+      child: DefaultTabController(
         length: 3,
         child: Scaffold(
           appBar: AppBar(
@@ -36,10 +41,11 @@ class _GroupDetail extends State<GroupDetail> {
             children: [
               Text("Einkaufslisten der Gruppe"),
               Text("Statistiken der Gruppe"),
-              Text("${group.members}")
+              GroupUserList()
             ],
           ),
-        )
+        ),
+      )
     );
   }
 }

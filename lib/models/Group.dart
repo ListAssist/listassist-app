@@ -1,12 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:listassist/models/User.dart';
+import 'PublicUser.dart';
 
 
 class Group {
   final String title;
-  final dynamic creator;
+  final PublicUser creator;
   final int memberCount;
-  final List<dynamic> members;
+  final List<PublicUser> members;
 
   Group({this.title, this.creator, this.memberCount, this.members});
 
@@ -26,10 +26,9 @@ class Group {
     print(data["members"]);
     return Group(
         title: data["title"],
-        creator: data["creator"],
+        creator: PublicUser.fromMap(data["creator"]),
         memberCount: data["memberCount"],
-        //TODO: Map array to User List
-        members: data["members"]
+        members: List.from(data["members"]).map((member) => PublicUser.fromMap(member)).toList()
     );
   }
 }
