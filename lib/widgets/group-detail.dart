@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../main.dart';
-
 class GroupDetail extends StatefulWidget {
   final String title;
   GroupDetail({this.title = "Gruppe"});

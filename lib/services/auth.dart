@@ -29,7 +29,7 @@ class AuthService {
 
   BehaviorSubject<bool> loading = BehaviorSubject<bool>.seeded(false);
 
-  AuthService() {}
+  AuthService();
 
   /// Creates user with email and password
   Future<FirebaseUser> signUpWithMail(String email, String password, String displayName) async {

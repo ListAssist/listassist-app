@@ -42,6 +42,10 @@ dependencies:
   
   badges:
   flutter_spinkit:
+  camera:
+  flutter_vector_icons:
+  flutter_speed_dial:
+  path_provider:
 
 dev_dependencies:
   flutter_test:

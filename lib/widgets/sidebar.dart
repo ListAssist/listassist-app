@@ -6,6 +6,8 @@ import 'package:listassist/models/current-screen.dart';
 import 'package:listassist/services/auth.dart';
 import 'package:listassist/widgets/shoppinglist-view.dart';
 
+import 'detector.dart';
+
 class Sidebar extends StatefulWidget {
   @override
   _Sidebar createState() => _Sidebar();
@@ -41,6 +43,7 @@ class _Sidebar extends State<Sidebar> {
             leading: Icon(Icons.insert_chart),
             title: Text("Statistiken"),
             onTap: () {
+              ScreenModel.of(context).setScreen(Detector(), "Detector");
               Navigator.pop(context);
             },
           ),
