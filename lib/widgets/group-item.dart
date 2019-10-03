@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:listassist/models/Group.dart';
 import 'package:listassist/widgets/group-detail.dart';
-import 'package:listassist/widgets/shoppinglist-detail.dart';
+import 'package:provider/provider.dart';
 
 
-class Group extends StatelessWidget {
-  final String title;
-  final int memberCount;
-  Group({this.title = "Gruppe", this.memberCount = 0});
+class GroupItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    Group group = Provider.of<Group>(context);
+    return group != null ?
+    Container(
       child: GestureDetector(
         onTap: () => Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => GroupDetail(title: title)),
+          MaterialPageRoute(builder: (context) => GroupDetail(group: group)),
         ),
         child: Card(
           child: Container(
@@ -25,14 +26,16 @@ class Group extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Text(title, style: Theme.of(context).textTheme.title),
-                  Text("$memberCount Mitglieder")
+                  Text(group.title, style: Theme.of(context).textTheme.title),
+                  Text("${group.memberCount} Mitglieder")
                 ],
               ),
             ),
           ),
         ),
       ),
-    );
+    )
+    :
+    SpinKitDoubleBounce(color: Colors.blueAccent);
   }
 }

@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:listassist/models/Group.dart';
 
 import '../main.dart';
 
 class GroupDetail extends StatefulWidget {
-  final String title;
-  GroupDetail({this.title = "Gruppe"});
+  final Group group;
+  GroupDetail({this.group});
 
   @override
-  _GroupDetail createState() => _GroupDetail(title: title);
+  _GroupDetail createState() => _GroupDetail(group: group);
 }
 
 class _GroupDetail extends State<GroupDetail> {
 
-  String title;
-  _GroupDetail({this.title: "Gruppe"});
+  final Group group;
+  _GroupDetail({this.group});
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +23,7 @@ class _GroupDetail extends State<GroupDetail> {
         child: Scaffold(
           appBar: AppBar(
             backgroundColor: Theme.of(context).colorScheme.primary,
-            title: Text(this.title),
+            title: Text(group.title),
             bottom: TabBar(
               tabs: [
                 Tab(icon: Icon(Icons.list)),
@@ -35,7 +36,7 @@ class _GroupDetail extends State<GroupDetail> {
             children: [
               Text("Einkaufslisten der Gruppe"),
               Text("Statistiken der Gruppe"),
-              Text("Mitglieder der Gruppe")
+              Text("${group.members}")
             ],
           ),
         )

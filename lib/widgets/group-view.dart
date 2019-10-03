@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:listassist/main.dart';
-import 'package:listassist/widgets/group.dart';
+import 'package:listassist/models/Group.dart';
+import 'package:listassist/models/User.dart';
+import 'package:listassist/services/db.dart';
+import 'package:listassist/widgets/group-item.dart';
+import 'package:provider/provider.dart';
 
 class GroupView extends StatelessWidget {
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -15,12 +21,14 @@ class GroupView extends StatelessWidget {
           onPressed: () => mainScaffoldKey.currentState.openDrawer(),
         ),
       ),
-      body: ListView(
-        children: <Widget>[
-          Group(title: "Kekos", memberCount: 7),
-          Group(title: "Familie", memberCount: 4),
-        ],
-      ),
+      body: StreamProvider<Group>.value(
+        value: databaseService.streamGroupsFromUser(),
+        child: ListView(
+          children: <Widget>[
+            GroupItem(),
+          ],
+        )
+      )
     );
   }
 }
