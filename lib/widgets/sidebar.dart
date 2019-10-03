@@ -43,7 +43,6 @@ class _Sidebar extends State<Sidebar> {
             leading: Icon(Icons.insert_chart),
             title: Text("Statistiken"),
             onTap: () {
-              ScreenModel.of(context).setScreen(Detector(), "Detector");
               Navigator.pop(context);
             },
           ),
