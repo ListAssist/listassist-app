@@ -53,7 +53,7 @@ class AuthService {
       loading.add(false);
       return user;
     } on PlatformException catch(e) {
-      _ResultHandler.handlePlatformException(e);
+      ResultHandler.handlePlatformException(e);
       return null;
     }
   }
@@ -78,7 +78,7 @@ class AuthService {
       loading.add(false);
       return user;
     } on PlatformException catch(e) {
-      _ResultHandler.handlePlatformException(e);
+      ResultHandler.handlePlatformException(e);
       return null;
     }
   }
@@ -94,7 +94,7 @@ class AuthService {
         /** Native Facebook login screen **/
         FacebookLoginResult result = await _facebookSignIn.logIn(["email"]);
 
-        if (_ResultHandler.handleFacebookResultError(result)) return null;
+        if (ResultHandler.handleFacebookResultError(result)) return null;
 
         credential = FacebookAuthProvider.getCredential(accessToken: result.accessToken.token);
         break;
@@ -112,7 +112,7 @@ class AuthService {
         TwitterLoginResult result = await _twitterSignIn.authorize();
 
         /// Signing in with Twitter currently doesn't work. Created Issue at firebase_auth repo
-        if (_ResultHandler.handleTwitterResultError(result)) return null;
+        if (ResultHandler.handleTwitterResultError(result)) return null;
 
         credential = TwitterAuthProvider.getCredential(authToken: result.session.token, authTokenSecret: result.session.secret);
         break;
@@ -128,7 +128,7 @@ class AuthService {
       loading.add(false);
       return user;
     } on PlatformException catch (e) {
-      _ResultHandler.handlePlatformException(e);
+      ResultHandler.handlePlatformException(e);
       return null;
     }
   }
@@ -157,7 +157,7 @@ class AuthService {
 /// Expose to global namespace (not real singleton)
 final AuthService authService = AuthService();
 
-class _ResultHandler {
+class ResultHandler {
   static bool handleFacebookResultError(FacebookLoginResult result) {
     authService.loading.add(false);
 

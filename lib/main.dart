@@ -54,7 +54,7 @@ class _MainAppState extends State<MainApp> {
     return MaterialApp(
         title: "ListAssist",
         theme: ThemeData(
-          primarySwatch: Colors.indigo,
+          primarySwatch: Colors.blue,
         ),
         home: AnimatedSwitcher(
             duration: Duration(milliseconds: 600),

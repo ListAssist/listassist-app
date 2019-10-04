@@ -104,7 +104,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
           SpeedDialChild(
             child: Icon(Icons.camera),
             backgroundColor: Colors.blue,
-            label: "Check",
+            label: "Image Check",
             labelStyle: TextStyle(fontSize: 18.0),
             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => Detector())),
           ),
