@@ -115,6 +115,7 @@ class _DetectorState extends State<Detector> {
   Future initCamera() async {
     List<CameraDescription> cameras = await availableCameras();
     var backCameras = cameras.where((CameraDescription desc) => desc.lensDirection == CameraLensDirection.back).toList();
+
     _controller = CameraController(backCameras[0], ResolutionPreset.max);
     await _controller.initialize();
     return;
@@ -125,9 +126,9 @@ class _DetectorState extends State<Detector> {
       File image = await ImagePicker.pickImage(source: ImageSource.gallery);
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => PictureShow(image: Image.file(image))),
+        MaterialPageRoute(builder: (context) => PictureShow(image: Image.file(image), imageFile: image)),
       );
-    } on Exception catch (e) {
+    } on Exception {
       ResultHandler
           .showInfoSnackbar(Text("Ein Fehler ist aufgetreten beim Öffnen des Bildes. Die App benötigt Zugriff auf die Galerie"));
     }
@@ -144,7 +145,7 @@ class _DetectorState extends State<Detector> {
     File image = File(path);
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => PictureShow(image: Image.file(image)), ),
+      MaterialPageRoute(builder: (context) => PictureShow(image: Image.file(image), imageFile: image,), ),
     );
   }
 }

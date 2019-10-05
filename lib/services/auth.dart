@@ -6,6 +6,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:flutter_twitter_login/flutter_twitter_login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:listassist/models/User.dart';
+import 'package:listassist/services/db.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:listassist/main.dart';
 import 'package:listassist/widgets/authentication.dart';
@@ -24,8 +26,17 @@ class AuthService {
   FirebaseAuth _auth = FirebaseAuth.instance;
   Firestore _db = Firestore.instance;
 
-  Future<FirebaseUser> get getUser => _auth.currentUser();
   Stream<FirebaseUser> get user => _auth.onAuthStateChanged;
+
+  Observable<User> get userDoc => Observable(user).switchMap(
+      (FirebaseUser user)  {
+        if (user != null) {
+          return databaseService.streamProfile(user);
+        } else {
+          return Observable.just(null);
+        }
+      }
+  );
 
   BehaviorSubject<bool> loading = BehaviorSubject<bool>.seeded(false);
 

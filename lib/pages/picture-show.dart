@@ -1,10 +1,14 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:listassist/services/recognize.dart';
 
 class PictureShow extends StatefulWidget {
   final Image image;
+  final File imageFile;
 
-  PictureShow({Key key, this.image}): super(key: key);
+  PictureShow({Key key, @required this.image, @required this.imageFile}): super(key: key);
 
   @override
   _PictureShowState createState() => _PictureShowState();
@@ -15,7 +19,9 @@ class _PictureShowState extends State<PictureShow> {
   Widget build(BuildContext context) {
     return Stack(
       children: <Widget>[
-        widget.image,
+        Align(
+          child: widget.image,
+        ),
         Align(
           alignment: Alignment.bottomCenter,
           child: Padding(
@@ -36,7 +42,7 @@ class _PictureShowState extends State<PictureShow> {
                     padding: EdgeInsets.all(10.0),
                   ),
                   RawMaterialButton(
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: () => recognizeService.recognizeText(widget.imageFile),
                     child: Icon(
                       Icons.check,
                       color: Colors.white,

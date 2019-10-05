@@ -6,7 +6,6 @@ import 'package:listassist/models/current-screen.dart';
 import 'package:listassist/services/auth.dart';
 import 'package:listassist/widgets/shoppinglist-view.dart';
 
-import 'detector.dart';
 
 class Sidebar extends StatefulWidget {
   @override
@@ -17,7 +16,7 @@ class _Sidebar extends State<Sidebar> {
   @override
   Widget build(BuildContext context) {
     User user = Provider.of<User>(context);
-    
+
     return Drawer(
       child: Column(
         children: <Widget>[
