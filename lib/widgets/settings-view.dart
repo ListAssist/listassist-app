@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:listassist/widgets/profilesettings-view.dart';
 import 'package:listassist/widgets/notificationsettings-view.dart';
 import 'package:listassist/services/auth.dart';
+import 'package:listassist/widgets/shoppinglistsettings-view.dart';
 
 class SettingsView extends StatelessWidget {
   String img = "https://www.indiewire.com/wp-content/uploads/2019/05/shutterstock_8999492b.jpg?w=780";
@@ -126,7 +127,14 @@ class SettingsView extends StatelessWidget {
                       leading: Icon(Icons.view_agenda),
                       title: Text('Ansicht'),
                       trailing: Icon(Icons.keyboard_arrow_right),
-                      onTap: () => {},
+                        onTap: () => {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => ShoppinglistsettingsView()
+                            )
+                          )
+                        },
                     ),
                     ListTile(
                       leading: Icon(Icons.notifications),
