@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:listassist/models/current-screen.dart';
 import 'package:listassist/services/auth.dart';
+import 'package:listassist/widgets/settings-view.dart';
 import 'package:listassist/widgets/shoppinglist-view.dart';
 
 
@@ -70,7 +71,8 @@ class _Sidebar extends State<Sidebar> {
             leading: Icon(Icons.settings),
             title: Text("Einstellungen"),
             onTap: () {
-              Navigator.pop(context);
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => SettingsView()));
             },
           ),
           Spacer(),
