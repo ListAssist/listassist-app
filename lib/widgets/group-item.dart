@@ -12,29 +12,35 @@ class GroupItem extends StatelessWidget {
   Widget build(BuildContext context) {
     Group group = Provider.of<Group>(context);
     return group != null ?
-    Container(
-      child: GestureDetector(
-        onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => GroupDetail(group: group)),
-        ),
-        child: Card(
-          child: Container(
-            padding: EdgeInsets.all(20),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(group.title, style: Theme.of(context).textTheme.title),
-                  Text("${group.memberCount} Mitglieder")
-                ],
+      Container(
+        child: GestureDetector(
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) {
+              return Provider<Group>.value(
+                value: group,
+                child: GroupDetail()
+              );
+//              return GroupDetail();
+            }),
+          ),
+          child: Card(
+            child: Container(
+              padding: EdgeInsets.all(20),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(group.title, style: Theme.of(context).textTheme.title),
+                    Text("${group.members.length + 1} Mitglieder")
+                  ],
+                ),
               ),
             ),
           ),
         ),
-      ),
-    )
+      )
     :
     SpinKitDoubleBounce(color: Colors.blueAccent);
   }

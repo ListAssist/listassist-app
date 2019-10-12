@@ -16,7 +16,6 @@ class Group {
     return Group(
         title: data["title"],
         creator: data["creator"],
-        memberCount: data["memberCount"],
         members: data["members"]
     );
   }
@@ -27,8 +26,7 @@ class Group {
     return Group(
         title: data["title"],
         creator: PublicUser.fromMap(data["creator"]),
-        memberCount: data["memberCount"],
-        members: List.from(data["members"]).map((member) => PublicUser.fromMap(member)).toList()
+        members: List.from(data["members"] ?? []).map((member) => PublicUser.fromMap(member)).toList()
     );
   }
 }

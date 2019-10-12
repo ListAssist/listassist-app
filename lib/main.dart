@@ -10,6 +10,8 @@ import 'package:listassist/services/auth.dart';
 import 'package:listassist/widgets/sidebar.dart';
 import 'package:listassist/widgets/authentication.dart';
 
+import 'models/Group.dart';
+import 'models/PublicUser.dart';
 import 'models/User.dart';
 
 void main() => runApp(MyApp());
@@ -29,11 +31,11 @@ class MyApp extends StatelessWidget {
           StreamProvider<bool>.value(value: authService.loading.asBroadcastStream())
         ],
         child: MaterialApp(
-            title: "ListAssist",
-            theme: ThemeData(
-              primarySwatch: Colors.indigo,
-            ),
-            home: MainApp()
+          title: "ListAssist",
+          theme: ThemeData(
+            primarySwatch: Colors.indigo,
+          ),
+          home: MainApp()
         ),
       )
     );
@@ -54,9 +56,20 @@ class _MainAppState extends State<MainApp> {
     return AnimatedSwitcher(
       duration: Duration(milliseconds: 600),
       child: user != null ?
-      StreamProvider<User>.value(
-        value: databaseService.streamProfile(user),
-        child: Scaffold(
+      MultiProvider(
+        providers: [
+          StreamProvider<User>.value(value: databaseService.streamProfile(user)),
+          //StreamProvider<Group>.value(value: databaseService.streamGroupsFromUser())
+          Provider<Group>.value(value: Group(
+              creator: PublicUser(
+                  displayName: "Tobias Seczer",
+              ),
+              members: [],
+              title: "Testgruppe"
+            )
+          )
+        ],
+      child: Scaffold(
           key: mainScaffoldKey,
           body: Body(),
           drawer: Sidebar(),

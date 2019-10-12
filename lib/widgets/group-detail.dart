@@ -7,22 +7,24 @@ import 'package:provider/provider.dart';
 import '../main.dart';
 
 class GroupDetail extends StatefulWidget {
-  final Group group;
-  GroupDetail({this.group});
+//  GroupDetail({
+//    Key key,
+//    this.group
+//  }) : super(key: key);
+//
+//  final Group group;
 
   @override
-  _GroupDetail createState() => _GroupDetail(group: group);
+  _GroupDetail createState() => _GroupDetail();
 }
 
 class _GroupDetail extends State<GroupDetail> {
 
-  final Group group;
-  _GroupDetail({this.group});
-
   @override
   Widget build(BuildContext context) {
-    return StreamProvider<Group>.value(
-      value: databaseService.streamGroupsFromUser(),
+    Group group = Provider.of<Group>(context);
+    return Provider<Group>.value(
+      value: group,
       child: DefaultTabController(
         length: 3,
         child: Scaffold(
