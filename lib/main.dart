@@ -51,33 +51,25 @@ class _MainAppState extends State<MainApp> {
     FirebaseUser user = Provider.of<FirebaseUser>(context);
     bool loading = Provider.of<bool>(context);
 
-    return MaterialApp(
-        title: "ListAssist",
-        theme: ThemeData(
-          primarySwatch: Colors.indigo,
-        ),
-        home: AnimatedSwitcher(
-            duration: Duration(milliseconds: 600),
-            child: user != null ?
-            StreamProvider<User>.value(
-                value: databaseService.streamProfile(user),
-                child: Scaffold(
-                  key: mainScaffoldKey,
-                  body: Body(),
-                  drawer: Sidebar(),
-              )
-            )
-             :
-           Scaffold(
-             key: authScaffoldKey,
-             body: AnimatedSwitcher(
-               duration: Duration(milliseconds: 600),
-               child: loading ? SpinKitDoubleBounce(color: Colors.blueAccent) : AuthenticationPage(),
-             ),
-             resizeToAvoidBottomInset: false,
-           )
+    return AnimatedSwitcher(
+      duration: Duration(milliseconds: 600),
+      child: user != null ?
+      StreamProvider<User>.value(
+        value: databaseService.streamProfile(user),
+        child: Scaffold(
+          key: mainScaffoldKey,
+          body: Body(),
+          drawer: Sidebar(),
         )
-    );
+      ) : Scaffold(
+        key: authScaffoldKey,
+        body: AnimatedSwitcher(
+         duration: Duration(milliseconds: 600),
+         child: loading ? SpinKitDoubleBounce(color: Colors.blueAccent) : AuthenticationPage(),
+        ),
+        resizeToAvoidBottomInset: false,
+       )
+      );
   }
 }
 class Body extends StatefulWidget {

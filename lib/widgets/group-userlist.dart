@@ -20,7 +20,7 @@ class GroupUserList extends StatelessWidget {
               CircleAvatar(backgroundImage: NetworkImage(member.photoUrl)),
               Padding(
                 padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
-                child: Text(member.displayName, style: Theme.of(context).textTheme.title),
+                child: Text(member.displayName, style: Theme.of(context).textTheme.subtitle),
               )
             ],
           )
@@ -40,7 +40,7 @@ class GroupUserList extends StatelessWidget {
                   padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
                   child: Text(
                     group.creator.displayName,
-                    style: Theme.of(context).textTheme.title,
+                    style: Theme.of(context).textTheme.subtitle,
                     overflow: TextOverflow.ellipsis
                   ),
                 )
