@@ -3,6 +3,7 @@ import 'package:listassist/widgets/profilesettings-view.dart';
 import 'package:listassist/widgets/notificationsettings-view.dart';
 import 'package:listassist/services/auth.dart';
 import 'package:listassist/widgets/shoppinglistsettings-view.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SettingsView extends StatelessWidget {
   String img = "https://www.indiewire.com/wp-content/uploads/2019/05/shutterstock_8999492b.jpg?w=780";
@@ -47,6 +48,15 @@ class SettingsView extends StatelessWidget {
     );
   }
 
+  void _launchURL() async {
+    const url = 'https://listassist.gq/impressum.html';
+    print("kek");
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -153,7 +163,9 @@ class SettingsView extends StatelessWidget {
                       leading: Icon(Icons.security),
                       title: Text('Datenschutz'),
                       trailing: Icon(Icons.keyboard_arrow_right),
-                      onTap: () => {},
+                      onTap: () => {
+                        _launchURL
+                      },
                     ),
                     ListTile(
                       leading: Icon(Icons.bug_report),

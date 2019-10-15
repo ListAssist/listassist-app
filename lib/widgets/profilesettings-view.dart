@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:listassist/main.dart';
-import 'package:listassist/widgets/shopping-list.dart';
-import 'package:listassist/services/auth.dart';
+import 'settings-modal.dart';
 
 class ProfilesettingsView extends StatelessWidget {
   String img = "https://www.indiewire.com/wp-content/uploads/2019/05/shutterstock_8999492b.jpg?w=780";
+  SettingsModal modal = new SettingsModal();
 
   @override
   Widget build(BuildContext context) {
@@ -29,19 +28,26 @@ class ProfilesettingsView extends StatelessWidget {
 
                   Container(
                     margin: const EdgeInsets.only(bottom: 10.0),
-                    child:
-                    CircleAvatar(
-                      backgroundImage: NetworkImage(img),
-                      radius: 50,
+                    child: GestureDetector(
+                      onTap: () => modal.mainBottomSheet(context),
+                      child:
+                        CircleAvatar(
+                          backgroundImage: NetworkImage(img),
+                          radius: 50,
+                        )
                     ),
                   ),
                   Container(
                     margin: const EdgeInsets.only(bottom: 50.0),
-                    child:
-                    Text(
-                      "Foto ändern",
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                      textAlign: TextAlign.center,
+
+                    child: GestureDetector(
+                        onTap: () => modal.mainBottomSheet(context),
+                        child:
+                      Text(
+                        "Foto ändern",
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                        textAlign: TextAlign.center,
+                      )
                     )
                   ),
 
@@ -66,7 +72,15 @@ class ProfilesettingsView extends StatelessWidget {
 
 
                 ])
-        )
+        ),
+
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            // Add your onPressed code here!
+          },
+          child: Icon(Icons.check),
+          backgroundColor: Colors.green,
+        ),
     );
   }
 }
