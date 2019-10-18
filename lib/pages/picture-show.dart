@@ -74,7 +74,7 @@ class _PictureShowState extends State<PictureShow> {
                 child: PositionedTapDetector(
                     onTap: (TapPosition pos) {
                       setState(() {
-                        if (_points.length < 3) {
+                        if (_points.length <= 3) {
                           _clear = false;
                           _points = List.from(_points)..add(pos.relative);
                         }
@@ -139,12 +139,13 @@ class RectanglePainter extends CustomPainter {
           canvas.drawLine(points[0], points[1], paint);
           canvas.drawLine(points[1], points[2], paint);
 
-          double x = points[2].dx - points[1].dx;
-          double y = points[2].dy - points[1].dy;
+          /* double x = points[2].dx - points[1].dx;
+             double y = points[2].dy - points[1].dy;
 
           points.add(Offset(points[0].dx + x, points[0].dy + y));
           canvas.drawLine(points[2], points[3], paint);
           canvas.drawLine(points[3], points[0], paint);
+           */
         } else {
           canvas.drawLine(points[0], points[1], paint);
           canvas.drawLine(points[1], points[2], paint);
