@@ -48,9 +48,9 @@ class SettingsView extends StatelessWidget {
     );
   }
 
-  void _launchURL() async {
+  _launchURL() async {
+    print("keko");
     const url = 'https://listassist.gq/impressum.html';
-    print("kek");
     if (await canLaunch(url)) {
       await launch(url);
     } else {
@@ -164,7 +164,7 @@ class SettingsView extends StatelessWidget {
                       title: Text('Datenschutz'),
                       trailing: Icon(Icons.keyboard_arrow_right),
                       onTap: () => {
-                        _launchURL
+                        _launchURL()
                       },
                     ),
                     ListTile(
