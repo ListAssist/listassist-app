@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-import 'detector.dart';
+import 'package:listassist/pages/picture-show.dart';
 
 class Item {
   String name;
@@ -106,7 +106,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
             backgroundColor: Colors.blue,
             label: "Image Check",
             labelStyle: TextStyle(fontSize: 18.0),
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => Detector())),
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => PictureShow())),
           ),
         ],
       ),

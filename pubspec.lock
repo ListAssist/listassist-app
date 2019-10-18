@@ -22,13 +22,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.5"
-  camera:
+  camera_fix_exception:
     dependency: "direct main"
     description:
-      name: camera
+      name: camera_fix_exception
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.5.5+1"
+    version: "0.4.0+5"
   charcode:
     dependency: transitive
     description:
@@ -42,7 +42,7 @@ packages:
       name: cloud_firestore
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.12.9+4"
+    version: "0.12.9+5"
   collection:
     dependency: transitive
     description:
@@ -103,14 +103,14 @@ packages:
       name: flutter_signin_button
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.3.0"
+    version: "0.4.1"
   flutter_speed_dial:
     dependency: "direct main"
     description:
       name: flutter_speed_dial
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.2.1"
+    version: "1.2.2"
   flutter_spinkit:
     dependency: "direct main"
     description:
@@ -157,7 +157,7 @@ packages:
       name: image_picker
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.6.1+4"
+    version: "0.6.1+8"
   matcher:
     dependency: transitive
     description:
@@ -185,7 +185,7 @@ packages:
       name: path_provider
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.3.0"
+    version: "1.3.1"
   pedantic:
     dependency: transitive
     description:
@@ -200,13 +200,20 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.2.1"
+  positioned_tap_detector:
+    dependency: "direct main"
+    description:
+      name: positioned_tap_detector
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.3"
   provider:
     dependency: "direct main"
     description:
       name: provider
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.1.0"
+    version: "3.1.0+1"
   quiver:
     dependency: transitive
     description:
@@ -220,7 +227,7 @@ packages:
       name: rxdart
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.22.2"
+    version: "0.22.4"
   scoped_model:
     dependency: "direct main"
     description:

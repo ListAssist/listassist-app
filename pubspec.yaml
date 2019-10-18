@@ -42,11 +42,12 @@ dependencies:
   
   badges:
   flutter_spinkit:
-  camera:
+  camera_fix_exception:
   flutter_vector_icons:
   flutter_speed_dial:
   path_provider:
   image_picker:
+  positioned_tap_detector:
 
 dev_dependencies:
   flutter_test:

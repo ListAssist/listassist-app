@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
-import 'package:listassist/services/auth.dart';
 
 class RecognizeService {
   final TextRecognizer _textRecognizer = FirebaseVision.instance.cloudTextRecognizer();
