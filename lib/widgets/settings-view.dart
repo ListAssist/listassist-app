@@ -48,9 +48,7 @@ class SettingsView extends StatelessWidget {
     );
   }
 
-  _launchURL() async {
-    print("keko");
-    const url = 'https://listassist.gq/impressum.html';
+  _launchURL(url) async {
     if (await canLaunch(url)) {
       await launch(url);
     } else {
@@ -164,7 +162,7 @@ class SettingsView extends StatelessWidget {
                       title: Text('Datenschutz'),
                       trailing: Icon(Icons.keyboard_arrow_right),
                       onTap: () => {
-                        _launchURL()
+                        _launchURL("https://listassist.gq/impressum.html")
                       },
                     ),
                     ListTile(
@@ -177,7 +175,9 @@ class SettingsView extends StatelessWidget {
                       leading: Icon(Icons.info),
                       title: Text('Info'),
                       trailing: Icon(Icons.keyboard_arrow_right),
-                      onTap: () => {},
+                      onTap: () => {
+                        _launchURL("https://listassist.gq")
+                      },
                     ),
 
                   ],
