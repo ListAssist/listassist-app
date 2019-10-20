@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:listassist/main.dart';
-import 'package:listassist/widgets/group.dart';
+import 'package:listassist/models/Group.dart';
+import 'package:listassist/models/User.dart';
+import 'package:listassist/services/db.dart';
+import 'package:listassist/widgets/add-group.dart';
+import 'package:listassist/widgets/group-item.dart';
 
 class GroupView extends StatelessWidget {
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -17,9 +23,17 @@ class GroupView extends StatelessWidget {
       ),
       body: ListView(
         children: <Widget>[
-          Group(title: "Kekos", memberCount: 7),
-          Group(title: "Familie", memberCount: 4),
+          GroupItem(),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.add),
+        tooltip: "Neue Gruppe erstellen",
+        onPressed: () =>
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => AddGroup()),
+          )
       ),
     );
   }

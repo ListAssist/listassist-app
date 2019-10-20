@@ -207,13 +207,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.2.1"
-  positioned_tap_detector:
-    dependency: "direct main"
-    description:
-      name: positioned_tap_detector
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.0.3"
   provider:
     dependency: "direct main"
     description:
