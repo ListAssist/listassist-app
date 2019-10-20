@@ -1,13 +1,11 @@
-import 'dart:ffi';
 import 'dart:io';
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:listassist/services/auth.dart';
-import 'package:listassist/services/recognize.dart';
-import 'package:positioned_tap_detector/positioned_tap_detector.dart';
 
 class PictureShow extends StatefulWidget {
   @override
@@ -16,8 +14,9 @@ class PictureShow extends StatefulWidget {
 
 class _PictureShowState extends State<PictureShow> {
   File _imageFile;
-  List<Offset> _points = [];
+  List<Offset> _points = [Offset(90, 120), Offset(90, 370), Offset(320, 370), Offset(320, 120)];
   bool _clear = false;
+  int _currentlyDraggedIndex = -1;
 
   @override
   Widget build(BuildContext context) {
@@ -71,13 +70,32 @@ class _PictureShowState extends State<PictureShow> {
             ],
             if (_imageFile != null) ...[
               Container(
-                child: PositionedTapDetector(
-                    onTap: (TapPosition pos) {
-                      setState(() {
-                        if (_points.length <= 3) {
-                          _clear = false;
-                          _points = List.from(_points)..add(pos.relative);
+                child: GestureDetector(
+                    onPanStart: (DragStartDetails details) {
+                      // get distance from points to check if is in circle
+                      int indexMatch = -1;
+                      for (int i = 0; i < _points.length; i++) {
+                        double distance = sqrt(pow(details.localPosition.dx - _points[i].dx, 2) + pow(details.localPosition.dy - _points[i].dy, 2));
+                        if (distance <= 30) {
+                          indexMatch = i;
+                          break;
                         }
+                      }
+                      if (indexMatch != -1) {
+                        _currentlyDraggedIndex = indexMatch;
+                      }
+                    },
+                    onPanUpdate: (DragUpdateDetails details) {
+                      if (_currentlyDraggedIndex != -1) {
+                        setState(() {
+                          _points = List.from(_points);
+                          _points[_currentlyDraggedIndex] = details.localPosition;
+                        });
+                      }
+                    },
+                    onPanEnd: (_) {
+                      setState(() {
+                        _currentlyDraggedIndex = -1;
                       });
                     },
                     child: Stack(
@@ -91,7 +109,7 @@ class _PictureShowState extends State<PictureShow> {
                       ]
                     )
                 ),
-              )
+              ),
             ]
           ],
         ),
@@ -127,31 +145,22 @@ class RectanglePainter extends CustomPainter {
       final paint = Paint()
         ..color = Colors.red
         ..strokeCap = StrokeCap.square
-        ..style = PaintingStyle.stroke
+        ..style = PaintingStyle.fill
+        ..strokeWidth = 2;
+      final circlePaint = Paint()
+        ..color = Colors.red
+        ..strokeCap = StrokeCap.square
+        ..style = PaintingStyle.fill
+        ..blendMode = BlendMode.multiply
         ..strokeWidth = 2;
 
-      if (points.isNotEmpty && points != null) {
-        if (points.length == 1) {
-          canvas.drawPoints(PointMode.points, [points[0]], paint);
-        } else if (points.length == 2) {
-          canvas.drawLine(points[0], points[1], paint);
-        } else if (points.length == 3) {
-          canvas.drawLine(points[0], points[1], paint);
-          canvas.drawLine(points[1], points[2], paint);
-
-          /* double x = points[2].dx - points[1].dx;
-             double y = points[2].dy - points[1].dy;
-
-          points.add(Offset(points[0].dx + x, points[0].dy + y));
-          canvas.drawLine(points[2], points[3], paint);
-          canvas.drawLine(points[3], points[0], paint);
-           */
-        } else {
-          canvas.drawLine(points[0], points[1], paint);
-          canvas.drawLine(points[1], points[2], paint);
-          canvas.drawLine(points[2], points[3], paint);
-          canvas.drawLine(points[3], points[0], paint);
-        }
+      for (int i = 0; i < points.length; i++) {
+          if (i + 1 == points.length) {
+            canvas.drawLine(points[i], points[0], paint);
+          } else {
+            canvas.drawLine(points[i], points[i + 1], paint);
+          }
+          canvas.drawCircle(points[i], 10, circlePaint);
       }
     }
   }

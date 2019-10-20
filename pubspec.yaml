@@ -39,7 +39,7 @@ dependencies:
 
   rxdart:  
   provider:
-  
+  extended_math:
   badges:
   flutter_spinkit:
   camera_fix_exception:
@@ -47,7 +47,6 @@ dependencies:
   flutter_speed_dial:
   path_provider:
   image_picker:
-  positioned_tap_detector:
 
 dev_dependencies:
   flutter_test:
