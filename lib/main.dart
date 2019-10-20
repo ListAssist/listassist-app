@@ -1,17 +1,12 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:listassist/models/current-screen.dart';
-import 'package:listassist/services/db.dart';
 import 'package:provider/provider.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:listassist/services/auth.dart';
 import 'package:listassist/widgets/sidebar.dart';
 import 'package:listassist/widgets/authentication.dart';
-
-import 'models/Group.dart';
-import 'models/PublicUser.dart';
 import 'models/User.dart';
 
 void main() => runApp(MyApp());
@@ -27,7 +22,7 @@ class MyApp extends StatelessWidget {
       model: ScreenModel(),
       child: MultiProvider(
         providers: [
-          StreamProvider<FirebaseUser>.value(value: authService.user,),
+          StreamProvider<User>.value(value: authService.userDoc,),
           StreamProvider<bool>.value(value: authService.loading.asBroadcastStream())
         ],
         child: MaterialApp(
@@ -50,39 +45,25 @@ class MainApp extends StatefulWidget {
 class _MainAppState extends State<MainApp> {
   @override
   Widget build(BuildContext context) {
-    FirebaseUser user = Provider.of<FirebaseUser>(context);
+    User user = Provider.of<User>(context);
     bool loading = Provider.of<bool>(context);
 
     return AnimatedSwitcher(
       duration: Duration(milliseconds: 600),
       child: user != null ?
-      MultiProvider(
-        providers: [
-          StreamProvider<User>.value(value: databaseService.streamProfile(user)),
-          //StreamProvider<Group>.value(value: databaseService.streamGroupsFromUser())
-          Provider<Group>.value(value: Group(
-              creator: PublicUser(
-                  displayName: "Tobias Seczer",
-              ),
-              members: [],
-              title: "Testgruppe"
-            )
-          )
-        ],
-      child: Scaffold(
-          key: mainScaffoldKey,
-          body: Body(),
-          drawer: Sidebar(),
-        )
+      Scaffold(
+        key: mainScaffoldKey,
+        body: Body(),
+        drawer: Sidebar(),
       ) : Scaffold(
-        key: authScaffoldKey,
-        body: AnimatedSwitcher(
+       key: authScaffoldKey,
+       body: AnimatedSwitcher(
          duration: Duration(milliseconds: 600),
          child: loading ? SpinKitDoubleBounce(color: Colors.blueAccent) : AuthenticationPage(),
-        ),
-        resizeToAvoidBottomInset: false,
-       )
-      );
+       ),
+       resizeToAvoidBottomInset: false,
+     )
+    );
   }
 }
 class Body extends StatefulWidget {

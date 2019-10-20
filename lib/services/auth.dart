@@ -6,6 +6,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:flutter_twitter_login/flutter_twitter_login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:listassist/models/User.dart';
+import 'package:listassist/services/db.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:listassist/main.dart';
 import 'package:listassist/widgets/authentication.dart';
@@ -24,12 +26,21 @@ class AuthService {
   FirebaseAuth _auth = FirebaseAuth.instance;
   Firestore _db = Firestore.instance;
 
-  Future<FirebaseUser> get getUser => _auth.currentUser();
   Stream<FirebaseUser> get user => _auth.onAuthStateChanged;
+
+  Observable<User> get userDoc => Observable(user).switchMap(
+      (FirebaseUser user)  {
+        if (user != null) {
+          return databaseService.streamProfile(user);
+        } else {
+          return Observable.just(null);
+        }
+      }
+  );
 
   BehaviorSubject<bool> loading = BehaviorSubject<bool>.seeded(false);
 
-  AuthService() {}
+  AuthService();
 
   /// Creates user with email and password
   Future<FirebaseUser> signUpWithMail(String email, String password, String displayName) async {
@@ -53,7 +64,7 @@ class AuthService {
       loading.add(false);
       return user;
     } on PlatformException catch(e) {
-      _ResultHandler.handlePlatformException(e);
+      ResultHandler.handlePlatformException(e);
       return null;
     }
   }
@@ -78,7 +89,7 @@ class AuthService {
       loading.add(false);
       return user;
     } on PlatformException catch(e) {
-      _ResultHandler.handlePlatformException(e);
+      ResultHandler.handlePlatformException(e);
       return null;
     }
   }
@@ -94,7 +105,7 @@ class AuthService {
         /** Native Facebook login screen **/
         FacebookLoginResult result = await _facebookSignIn.logIn(["email"]);
 
-        if (_ResultHandler.handleFacebookResultError(result)) return null;
+        if (ResultHandler.handleFacebookResultError(result)) return null;
 
         credential = FacebookAuthProvider.getCredential(accessToken: result.accessToken.token);
         break;
@@ -112,7 +123,7 @@ class AuthService {
         TwitterLoginResult result = await _twitterSignIn.authorize();
 
         /// Signing in with Twitter currently doesn't work. Created Issue at firebase_auth repo
-        if (_ResultHandler.handleTwitterResultError(result)) return null;
+        if (ResultHandler.handleTwitterResultError(result)) return null;
 
         credential = TwitterAuthProvider.getCredential(authToken: result.session.token, authTokenSecret: result.session.secret);
         break;
@@ -128,7 +139,7 @@ class AuthService {
       loading.add(false);
       return user;
     } on PlatformException catch (e) {
-      _ResultHandler.handlePlatformException(e);
+      ResultHandler.handlePlatformException(e);
       return null;
     }
   }
@@ -157,7 +168,7 @@ class AuthService {
 /// Expose to global namespace (not real singleton)
 final AuthService authService = AuthService();
 
-class _ResultHandler {
+class ResultHandler {
   static bool handleFacebookResultError(FacebookLoginResult result) {
     authService.loading.add(false);
 
