@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:listassist/main.dart';
 import 'package:listassist/models/Group.dart';
-import 'package:listassist/models/User.dart';
 import 'package:listassist/services/db.dart';
 import 'package:listassist/widgets/add-group.dart';
 import 'package:listassist/widgets/group-item.dart';
+import 'package:provider/provider.dart';
 
 class GroupView extends StatelessWidget {
 
@@ -21,10 +20,13 @@ class GroupView extends StatelessWidget {
           onPressed: () => mainScaffoldKey.currentState.openDrawer(),
         ),
       ),
-      body: ListView(
-        children: <Widget>[
-          GroupItem(),
-        ],
+      body: StreamProvider<Group>.value(
+          value: databaseService.streamGroupsFromUser(),
+          child: ListView(
+            children: <Widget>[
+              GroupItem(),
+            ],
+          )
       ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
