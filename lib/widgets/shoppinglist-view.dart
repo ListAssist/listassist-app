@@ -29,27 +29,10 @@ class ShoppingListView extends StatelessWidget {
               children: <Widget>[
                 ShoppingList(title: "Super liste", total: 18, bought: 4,),
                 ShoppingList(title: "Schlechte liste", total: 4, bought: 3,),
-                ShoppingList(),
-                ShoppingList(),
-                ShoppingList(),
-                ShoppingList(),
-                ShoppingList(),
-                ShoppingList(),
-                ShoppingList(),
-                ShoppingList(),
-                ShoppingList(),
-                ShoppingList(),
-                ShoppingList(),
-                ShoppingList(),
-                ShoppingList(),
-                ShoppingList(),
-                ShoppingList(),
-                ShoppingList(),
-                ShoppingList(),
+                ShoppingList()
               ],
-              //mainAxisAlignment: MainAxisAlignment.center,
             ),
-            Text("VERLAUF DER EINKAUSLISTEN")
+            Text("VERLAUF DER EINKAUFSLISTEN")
           ],
         ),
       )

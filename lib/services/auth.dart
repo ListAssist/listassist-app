@@ -24,32 +24,12 @@ class AuthService {
   FirebaseAuth _auth = FirebaseAuth.instance;
   Firestore _db = Firestore.instance;
 
-  Observable<FirebaseUser> user;
-  Observable<Map<String, dynamic>> profile;
-  PublishSubject loading = PublishSubject();
+  Future<FirebaseUser> get getUser => _auth.currentUser();
+  Stream<FirebaseUser> get user => _auth.onAuthStateChanged;
 
-  AuthService() {
-    /** Convert onAuthStateChanged Stream to normal Observable to **/
-    user = Observable(_auth.onAuthStateChanged);
+  BehaviorSubject<bool> loading = BehaviorSubject<bool>.seeded(false);
 
-    profile = user.switchMap((FirebaseUser u) {
-      /**
-       * Check if user is authenticated
-       *
-       * If so, get the user data by retrieving it from firestore
-       * Otherwise return empty Observable
-       */
-      if (u != null) {
-        return _db
-            .collection("users")
-            .document(u.uid)
-            .snapshots()
-            .map((snap) => snap.data);
-      } else {
-        return Observable.just({});
-      }
-    });
-  }
+  AuthService() {}
 
   /// Creates user with email and password
   Future<FirebaseUser> signUpWithMail(String email, String password, String displayName) async {
@@ -86,6 +66,15 @@ class AuthService {
       AuthResult res = await _auth.signInWithEmailAndPassword(email: email, password: password);
       FirebaseUser user = res.user;
 
+      //TODO: Email verify error
+      DocumentReference userRef = _db
+          .collection("users")
+          .document(user.uid);
+
+      userRef.setData({
+        "lastLogin": DateTime.now(),
+      }, merge: true);
+
       loading.add(false);
       return user;
     } on PlatformException catch(e) {
@@ -103,7 +92,7 @@ class AuthService {
     switch (type) {
       case AuthenticationType.Facebook:
         /** Native Facebook login screen **/
-        FacebookLoginResult result = await _facebookSignIn.logInWithReadPermissions(["email"]);
+        FacebookLoginResult result = await _facebookSignIn.logIn(["email"]);
 
         if (_ResultHandler.handleFacebookResultError(result)) return null;
 
@@ -229,23 +218,31 @@ class _ResultHandler {
   }
 
   static void handlePlatformException(PlatformException e) {
-    if (e.code == "ERROR_ACCOUNT_EXISTS_WITH_DIFFERENT_CREDENTIAL" || e.code == "ERROR_EMAIL_ALREADY_IN_USE") {
+    if (e.code == "ERROR_ACCOUNT_EXISTS_WITH_DIFFERENT_CREDENTIAL"
+        || e.code == "ERROR_EMAIL_ALREADY_IN_USE"
+    ) {
       showInfoSnackbar(
         Text("Ein Account mit dieser E-Mail Adresse existiert bereits. Haben Sie vielleicht einen anderen Login-typ verwendet?"),
         duration: Duration(seconds: 6),
       );
     } else if (
-        e.code == "ERROR_USER_NOT_FOUND"
+    e.code == "ERROR_USER_NOT_FOUND"
         || e.code == "ERROR_WRONG_PASSWORD"
         || e.code == "ERROR_TOO_MANY_REQUESTS"
         || e.code == "ERROR_INVALID_CREDENTIAL"
     ) {
-      print(e.toString());
       showError(Text("Login fehlgeschlagen"), Text("Die E-Mail oder das Passwort sind fehlerhaft."));
-    } else if (e.code ==  "ERROR_DISABLED" || e.code == "ERROR_USER_DISABLED") {
+    } else if (e.code ==  "ERROR_DISABLED"
+        || e.code == "ERROR_USER_DISABLED"
+    ) {
       showInfoSnackbar(Text("Dein Account ist derzeit deaktiviert."));
-    }
-    else {
+    } else if (
+    e.code == "ERROR_NETWORK_REQUEST_FAILED" ||
+        e.code == "ERROR_NETWORK_REQUEST_FAILED" ||
+        e.code == "AUTHENTICATION_FAILED"
+    ) {
+      showError(Text("Login fehlgeschlagen"), Text("Bitte überprüfen Sie Ihre Internetverbindung."));
+    } else {
       print("UNHANDLED ERROR!!!!!!!!!!!!!!!!!!");
       print(e.toString());
     }

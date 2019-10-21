@@ -1,8 +1,12 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:listassist/models/User.dart';
+import 'package:listassist/services/db.dart';
 import 'package:listassist/widgets/profilesettings-view.dart';
 import 'package:listassist/widgets/notificationsettings-view.dart';
 import 'package:listassist/services/auth.dart';
 import 'package:listassist/widgets/shoppinglistsettings-view.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SettingsView extends StatelessWidget {
@@ -48,17 +52,11 @@ class SettingsView extends StatelessWidget {
     );
   }
 
-  _launchURL(url) async {
-    if (await canLaunch(url)) {
-      await launch(url);
-    } else {
-      throw 'Could not launch $url';
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
 
+    FirebaseUser keko = Provider.of<FirebaseUser>(context);
 
     return Scaffold(
       //backgroundColor: Colors.transparent,
@@ -76,118 +74,141 @@ class SettingsView extends StatelessWidget {
           ),
         ],
       ),
-      body: Container(
-        width: MediaQuery.of(context).size.width,
-        padding: EdgeInsets.all(10),
-        decoration: BoxDecoration(),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
+      body: StreamProvider<User>.value(
+        value: databaseService.streamProfile(keko),child: Test(),
+      ),
+    );
+  }
+}
 
-            Container(
-              margin: const EdgeInsets.only(bottom: 25.0),
-              child:
-              CircleAvatar(
-                backgroundImage: NetworkImage(img),
-                radius: 50,
-              ),
+class Test extends StatelessWidget {
+
+  @override
+  Widget build(BuildContext context) {
+
+    User user  = Provider.of<User>(context);
+
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      padding: EdgeInsets.all(10),
+      decoration: BoxDecoration(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+
+          Container(
+            margin: const EdgeInsets.only(bottom: 25.0),
+            child:
+            CircleAvatar(
+              backgroundImage: NetworkImage(user.photoUrl),
+              radius: 50,
             ),
-            Container(
+          ),
+          Container(
               margin: const EdgeInsets.only(bottom: 10.0),
               child:
               Text(
-                "Tobias Seczer",
+                user.displayName,
                 style: Theme.of(context).textTheme.headline,
                 textAlign: TextAlign.center,
               )
-            ),
+          ),
 
-            Text(
-              "tobias.seczer@gmail.com",
-              //style: Theme.of(context).textTheme.headline,
-              textAlign: TextAlign.center,
-            ),
+          Text(
+            user.email,
+            //style: Theme.of(context).textTheme.headline,
+            textAlign: TextAlign.center,
+          ),
 
 
-            Container(
+          Container(
               margin: const EdgeInsets.only(top: 30.0),
               child:
-                ListView(
-                  scrollDirection: Axis.vertical,
-                  shrinkWrap: true,
-                  children: <Widget>[
+              ListView(
+                scrollDirection: Axis.vertical,
+                shrinkWrap: true,
+                children: <Widget>[
 
-                    ListTile(
-                      leading: Icon(Icons.person),
-                      title: Text('Konto'),
-                      trailing: Icon(Icons.keyboard_arrow_right),
-                      onTap: () => {
-                        Navigator.push(
+                  ListTile(
+                    leading: Icon(Icons.person),
+                    title: Text('Konto'),
+                    trailing: Icon(Icons.keyboard_arrow_right),
+                    onTap: () => {
+                      Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => ProfilesettingsView()
+                              builder: (context) => ProfilesettingsView()
                           )
-                        )
-                      },
-                    ),
-                    ListTile(
-                      leading: Icon(Icons.view_agenda),
-                      title: Text('Ansicht'),
-                      trailing: Icon(Icons.keyboard_arrow_right),
-                        onTap: () => {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => ShoppinglistsettingsView()
-                            )
+                      )
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.view_agenda),
+                    title: Text('Ansicht'),
+                    trailing: Icon(Icons.keyboard_arrow_right),
+                    onTap: () => {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ShoppinglistsettingsView()
                           )
-                        },
-                    ),
-                    ListTile(
-                      leading: Icon(Icons.notifications),
-                      title: Text('Benachrichtigungen'),
-                      trailing: Icon(Icons.keyboard_arrow_right),
-                      onTap: () => {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => Keko()
-                            )
-                        )
-                      },
-                    ),
-                    ListTile(
-                      leading: Icon(Icons.security),
-                      title: Text('Datenschutz'),
-                      trailing: Icon(Icons.keyboard_arrow_right),
-                      onTap: () => {
-                        _launchURL("https://listassist.gq/impressum.html")
-                      },
-                    ),
-                    ListTile(
-                      leading: Icon(Icons.bug_report),
-                      title: Text('Fehler melden'),
-                      trailing: Icon(Icons.keyboard_arrow_right),
-                      onTap: () => {},
-                    ),
-                    ListTile(
-                      leading: Icon(Icons.info),
-                      title: Text('Info'),
-                      trailing: Icon(Icons.keyboard_arrow_right),
-                      onTap: () => {
-                        _launchURL("https://listassist.gq")
-                      },
-                    ),
+                      )
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.notifications),
+                    title: Text('Benachrichtigungen'),
+                    trailing: Icon(Icons.keyboard_arrow_right),
+                    onTap: () => {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => Keko()
+                          )
+                      )
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.security),
+                    title: Text('Datenschutz'),
+                    trailing: Icon(Icons.keyboard_arrow_right),
+                    onTap: () => {
+                      _launchURL("https://listassist.gq/impressum.html")
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.bug_report),
+                    title: Text('Fehler melden'),
+                    trailing: Icon(Icons.keyboard_arrow_right),
+                    onTap: () => {},
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.info),
+                    title: Text('Info'),
+                    trailing: Icon(Icons.keyboard_arrow_right),
+                    onTap: () => {
+                      _launchURL("https://listassist.gq")
+                    },
+                  ),
 
-                  ],
-                )
-            ),
+                ],
+              )
+          ),
 
 
-          ],
-        ),
+        ],
       ),
     );
+  }
+
+
+
+  _launchURL(url) async {
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
   }
 }
