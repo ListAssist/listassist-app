@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:listassist/models/current-screen.dart';
 import 'package:listassist/services/db.dart';
+import 'package:listassist/services/global.dart';
 import 'package:provider/provider.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:listassist/services/auth.dart';
@@ -18,13 +19,19 @@ final GlobalKey<ScaffoldState> authScaffoldKey = GlobalKey<ScaffoldState>();
 
 class MyApp extends StatelessWidget {
 
+  void run() {
+    authService.userDoc.listen((data) => globalService.setUser(data));
+  }
+
   @override
   Widget build(BuildContext context) {
+    run();
     return ScopedModel<ScreenModel>(
       model: ScreenModel(),
       child: MultiProvider(
         providers: [
-          StreamProvider<User>.value(value: authService.userDoc,),
+          //StreamProvider<User>.value(value: authService.userDoc,),
+          StreamProvider<Group>.value(value: databaseService.streamGroupsFromUser()),
           StreamProvider<bool>.value(value: authService.loading.asBroadcastStream())
         ],
         child: MaterialApp(
@@ -45,22 +52,29 @@ class MainApp extends StatefulWidget {
 }
 
 class _MainAppState extends State<MainApp> {
+
+
   @override
   Widget build(BuildContext context) {
-    User user = Provider.of<User>(context);
+//    User user = Provider.of<User>(context);
     bool loading = Provider.of<bool>(context);
 
     return AnimatedSwitcher(
       duration: Duration(milliseconds: 600),
-      child: user != null ?
-        StreamProvider<Group>.value(
+      child: globalService.user != null ?
+        Scaffold(
+          key: mainScaffoldKey,
+          body: Body(),
+          drawer: Sidebar(),
+        )
+        /*StreamProvider<Group>.value(
           value: databaseService.streamGroupsFromUser(),
           child: Scaffold(
             key: mainScaffoldKey,
             body: Body(),
             drawer: Sidebar(),
           ),
-        ) : Scaffold(
+        )*/ : Scaffold(
        key: authScaffoldKey,
        body: AnimatedSwitcher(
          duration: Duration(milliseconds: 600),
