@@ -1,0 +1,1 @@
+// trigger on delete group doc to remove from group_users

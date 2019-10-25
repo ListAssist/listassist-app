@@ -4,8 +4,6 @@ import 'package:listassist/services/db.dart';
 import 'package:listassist/widgets/group-userlist.dart';
 import 'package:provider/provider.dart';
 
-import '../main.dart';
-
 class GroupDetail extends StatefulWidget {
 //  GroupDetail({
 //    Key key,

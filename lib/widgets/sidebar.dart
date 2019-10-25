@@ -7,6 +7,7 @@ import 'package:listassist/services/auth.dart';
 import 'package:listassist/widgets/settings-view.dart';
 import 'package:listassist/widgets/shoppinglist-view.dart';
 
+
 class Sidebar extends StatefulWidget {
   @override
   _Sidebar createState() => _Sidebar();
@@ -16,7 +17,7 @@ class _Sidebar extends State<Sidebar> {
   @override
   Widget build(BuildContext context) {
     User user = Provider.of<User>(context);
-    
+
     return Drawer(
       child: Column(
         children: <Widget>[
@@ -26,8 +27,11 @@ class _Sidebar extends State<Sidebar> {
             ),
             accountName: Text(user.displayName),
             accountEmail: Text(user.email),
-            currentAccountPicture: CircleAvatar(
-              backgroundImage: NetworkImage(user.photoUrl),
+            currentAccountPicture: Hero(
+              tag: "profilePicture",
+              child: CircleAvatar(
+                backgroundImage: NetworkImage(user.photoUrl),
+              ),
             ),
           ),
           ListTile(

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:listassist/pages/picture-show.dart';
 
 class Item {
   String name;
@@ -42,51 +44,6 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
     });
   }
 
-  Future<void> _showDialog() async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("Einkaufsliste abschließen"),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                RichText(text:
-                  TextSpan(
-                    style: new TextStyle(
-                      color: Theme.of(context).textTheme.title.color,
-                    ),
-                    children: <TextSpan> [
-                      TextSpan(text: "Sind Sie sicher, dass Sie die Einkaufsliste "),
-                      TextSpan(text: "${this.title}", style: TextStyle(fontWeight: FontWeight.bold)),
-                      TextSpan(text: " abschließen möchten?")
-                    ]
-                  )
-                )
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            FlatButton(
-              textColor: Colors.red,
-              child: Text("Abbrechen"),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            FlatButton(
-              child: Text("Abschließen"),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -116,19 +73,88 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
               }
             )
           ),
-          Container(
-            padding: EdgeInsets.all(10),
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: FloatingActionButton(
-                backgroundColor: Colors.green,
-                child: Icon(Icons.check),
-                onPressed: () { _showDialog(); }
-              ),
-            )
-          )
         ],
-      )
+      ),
+      floatingActionButton: SpeedDial(
+        animatedIcon: AnimatedIcons.menu_close,
+        animatedIconTheme: IconThemeData(size: 22.0),
+        closeManually: false,
+        curve: Curves.easeIn,
+        overlayColor: Colors.black,
+        overlayOpacity: 0.35,
+        backgroundColor: Colors.blueAccent,
+        foregroundColor: Colors.white,
+        elevation: 8.0,
+        shape: CircleBorder(),
+        children: [
+          SpeedDialChild(
+              child: Icon(Icons.check),
+              backgroundColor: Colors.green,
+              label: "Complete",
+              labelStyle: TextStyle(fontSize: 18.0),
+              onTap: _showDialog
+          ),
+          SpeedDialChild(
+            child: Icon(Icons.delete),
+            backgroundColor: Colors.red,
+            label: "Delete",
+            labelStyle: TextStyle(fontSize: 18.0),
+            onTap: null,
+          ),
+          SpeedDialChild(
+            child: Icon(Icons.camera),
+            backgroundColor: Colors.blue,
+            label: "Image Check",
+            labelStyle: TextStyle(fontSize: 18.0),
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => PictureShow())),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Einkaufsliste abschließen"),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                RichText(text:
+                TextSpan(
+                    style: new TextStyle(
+                      color: Theme.of(context).textTheme.title.color,
+                    ),
+                    children: <TextSpan> [
+                      TextSpan(text: "Sind Sie sicher, dass Sie die Einkaufsliste "),
+                      TextSpan(text: "${this.title}", style: TextStyle(fontWeight: FontWeight.bold)),
+                      TextSpan(text: " abschließen möchten?")
+                    ]
+                )
+                )
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              textColor: Colors.red,
+              child: Text("Abbrechen"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            FlatButton(
+              child: Text("Abschließen"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }

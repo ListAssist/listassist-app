@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:listassist/main.dart';
 import 'package:listassist/widgets/shopping-list.dart';
+import 'package:listassist/widgets/add-shoppinglist.dart';
 
 class ShoppingListView extends StatelessWidget {
   @override
@@ -8,6 +9,12 @@ class ShoppingListView extends StatelessWidget {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
+        floatingActionButton: FloatingActionButton(
+          child: Icon(Icons.add),
+          onPressed: () {
+            Navigator.push(context, MaterialPageRoute(builder: (context) => AddShoppinglist()));
+          },
+        ),
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.primary,
           title: Text("Einkaufslisten"),
@@ -32,7 +39,7 @@ class ShoppingListView extends StatelessWidget {
                 ShoppingList()
               ],
             ),
-            Text("VERLAUF DER EINKAUFSLISTEN")
+            Text("VERLAUF DER EINKAUFSLISTEN"),
           ],
         ),
       )

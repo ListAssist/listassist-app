@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:listassist/pages/login.dart';
 import 'package:listassist/pages/register.dart';
-import 'package:listassist/services/auth.dart';
 
-import 'package:listassist/main.dart';
 
 BuildContext authContext;
 enum _AuthType {SignIn, SignUp}
