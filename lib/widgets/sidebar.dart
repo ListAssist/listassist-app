@@ -26,8 +26,11 @@ class _Sidebar extends State<Sidebar> {
             ),
             accountName: Text(user.displayName),
             accountEmail: Text(user.email),
-            currentAccountPicture: CircleAvatar(
-              backgroundImage: NetworkImage(user.photoUrl),
+            currentAccountPicture: Hero(
+              tag: "profilePicture",
+              child: CircleAvatar(
+                backgroundImage: NetworkImage(user.photoUrl),
+              ),
             ),
           ),
           ListTile(
