@@ -133,9 +133,11 @@ packages:
   flutter_twitter_login:
     dependency: "direct main"
     description:
-      name: flutter_twitter_login
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "."
+      ref: HEAD
+      resolved-ref: dd807741a3106759854c9f53eae84da3f0b22c7b
+      url: "git://github.com/eudangeld/flutter_twitter_login.git"
+    source: git
     version: "1.1.0"
   flutter_vector_icons:
     dependency: "direct main"
@@ -289,6 +291,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.1.6"
+  url_launcher:
+    dependency: "direct main"
+    description:
+      name: url_launcher
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.0.3"
   vector_math:
     dependency: transitive
     description:
