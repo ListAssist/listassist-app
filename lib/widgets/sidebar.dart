@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:listassist/services/global.dart';
 import 'package:listassist/widgets/group-view.dart';
-import 'package:provider/provider.dart';
-import 'package:listassist/models/User.dart';
 import 'package:listassist/models/current-screen.dart';
 import 'package:listassist/services/auth.dart';
+import 'package:listassist/widgets/invite-view.dart';
 import 'package:listassist/widgets/shoppinglist-view.dart';
 import 'package:scoped_model/scoped_model.dart';
 
@@ -17,8 +16,6 @@ class _Sidebar extends State<Sidebar> {
 
   @override
   Widget build(BuildContext context) {
-    //User user = Provider.of<User>(context);
-
     return ScopedModel<GlobalService>(
       model: globalService,
       child: ScopedModelDescendant<GlobalService>(
@@ -39,7 +36,7 @@ class _Sidebar extends State<Sidebar> {
                   leading: Icon(Icons.list),
                   title: Text("Einkaufslisten"),
                   onTap: () {
-                    ScreenModel.of(context).setScreen(ShoppingListView(), "Einkaufslisten");
+                    ScreenModel.of(context).setScreen(ShoppingListView());
                     Navigator.pop(context);
                   },
                 ),
@@ -62,7 +59,7 @@ class _Sidebar extends State<Sidebar> {
                   leading: Icon(Icons.group),
                   title: Text("Gruppen"),
                   onTap: () {
-                    ScreenModel.of(context).setScreen(GroupView(), "Gruppen");
+                    ScreenModel.of(context).setScreen(GroupView());
                     Navigator.pop(context);
                   },
                 ),
@@ -70,6 +67,7 @@ class _Sidebar extends State<Sidebar> {
                   leading: Icon(Icons.mail),
                   title: Text("Einladungen"),
                   onTap: () {
+                    ScreenModel.of(context).setScreen(InviteView());
                     Navigator.pop(context);
                   },
                 ),
