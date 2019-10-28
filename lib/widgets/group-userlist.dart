@@ -12,16 +12,22 @@ class GroupUserList extends StatelessWidget {
 
     List<Widget> members = group.members.map((member) {
       return Container(
-        padding: EdgeInsets.all(10),
+        padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
         child: Align(
           alignment: Alignment.centerLeft,
           child: Row(
             children: <Widget>[
               CircleAvatar(backgroundImage: NetworkImage(member.photoUrl)),
-              Padding(
-                padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
-                child: Text(member.displayName, style: Theme.of(context).textTheme.subtitle),
-              )
+              Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                    child: Text(
+                        member.displayName,
+                        style: Theme.of(context).textTheme.subhead,
+                        overflow: TextOverflow.ellipsis
+                    ),
+                  )
+              ),
             ],
           )
         ),
@@ -29,7 +35,7 @@ class GroupUserList extends StatelessWidget {
     }).toList();
 
     members.insert(0, Container(
-      padding: EdgeInsets.all(10),
+      padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
       child: Align(
           alignment: Alignment.centerLeft,
           child: Row(
@@ -40,7 +46,7 @@ class GroupUserList extends StatelessWidget {
                   padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
                   child: Text(
                     group.creator.displayName,
-                    style: Theme.of(context).textTheme.subtitle,
+                    style: Theme.of(context).textTheme.subhead,
                     overflow: TextOverflow.ellipsis
                   ),
                 )
@@ -52,7 +58,20 @@ class GroupUserList extends StatelessWidget {
     ));
 
     return ListView(
-      children: members
+      children: members,
     );
   }
 }
+
+
+/*
+ListView.separated(
+        separatorBuilder: (context, index) => Divider(
+          color: Colors.grey,
+          endIndent: 10,
+          indent: 10,
+        ),
+        itemCount: members.length,
+        itemBuilder: (context, index) => members[index]
+    );
+ */
