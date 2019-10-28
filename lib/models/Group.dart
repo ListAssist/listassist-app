@@ -22,7 +22,7 @@ class Group {
 
   factory Group.fromMap(Map data) {
     data = data ?? { };
-    print(data["members"]);
+//    print(data["members"]);
     return Group(
         title: data["title"],
         creator: PublicUser.fromMap(data["creator"]),
