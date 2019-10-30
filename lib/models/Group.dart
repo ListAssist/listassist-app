@@ -11,12 +11,12 @@ class Group {
   Group({this.title, this.creator, this.memberCount, this.members});
 
   factory Group.fromFirestore(DocumentSnapshot doc) {
-    Map data = doc.data;
+    Map data = doc.data ?? { };
 
     return Group(
         title: data["title"],
-        creator: data["creator"],
-        members: data["members"]
+        creator: PublicUser.fromMap(data["creator"]),
+        members: List.from(data["members"] ?? []).map((member) => PublicUser.fromMap(member)).toList()
     );
   }
 

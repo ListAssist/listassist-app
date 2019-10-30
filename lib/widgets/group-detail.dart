@@ -5,13 +5,6 @@ import 'package:listassist/widgets/group-userlist.dart';
 import 'package:provider/provider.dart';
 
 class GroupDetail extends StatefulWidget {
-//  GroupDetail({
-//    Key key,
-//    this.group
-//  }) : super(key: key);
-//
-//  final Group group;
-
   @override
   _GroupDetail createState() => _GroupDetail();
 }
@@ -20,6 +13,7 @@ class _GroupDetail extends State<GroupDetail> {
 
   @override
   Widget build(BuildContext context) {
+    //FIXME: Provider not found
     Group group = Provider.of<Group>(context);
     return DefaultTabController(
       length: 3,

@@ -16,29 +16,28 @@ class DatabaseService {
         .map((snap) => User.fromMap(snap.data));
   }
 
-  Stream<Group> streamGroupsFromUser(String uid) {
+  Stream<List<Stream<Group>>> streamGroupsFromUser(String uid) {
 //    String[] groupIds =
-      Stream<List<Group>> groups;
-        _db
-        .collection("groups_user")
-        .document(uid)
-        .get()
-        .then((snap) {
-          print(snap.data);
-//          for(int i = 0; i < snap.data["groups"].length; i++){
-//            groups.add(_db
-//                .collection("groups")
-//                .snapshots()
-//                .snapshots()
-//                .map((snap) => Group.fromMap(snap.data));)
-//          }
-        });
-
+    print(uid);
     return _db
+      .collection("groups_user")
+      .document(uid)
+      .snapshots()
+      .map((list) {
+        return list.data["groups"]
+          .map<Stream<Group>>((groupId) => _db
             .collection("groups")
-            .document('89XF5ZpygJtmMxWQ0Weo')
+            .document(groupId)
             .snapshots()
-            .map((snap) => Group.fromMap(snap.data));
+            .map<Group>((snap) => Group.fromMap(snap.data))
+          ).toList();
+      });
+
+//    return _db
+//            .collection("groups")
+//            .document('89XF5ZpygJtmMxWQ0Weo')
+//            .snapshots()
+//            .map((snap) => Group.fromMap(snap.data));
   }
 
   Stream<List<Invite>> streamInvites(String uid) {
