@@ -21,31 +21,28 @@ class _GroupDetail extends State<GroupDetail> {
   @override
   Widget build(BuildContext context) {
     Group group = Provider.of<Group>(context);
-    return Provider<Group>.value(
-      value: group,
-      child: DefaultTabController(
-        length: 3,
-        child: Scaffold(
-          appBar: AppBar(
-            backgroundColor: Theme.of(context).colorScheme.primary,
-            title: Text(group.title),
-            bottom: TabBar(
-              tabs: [
-                Tab(icon: Icon(Icons.list)),
-                Tab(icon: Icon(Icons.insert_chart)),
-                Tab(icon: Icon(Icons.group))
-              ],
-            ),
-          ),
-          body: TabBarView(
-            children: [
-              Text("Einkaufslisten der Gruppe"),
-              Text("Statistiken der Gruppe"),
-              GroupUserList()
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          title: Text(group.title),
+          bottom: TabBar(
+            tabs: [
+              Tab(icon: Icon(Icons.list)),
+              Tab(icon: Icon(Icons.insert_chart)),
+              Tab(icon: Icon(Icons.group))
             ],
           ),
         ),
-      )
+        body: TabBarView(
+          children: [
+            Text("Einkaufslisten der Gruppe"),
+            Text("Statistiken der Gruppe"),
+            GroupUserList()
+          ],
+        ),
+      ),
     );
   }
 }

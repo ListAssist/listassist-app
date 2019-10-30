@@ -19,14 +19,14 @@ class GroupUserList extends StatelessWidget {
             children: <Widget>[
               CircleAvatar(backgroundImage: NetworkImage(member.photoUrl)),
               Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-                    child: Text(
-                        member.displayName,
-                        style: Theme.of(context).textTheme.subhead,
-                        overflow: TextOverflow.ellipsis
-                    ),
-                  )
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                  child: Text(
+                    member.displayName,
+                    style: Theme.of(context).textTheme.subhead,
+                    overflow: TextOverflow.ellipsis
+                  ),
+                )
               ),
             ],
           )

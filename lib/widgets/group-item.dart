@@ -17,10 +17,6 @@ class GroupItem extends StatelessWidget {
           onTap: () => Navigator.push(
             context,
             MaterialPageRoute(builder: (context) {
-//              return Provider<Group>.value(
-//                value: group,
-//                child: GroupDetail()
-//              );
               return GroupDetail();
             }),
           ),

@@ -2,14 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:listassist/models/current-screen.dart';
-import 'package:listassist/services/db.dart';
-import 'package:listassist/services/global.dart';
 import 'package:provider/provider.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:listassist/services/auth.dart';
 import 'package:listassist/widgets/sidebar.dart';
 import 'package:listassist/widgets/authentication.dart';
-import 'models/Group.dart';
 import 'models/User.dart';
 
 void main() => runApp(MyApp());
@@ -19,19 +16,13 @@ final GlobalKey<ScaffoldState> authScaffoldKey = GlobalKey<ScaffoldState>();
 
 class MyApp extends StatelessWidget {
 
-  void run() {
-    authService.userDoc.listen((data) => globalService.setUser(data));
-  }
-
   @override
   Widget build(BuildContext context) {
-    run();
     return ScopedModel<ScreenModel>(
       model: ScreenModel(),
       child: MultiProvider(
         providers: [
-          //StreamProvider<User>.value(value: authService.userDoc,),
-          StreamProvider<Group>.value(value: databaseService.streamGroupsFromUser()),
+          StreamProvider<User>.value(value: authService.userDoc,),
           StreamProvider<bool>.value(value: authService.loading.asBroadcastStream())
         ],
         child: MaterialApp(
@@ -56,25 +47,17 @@ class _MainAppState extends State<MainApp> {
 
   @override
   Widget build(BuildContext context) {
-//    User user = Provider.of<User>(context);
+    User user = Provider.of<User>(context);
     bool loading = Provider.of<bool>(context);
 
     return AnimatedSwitcher(
       duration: Duration(milliseconds: 600),
-      child: globalService.user != null ?
+      child: user != null ?
         Scaffold(
           key: mainScaffoldKey,
           body: Body(),
           drawer: Sidebar(),
-        )
-        /*StreamProvider<Group>.value(
-          value: databaseService.streamGroupsFromUser(),
-          child: Scaffold(
-            key: mainScaffoldKey,
-            body: Body(),
-            drawer: Sidebar(),
-          ),
-        )*/ : Scaffold(
+        ) : Scaffold(
        key: authScaffoldKey,
        body: AnimatedSwitcher(
          duration: Duration(milliseconds: 600),
