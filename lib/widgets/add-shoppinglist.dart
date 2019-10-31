@@ -1,8 +1,15 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:listassist/models/User.dart';
-import 'package:listassist/validators/email.dart';
-import 'package:provider/provider.dart';
+
+class Item {
+  String name;
+  bool checked;
+
+  Item(String name, bool checked) {
+    this.name = name;
+    this.checked = checked;
+  }
+}
 
 class AddShoppinglist extends StatefulWidget {
   @override
@@ -13,18 +20,39 @@ class _AddShoppinglist extends State<AddShoppinglist> {
 
   final _productTextController = TextEditingController();
   final _nameTextController = TextEditingController();
-  List<String> _products = [];
+  //List<String> _products = ["Milch", "Reis", "Bier"];
 
-  _addMember(email) {
+  var _products = [
+  new Item("Apfel", false),
+  new Item("Kekse", false),
+  new Item("Seife", false),
+  new Item("Öl", false)];
+
+  void itemChange(bool val, int index){
+    setState(() {
+      _products[index].checked = val;
+    });
+  }
+
+  _addProduct(product) {
     setState(() {
       _productTextController.clear();
-      _products.add(email);
+      _products.add(new Item(product, false));
     });
   }
 
   _createGroup() {
     print(_products);
     print(_nameTextController.text);
+  }
+
+  FocusNode myFocusNode;
+
+  @override
+  void initState() {
+    super.initState();
+
+    myFocusNode = FocusNode();
   }
 
   @override
@@ -34,6 +62,8 @@ class _AddShoppinglist extends State<AddShoppinglist> {
     _productTextController.dispose();
     super.dispose();
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -52,10 +82,15 @@ class _AddShoppinglist extends State<AddShoppinglist> {
                   padding: EdgeInsets.all(20),
                   child: TextField(
                     controller: _nameTextController,
+                    autofocus: true,
+                    onSubmitted: (term) => {
+                      FocusScope.of(context).requestFocus(myFocusNode),
+                    },
                     decoration: InputDecoration(
                       border: UnderlineInputBorder(),
                       contentPadding: EdgeInsets.all(3),
                       labelText: 'Name',
+
                     ),
                   )
               ),
@@ -70,6 +105,13 @@ class _AddShoppinglist extends State<AddShoppinglist> {
                           Expanded(
                             child: TextField(
                               controller: _productTextController,
+                              focusNode: myFocusNode,
+                              onSubmitted: (term) => {
+                                if(_productTextController.text.length > 1){
+                                  _addProduct(_productTextController.text)
+                                },
+                                FocusScope.of(context).requestFocus(myFocusNode),
+                              },
                               //keyboardType: TextInputType.emailAddress,
                               decoration: InputDecoration(
                                 border: UnderlineInputBorder(),
@@ -81,13 +123,32 @@ class _AddShoppinglist extends State<AddShoppinglist> {
                           IconButton(
                             icon: Icon(Icons.add),
                             onPressed: () =>
-                                _addMember(_productTextController.text),
+                            {
+                              if(_productTextController.text.length > 1){
+                                _addProduct(_productTextController.text)
+                              },                            }
                           ),
                         ],
                       ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: _products.map((x) => Text(x)).toList(),
+                      Container(
+                        margin: EdgeInsets.only(top: 20.0),
+                        height: 500,
+                        child: ListView.builder(
+                            itemCount: _products.length,
+                            scrollDirection: Axis.vertical,
+                            shrinkWrap: true,
+                            reverse: true,
+                            itemBuilder: (BuildContext context, int index){
+                              return Container(
+                                  child: CheckboxListTile(
+                                      value: _products[index].checked,
+                                      title: new Text("${_products[index].name}"),
+                                      controlAffinity: ListTileControlAffinity.trailing,
+                                      onChanged: (bool val) { itemChange(val, index); }
+                                  )
+                              );
+                            }
+                        ),
                       ),
                     ],
                   )

@@ -56,8 +56,6 @@ class SettingsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    FirebaseUser keko = Provider.of<FirebaseUser>(context);
-
     return Scaffold(
       //backgroundColor: Colors.transparent,
       appBar: new AppBar(
@@ -74,10 +72,9 @@ class SettingsView extends StatelessWidget {
           ),
         ],
       ),
-      body: StreamProvider<User>.value(
-        value: databaseService.streamProfile(keko),child: Test(),
-      ),
-    );
+      body:
+        Test(),
+      );
   }
 }
 
@@ -98,11 +95,14 @@ class Test extends StatelessWidget {
         children: [
 
           Container(
-            margin: const EdgeInsets.only(bottom: 25.0),
+            margin: EdgeInsets.only(bottom: 25.0),
             child:
-            CircleAvatar(
-              backgroundImage: NetworkImage(user.photoUrl),
-              radius: 50,
+            Hero(
+              tag: "profilePicture",
+              child: CircleAvatar(
+                backgroundImage: NetworkImage(user.photoUrl),
+                radius: 50,
+              ),
             ),
           ),
           Container(

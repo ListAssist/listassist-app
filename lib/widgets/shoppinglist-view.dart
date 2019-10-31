@@ -11,6 +11,7 @@ class ShoppingListView extends StatelessWidget {
       child: Scaffold(
         floatingActionButton: FloatingActionButton(
           child: Icon(Icons.add),
+          backgroundColor: Colors.blueAccent,
           onPressed: () {
             Navigator.push(context, MaterialPageRoute(builder: (context) => AddShoppinglist()));
           },

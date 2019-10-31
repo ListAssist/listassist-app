@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:listassist/models/User.dart';
+import 'package:provider/provider.dart';
 import 'settings-modal.dart';
 
 class ProfilesettingsView extends StatelessWidget {
@@ -7,6 +9,9 @@ class ProfilesettingsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    User user  = Provider.of<User>(context);
+
     return Scaffold(
       //backgroundColor: Colors.transparent,
         appBar: new AppBar(
@@ -31,9 +36,12 @@ class ProfilesettingsView extends StatelessWidget {
                     child: GestureDetector(
                       onTap: () => modal.mainBottomSheet(context),
                       child:
-                        CircleAvatar(
-                          backgroundImage: NetworkImage(img),
-                          radius: 50,
+                        Hero(
+                          tag: "profilePicture",
+                          child: CircleAvatar(
+                            backgroundImage: NetworkImage(user.photoUrl),
+                            radius: 50,
+                          ),
                         )
                     ),
                   ),
