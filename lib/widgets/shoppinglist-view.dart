@@ -6,8 +6,8 @@ class ShoppingListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     List<Widget> listItem = List();
-    listItem.add(ShoppingList(title: "Super liste", total: 18, bought: 4,));
-    listItem.add( ShoppingList(title: "Schlechte liste", total: 4, bought: 3,));
+    listItem.add(ShoppingList(title: "Automatische Einkaufsliste", total: 18, bought: 0,));
+    listItem.add(ShoppingList(title: "Grillen am Wochenende", total: 4, bought: 3,));
     listItem.add(ShoppingList());
 
     return DefaultTabController(
@@ -18,8 +18,8 @@ class ShoppingListView extends StatelessWidget {
           title: Text("Einkaufslisten"),
           bottom: TabBar(
             tabs: [
-              Tab(text: "Offen",),
-              Tab(text: "Verlauf")
+              Tab(text: "Zu erledigen",),
+              Tab(text: "Erledigt")
             ],
           ),
           leading: IconButton(
