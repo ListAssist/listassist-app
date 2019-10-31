@@ -17,7 +17,6 @@ class ShoppingList extends StatelessWidget {
         MaterialPageRoute(builder: (context) => ShoppingListDetail(title: title)),
       ),
       child: Container(
-        color: Colors.cyanAccent,
         padding: EdgeInsets.all(20),
         child: Align(
           alignment: Alignment.centerLeft,
