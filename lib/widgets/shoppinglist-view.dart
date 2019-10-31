@@ -5,6 +5,11 @@ import 'package:listassist/widgets/shopping-list.dart';
 class ShoppingListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    List<Widget> listItem = List();
+    listItem.add(ShoppingList(title: "Super liste", total: 18, bought: 4,));
+    listItem.add( ShoppingList(title: "Schlechte liste", total: 4, bought: 3,));
+    listItem.add(ShoppingList());
+
     return DefaultTabController(
       length: 2,
       child: Scaffold(
@@ -25,12 +30,14 @@ class ShoppingListView extends StatelessWidget {
         ),
         body: TabBarView(
           children: [
-            ListView(
-              children: <Widget>[
-                ShoppingList(title: "Super liste", total: 18, bought: 4,),
-                ShoppingList(title: "Schlechte liste", total: 4, bought: 3,),
-                ShoppingList()
-              ],
+            ListView.separated(
+              separatorBuilder: (ctx, i) => Divider(
+                indent: 10,
+                endIndent: 10,
+                color: Colors.grey,
+              ),
+              itemCount: listItem.length,
+              itemBuilder: (ctx, index) => listItem[index]
             ),
             Text("VERLAUF DER EINKAUFSLISTEN")
           ],
