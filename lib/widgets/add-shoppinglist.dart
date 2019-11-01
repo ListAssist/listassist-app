@@ -22,6 +22,9 @@ class _AddShoppinglist extends State<AddShoppinglist> {
   final _productTextController = TextEditingController();
   final _nameTextController = TextEditingController();
 
+  bool _nameIsValid = true;
+  bool _productsIsValid = true;
+
   var rng = new Random();
 
   var _products = [
@@ -49,9 +52,14 @@ class _AddShoppinglist extends State<AddShoppinglist> {
     });
   }
 
-  _createGroup() {
-    print(_products);
-    print(_nameTextController.text);
+  _createShoppingList() {
+      setState(() {
+        _nameTextController.text.length > 1 ? _nameIsValid = true : _nameIsValid = false;
+        _products.length > 0 ? _productsIsValid = true : _productsIsValid = false;
+      });
+
+      if(!_nameIsValid) return;
+      if(!_productsIsValid) return;
   }
 
   FocusNode myFocusNode;
@@ -98,7 +106,7 @@ class _AddShoppinglist extends State<AddShoppinglist> {
                       border: UnderlineInputBorder(),
                       contentPadding: EdgeInsets.all(3),
                       labelText: 'Name',
-
+                      errorText: _nameIsValid ? null : 'Bitte einen Namen eingeben',
                     ),
                   )
               ),
@@ -125,6 +133,7 @@ class _AddShoppinglist extends State<AddShoppinglist> {
                                 border: UnderlineInputBorder(),
                                 contentPadding: EdgeInsets.all(3),
                                 labelText: 'Produkt eingeben',
+                                errorText: _productsIsValid ? null : 'Die Einkaufsliste benötigt Produkte',
                               ),
                             ),
                           ),
@@ -195,7 +204,7 @@ class _AddShoppinglist extends State<AddShoppinglist> {
       floatingActionButton: FloatingActionButton(
           child: Icon(Icons.check),
           backgroundColor: Colors.green,
-          onPressed: () => _createGroup()
+          onPressed: () => _createShoppingList()
       ),
     );
   }
