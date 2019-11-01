@@ -21,6 +21,8 @@ class Group {
   }
 
   factory Group.fromMap(Map data) {
+    if(data == null)
+      return null;
     data = data ?? { };
 //    print(data["members"]);
     return Group(

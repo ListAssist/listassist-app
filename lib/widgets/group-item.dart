@@ -41,6 +41,7 @@ class GroupItem extends StatelessWidget {
         ),
       )
     :
-    SpinKitDoubleBounce(color: Colors.blueAccent);
+    //Nicht anzeigen falls z.B. eine ungültige ID angegeben wurde
+    Container();
   }
 }

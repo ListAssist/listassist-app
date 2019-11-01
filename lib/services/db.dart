@@ -17,7 +17,6 @@ class DatabaseService {
   }
 
   Stream<List<Stream<Group>>> streamGroupsFromUser(String uid) {
-//    String[] groupIds =
     print(uid);
     return _db
       .collection("groups_user")
@@ -46,7 +45,7 @@ class DatabaseService {
         .where("to", isEqualTo: uid)
         .where("type", isEqualTo: "pending")
         .snapshots()
-        .map((snap) => snap.documents.map((d) => Invite.fromMap(d.data)).toList());
+        .map((snap) => snap.documents.map((d) => Invite.fromFirestore(d)).toList());
   }
 
 }

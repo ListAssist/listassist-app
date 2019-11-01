@@ -39,7 +39,7 @@ class InviteItems extends StatelessWidget{
       ListView.builder(
           itemCount: invites.length,
           itemBuilder: (BuildContext ctx, int index) {
-            return Invite(creator: invites[index].from, title: invites[index].groupname);
+            return Invite(invite: invites[index]);
           }
       ) : SpinKitDoubleBounce(color: Colors.blueAccent);
   }

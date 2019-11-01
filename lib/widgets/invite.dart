@@ -1,11 +1,12 @@
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:listassist/models/Invite.dart' as model;
 
 
 class Invite extends StatefulWidget {
-  final String title;
-  final String creator;
-  Invite({this.title = "Gruppe", this.creator = "Setscha"});
+  final model.Invite invite;
+  Invite({this.invite});
 
   @override
   _InviteState createState() => _InviteState();
@@ -23,14 +24,27 @@ class _InviteState extends State<Invite> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text(widget.title, style: Theme.of(context).textTheme.title),
-                Text("von ${widget.creator}", style: Theme.of(context).textTheme.subhead)
+                Text(widget.invite.groupname, style: Theme.of(context).textTheme.title),
+                Text("von ${widget.invite.from}", style: Theme.of(context).textTheme.subhead)
               ],
             ),
           ),
           IconButton(
             icon: Icon(Icons.check),
-            onPressed: () {},
+            onPressed: () async {
+              final HttpsCallable accept = CloudFunctions.instance.getHttpsCallable(
+                  functionName: "acceptInvite"
+              );
+              print(accept.toString());
+              try {
+                dynamic resp = await accept.call(<String, dynamic>{
+                  'groupid': widget.invite.groupid,
+                });
+                print(resp.data);
+              }catch (e) {
+                print(e.message);
+              }
+            },
             color: Colors.green,
           ),
           IconButton(
@@ -60,7 +74,7 @@ class _InviteState extends State<Invite> {
                     ),
                     children: <TextSpan> [
                       TextSpan(text: "Sind Sie sicher, dass Sie die Einladung in die Gruppe "),
-                      TextSpan(text: "${this.widget.title}", style: TextStyle(fontWeight: FontWeight.bold)),
+                      TextSpan(text: "${this.widget.invite.groupname}", style: TextStyle(fontWeight: FontWeight.bold)),
                       TextSpan(text: " ablehnen möchten?")
                     ]
                 )
