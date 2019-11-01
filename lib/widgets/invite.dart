@@ -2,7 +2,7 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:listassist/models/Invite.dart' as model;
-import 'package:listassist/widgets/_snackbar.dart';
+import 'package:listassist/services/snackbar.dart';
 
 
 class Invite extends StatefulWidget {
@@ -38,7 +38,8 @@ class _InviteState extends State<Invite> {
               );
               try {
                 dynamic resp = await accept.call(<String, dynamic>{
-                  'groupid': widget.invite.groupid,
+                  "groupid": widget.invite.groupid,
+                  "inviteid": widget.invite.id
                 });
                 if(resp.data["status"] == "Failed"){
                   InfoSnackbar.showErrorSnackBar("Fehler beim Akzeptieren der Einladung");
@@ -106,7 +107,7 @@ class _InviteState extends State<Invite> {
                 );
                 try {
                   dynamic resp = await decline.call(<String, dynamic>{
-                    'inviteid': widget.invite.id,
+                    "inviteid": widget.invite.id,
                   });
                   if(resp.data["status"] == "Failed"){
                     InfoSnackbar.showErrorSnackBar("Fehler beim Ablehnen der Einladung");

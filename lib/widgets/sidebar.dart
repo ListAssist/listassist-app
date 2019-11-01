@@ -30,7 +30,7 @@ class _Sidebar extends State<Sidebar> {
             accountName: Text(user.displayName ?? ""),
             accountEmail: Text(user.email ?? ""),
             currentAccountPicture: CircleAvatar(
-              backgroundImage: NetworkImage(user.photoUrl ?? ""),
+              backgroundImage: NetworkImage(user.photoUrl),
             ),
           ),
           ListTile(

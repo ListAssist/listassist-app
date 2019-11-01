@@ -23,13 +23,13 @@ class DatabaseService {
       .document(uid)
       .snapshots()
       .map((list) {
-        return list.data["groups"]
+        return list.data != null ? list.data["groups"]
           .map<Stream<Group>>((groupId) => _db
             .collection("groups")
             .document(groupId)
             .snapshots()
             .map<Group>((snap) => Group.fromMap(snap.data))
-          ).toList();
+          ).toList() : List<Stream<Group>>();
       });
 
 //    return _db
