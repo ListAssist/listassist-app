@@ -35,7 +35,6 @@ class _InviteState extends State<Invite> {
               final HttpsCallable accept = CloudFunctions.instance.getHttpsCallable(
                   functionName: "acceptInvite"
               );
-              print(accept.toString());
               try {
                 dynamic resp = await accept.call(<String, dynamic>{
                   'groupid': widget.invite.groupid,
@@ -58,6 +57,7 @@ class _InviteState extends State<Invite> {
   }
 
   Future<void> _showDialog() async {
+    bool declined = false;
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
@@ -87,12 +87,26 @@ class _InviteState extends State<Invite> {
               textColor: Colors.red,
               child: Text("Abbrechen"),
               onPressed: () {
-                Navigator.of(context).pop();
+                if(!declined){
+                  Navigator.of(context).pop();
+                }
               },
             ),
             FlatButton(
               child: Text("Ablehnen"),
-              onPressed: () {
+              onPressed: () async {
+                declined = true;
+                final HttpsCallable decline = CloudFunctions.instance.getHttpsCallable(
+                    functionName: "declineInvite"
+                );
+                try {
+                  dynamic resp = await decline.call(<String, dynamic>{
+                    'inviteid': widget.invite.id,
+                  });
+                  print(resp.data);
+                }catch (e) {
+                  print(e.message);
+                }
                 Navigator.of(context).pop();
               },
             ),

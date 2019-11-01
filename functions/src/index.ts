@@ -3,3 +3,4 @@ admin.initializeApp();
 
 export { syncUser } from './syncUser';
 export { acceptInvite } from './onAcceptInvite';
+export { declineInvite } from './onDeclineInvite';
