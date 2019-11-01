@@ -1,3 +1,4 @@
+import 'package:extended_math/extended_math.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -20,7 +21,8 @@ class _AddShoppinglist extends State<AddShoppinglist> {
 
   final _productTextController = TextEditingController();
   final _nameTextController = TextEditingController();
-  //List<String> _products = ["Milch", "Reis", "Bier"];
+
+  var rng = new Random();
 
   var _products = [
   new Item("Apfel", false),
@@ -35,6 +37,12 @@ class _AddShoppinglist extends State<AddShoppinglist> {
   }
 
   _addProduct(product) {
+    for(var i = 0; i < _products.length; i++){
+      if(_products[i].name == product){
+        return;
+      }
+    }
+
     setState(() {
       _productTextController.clear();
       _products.add(new Item(product, false));
@@ -73,7 +81,7 @@ class _AddShoppinglist extends State<AddShoppinglist> {
             .of(context)
             .colorScheme
             .primary,
-        title: Text("Neue Einkaufslistes erstellen"),
+        title: Text("Neue Einkaufsliste erstellen"),
       ),
       body: Container(
           child: ListView(
@@ -126,26 +134,54 @@ class _AddShoppinglist extends State<AddShoppinglist> {
                             {
                               if(_productTextController.text.length > 1){
                                 _addProduct(_productTextController.text)
-                              },                            }
+                              },
+                            }
                           ),
                         ],
                       ),
                       Container(
-                        margin: EdgeInsets.only(top: 20.0),
-                        height: 500,
+                        margin: EdgeInsets.only(top: 25.0),
+                        constraints: BoxConstraints(
+                          maxHeight: 530,
+                        ),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                          color: Color(0xffeeeeee),
+                        ),
                         child: ListView.builder(
                             itemCount: _products.length,
                             scrollDirection: Axis.vertical,
                             shrinkWrap: true,
                             reverse: true,
                             itemBuilder: (BuildContext context, int index){
-                              return Container(
-                                  child: CheckboxListTile(
-                                      value: _products[index].checked,
-                                      title: new Text("${_products[index].name}"),
-                                      controlAffinity: ListTileControlAffinity.trailing,
-                                      onChanged: (bool val) { itemChange(val, index); }
-                                  )
+                              return Dismissible(
+                                key: Key(_products[index].name),
+                                direction: DismissDirection.startToEnd,
+                                background: Container(
+                                  child: Icon(Icons.delete, color: Colors.white,),
+                                  alignment: AlignmentDirectional.centerStart,
+                                  padding: EdgeInsets.only(left: 15),
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      stops: [0, 0.3],
+                                      colors: [Colors.red, Color(0xffeeeeee)],
+                                    ),
+                                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                                  ),
+                                ),
+                                onDismissed: (direction){
+                                  setState(() {
+                                    _products.removeAt(index);
+                                  });
+                                },
+                                child: Container(
+                                    child: CheckboxListTile(
+                                        value: _products[index].checked,
+                                        title: new Text("${_products[index].name}"),
+                                        controlAffinity: ListTileControlAffinity.trailing,
+                                        onChanged: (bool val) { itemChange(val, index); }
+                                    )
+                                ),
                               );
                             }
                         ),
