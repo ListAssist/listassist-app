@@ -49,6 +49,7 @@ dependencies:
   path_provider:
   image_picker:
   custom_navigator:
+  fluttertoast:
 
 dev_dependencies:
   flutter_test:

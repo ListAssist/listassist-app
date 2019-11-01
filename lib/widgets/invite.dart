@@ -2,6 +2,7 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:listassist/models/Invite.dart' as model;
+import 'package:listassist/widgets/_snackbar.dart';
 
 
 class Invite extends StatefulWidget {
@@ -39,9 +40,13 @@ class _InviteState extends State<Invite> {
                 dynamic resp = await accept.call(<String, dynamic>{
                   'groupid': widget.invite.groupid,
                 });
-                print(resp.data);
+                if(resp.data["status"] == "Failed"){
+                  InfoSnackbar.showErrorSnackBar("Fehler beim Akzeptieren der Einladung");
+                }else {
+                  InfoSnackbar.showInfoSnackBar("Einladung akzepiert");
+                }
               }catch (e) {
-                print(e.message);
+                InfoSnackbar.showErrorSnackBar("Fehler: ${e.message}");
               }
             },
             color: Colors.green,
@@ -61,7 +66,7 @@ class _InviteState extends State<Invite> {
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
+      builder: (BuildContext ctx) {
         return AlertDialog(
           title: Text("Einladung ablehnen"),
           content: SingleChildScrollView(
@@ -103,9 +108,13 @@ class _InviteState extends State<Invite> {
                   dynamic resp = await decline.call(<String, dynamic>{
                     'inviteid': widget.invite.id,
                   });
-                  print(resp.data);
+                  if(resp.data["status"] == "Failed"){
+                    InfoSnackbar.showErrorSnackBar("Fehler beim Ablehnen der Einladung");
+                  }else {
+                    InfoSnackbar.showInfoSnackBar("Einladung abgelehnt");
+                  }
                 }catch (e) {
-                  print(e.message);
+                  InfoSnackbar.showErrorSnackBar("Fehler: ${e.message}");
                 }
                 Navigator.of(context).pop();
               },

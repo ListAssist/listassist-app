@@ -1,14 +1,22 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+
 /// Reserved for later use..
-class InfoSnackbar extends StatelessWidget {
-  final String message;
-  final int duration;
+class InfoSnackbar {
 
-  InfoSnackbar({this.message, this.duration});
+  static void showInfoSnackBar(String message) {
+    Fluttertoast.showToast(
+        msg: message,
+        textColor: Colors.white,
+    );
+  }
 
-  @override
-  Widget build(BuildContext context) {
-    return null;
+  static void showErrorSnackBar(String message) {
+    Fluttertoast.showToast(
+        msg: message,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+    );
   }
 
 }
