@@ -9,7 +9,7 @@ export const acceptInvite = functions.https.onCall((data, context) => {
   const uid = context.auth.uid;
 
   if (!inviteid) {
-    throw new functions.https.HttpsError("invalid-argument", "GroupID is required");
+    throw new functions.https.HttpsError("invalid-argument", "InviteID is required");
   }
 
     return db.collection("invites")
