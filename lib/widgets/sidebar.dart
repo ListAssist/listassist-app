@@ -6,6 +6,7 @@ import 'package:listassist/services/db.dart';
 import 'package:listassist/widgets/group-view.dart';
 import 'package:listassist/models/current-screen.dart';
 import 'package:listassist/services/auth.dart';
+import 'package:listassist/widgets/settings-view.dart';
 import 'package:listassist/widgets/invite-view.dart';
 import 'package:listassist/widgets/shoppinglist-view.dart';
 import 'package:provider/provider.dart';
@@ -27,10 +28,13 @@ class _Sidebar extends State<Sidebar> {
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.primary,
             ),
-            accountName: Text(user.displayName ?? ""),
-            accountEmail: Text(user.email ?? ""),
-            currentAccountPicture: CircleAvatar(
-              backgroundImage: NetworkImage(user.photoUrl),
+            accountName: Text(user.displayName),
+            accountEmail: Text(user.email),
+            currentAccountPicture: Hero(
+              tag: "profilePicture",
+              child: CircleAvatar(
+                backgroundImage: NetworkImage(user.photoUrl),
+              ),
             ),
           ),
           ListTile(
@@ -83,7 +87,8 @@ class _Sidebar extends State<Sidebar> {
             leading: Icon(Icons.settings),
             title: Text("Einstellungen"),
             onTap: () {
-              Navigator.pop(context);
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => SettingsView()));
             },
           ),
           Spacer(),
