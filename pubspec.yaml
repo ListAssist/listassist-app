@@ -52,6 +52,8 @@ dependencies:
   path_provider:
   image_picker:
   custom_navigator:
+  progress_dialog:
+  image_crop:
   fluttertoast:
 
 dev_dependencies:

@@ -6,30 +6,33 @@ class User {
   final String displayName;
   final String photoUrl;
   final String uid;
+  final String type;
   final Timestamp lastLogin;
 
-  User({this.lastLogin, this.email, this.displayName, this.photoUrl, this.uid});
+  User({this.lastLogin, this.email, this.displayName, this.photoUrl, this.uid, this.type});
 
   factory User.fromFirestore(DocumentSnapshot doc) {
     Map data = doc.data;
 
     return User(
-        uid: data["uid"],
-        email: data["email"],
-        photoUrl: data["photoURL"] ?? "",
-        displayName: data["displayName"] ?? "",
-        lastLogin: data["lastLogin"] ?? null
+      uid: data["uid"],
+      email: data["email"],
+      photoUrl: data["photoURL"] ?? "",
+      displayName: data["displayName"] ?? '',
+      lastLogin: data["lastLogin"] ?? null,
+      type: data["type"] ?? null,
     );
   }
 
   factory User.fromMap(Map data) {
     data = data ?? { };
     return User(
-        uid: data["uid"],
-        email: data["email"],
-        photoUrl: data["photoURL"] ?? "",
-        displayName: data["displayName"] ?? "",
-        lastLogin: data["lastLogin"] ?? null
+      uid: data["uid"],
+      email: data["email"],
+      photoUrl: data["photoURL"] ?? "",
+      displayName: data["displayName"] ?? "",
+      lastLogin: data["lastLogin"] ?? null,
+      type: data["type"] ?? null,
     );
   }
 }
