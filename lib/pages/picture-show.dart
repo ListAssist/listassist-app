@@ -34,7 +34,7 @@ class _PictureShowState extends State<PictureShow> {
         _image = finalImg;
       });
     } catch(e)  {
-      print(e.toString());
+      print(e);
     }
   }
 
@@ -107,7 +107,7 @@ class _PictureShowState extends State<PictureShow> {
                 task.events.listen((event) async {
                   if (!progressDialog.isShowing()) {
                     task.cancel();
-                    await progressDialog.hide();
+                    progressDialog.dismiss();
                     /// ResultHandler.showInfoSnackbar(Text("Hochladevorgang unterbrochen"), auth: false);
                     return;
                   }
