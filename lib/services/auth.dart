@@ -10,7 +10,7 @@ import 'package:listassist/models/User.dart';
 import 'package:listassist/services/db.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:listassist/main.dart';
-import 'package:listassist/widgets/authentication.dart';
+import 'package:listassist/widgets/authentication/authentication.dart';
 
 enum AuthenticationType {Facebook, Google, Twitter}
 

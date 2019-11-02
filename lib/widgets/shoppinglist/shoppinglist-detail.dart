@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-import 'package:listassist/pages/picture-show.dart';
+import 'package:listassist/widgets/camera-scanner/picture-show.dart';
 
 class Item {
   String name;

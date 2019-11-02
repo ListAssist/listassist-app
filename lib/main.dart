@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:listassist/services/auth.dart';
 import 'package:listassist/widgets/sidebar.dart';
-import 'package:listassist/widgets/authentication.dart';
+import 'package:listassist/widgets/authentication/authentication.dart';
 import 'models/User.dart';
 
 void main() => runApp(MyApp());

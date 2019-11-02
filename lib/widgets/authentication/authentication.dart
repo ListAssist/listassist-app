@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:listassist/pages/login.dart';
-import 'package:listassist/pages/register.dart';
+import 'package:listassist/widgets/authentication/login.dart';
+import 'package:listassist/widgets/authentication/register.dart';
 
 
 BuildContext authContext;
