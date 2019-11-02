@@ -7,13 +7,8 @@ class ScreenModel extends Model {
 
   Widget get screen => _screen;
 
-  String _title = "Einkaufslisten";
-
-  String get title => _title;
-
-  void setScreen(Widget newScreen, String title) {
+  void setScreen(Widget newScreen) {
     _screen = newScreen;
-    _title = title;
 
     notifyListeners();
   }

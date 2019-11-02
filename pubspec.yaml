@@ -29,6 +29,7 @@ dependencies:
   firebase_ml_vision:
   firebase_storage:
   cloud_firestore:
+  cloud_functions:
 
   google_sign_in:
   flutter_twitter_login:
@@ -50,6 +51,8 @@ dependencies:
   flutter_speed_dial:
   path_provider:
   image_picker:
+  custom_navigator:
+  fluttertoast:
 
 dev_dependencies:
   flutter_test:

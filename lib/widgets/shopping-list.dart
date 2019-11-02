@@ -11,25 +11,21 @@ class ShoppingList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: GestureDetector(
-        onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => ShoppingListDetail(title: title)),
-        ),
-        child: Card(
-          child: Container(
-            padding: EdgeInsets.all(20),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(title, style: Theme.of(context).textTheme.title),
-                  Text("$bought/$total eingekauft")
-                ],
-              ),
-            ),
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => ShoppingListDetail(title: title)),
+      ),
+      child: Container(
+        padding: EdgeInsets.all(20),
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(title, style: Theme.of(context).textTheme.title),
+              Text("$bought/$total eingekauft")
+            ],
           ),
         ),
       )
