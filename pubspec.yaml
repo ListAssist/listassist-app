@@ -29,15 +29,19 @@ dependencies:
   firebase_ml_vision:
   firebase_storage:
   cloud_firestore:
+  cloud_functions:
 
   google_sign_in:
   flutter_twitter_login:
+    git: git://github.com/eudangeld/flutter_twitter_login.git
   flutter_facebook_login:
   flutter_signin_button:
 
+  rxdart:
   scoped_model:
 
-  rxdart:  
+  url_launcher:
+
   provider:
   extended_math:
   badges:
@@ -50,6 +54,7 @@ dependencies:
   custom_navigator:
   progress_dialog:
   image_crop:
+  fluttertoast:
 
 dev_dependencies:
   flutter_test:

@@ -65,8 +65,8 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
                 return Container(
                   child: CheckboxListTile(
                     value: inputs[index].checked,
-                    title: new Text("${inputs[index].name}"),
-                    controlAffinity: ListTileControlAffinity.trailing,
+                    title: new Text("${inputs[index].name}", style: inputs[index].checked ? TextStyle(decoration: TextDecoration.lineThrough, decorationThickness: 3) : null),
+                    controlAffinity: ListTileControlAffinity.leading,
                     onChanged: (bool val) { itemChange(val, index); }
                   )
                 );

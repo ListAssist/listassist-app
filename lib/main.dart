@@ -7,7 +7,6 @@ import 'package:scoped_model/scoped_model.dart';
 import 'package:listassist/services/auth.dart';
 import 'package:listassist/widgets/sidebar.dart';
 import 'package:listassist/widgets/authentication.dart';
-
 import 'models/User.dart';
 
 void main() => runApp(MyApp());
@@ -27,11 +26,11 @@ class MyApp extends StatelessWidget {
           StreamProvider<bool>.value(value: authService.loading.asBroadcastStream())
         ],
         child: MaterialApp(
-            title: "ListAssist",
-            theme: ThemeData(
-              primarySwatch: Colors.indigo,
-            ),
-            home: MainApp()
+          title: "ListAssist",
+          theme: ThemeData(
+            primarySwatch: Colors.indigo,
+          ),
+          home: MainApp()
         ),
       )
     );
@@ -44,29 +43,29 @@ class MainApp extends StatefulWidget {
 }
 
 class _MainAppState extends State<MainApp> {
+
+
   @override
   Widget build(BuildContext context) {
     User user = Provider.of<User>(context);
     bool loading = Provider.of<bool>(context);
 
     return AnimatedSwitcher(
-            duration: Duration(milliseconds: 600),
-            child: user != null ?
-            Scaffold(
-              key: mainScaffoldKey,
-              body: Body(),
-              drawer: Sidebar(),
-            )
-             :
-           Scaffold(
-             key: authScaffoldKey,
-             body: AnimatedSwitcher(
-               duration: Duration(milliseconds: 600),
-               child: loading ? SpinKitDoubleBounce(color: Colors.blueAccent) : AuthenticationPage(),
-             ),
-             resizeToAvoidBottomInset: false,
-           )
-        );
+      duration: Duration(milliseconds: 600),
+      child: user != null ?
+        Scaffold(
+          key: mainScaffoldKey,
+          body: Body(),
+          drawer: Sidebar(),
+        ) : Scaffold(
+       key: authScaffoldKey,
+       body: AnimatedSwitcher(
+         duration: Duration(milliseconds: 600),
+         child: loading ? SpinKitDoubleBounce(color: Colors.blueAccent) : AuthenticationPage(),
+       ),
+       resizeToAvoidBottomInset: false,
+     )
+    );
   }
 }
 class Body extends StatefulWidget {
