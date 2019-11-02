@@ -38,7 +38,6 @@ class _InviteState extends State<Invite> {
               );
               try {
                 dynamic resp = await accept.call(<String, dynamic>{
-                  "groupid": widget.invite.groupid,
                   "inviteid": widget.invite.id
                 });
                 if(resp.data["status"] == "Failed"){

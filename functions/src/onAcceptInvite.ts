@@ -5,11 +5,10 @@ import FieldValue = admin.firestore.FieldValue;
 const db = admin.firestore();
 
 export const acceptInvite = functions.https.onCall((data, context) => {
-  const groupid = data.groupid;
   const inviteid = data.inviteid;
   const uid = context.auth.uid;
 
-  if (!groupid) {
+  if (!inviteid) {
     throw new functions.https.HttpsError("invalid-argument", "GroupID is required");
   }
 
@@ -20,11 +19,11 @@ export const acceptInvite = functions.https.onCall((data, context) => {
             if(!snap.exists){
                 return { status: "Failed" };
             }
-            if(snap.data()["to"] === uid){
+            if(snap.data()["to"] === uid) {
                 return Promise.all([
                     db.collection("groups_user")
                         .doc(uid)
-                        .set({ groups: FieldValue.arrayUnion(groupid) }, {merge: true}),
+                        .set({ groups: FieldValue.arrayUnion(snap.data()["groupid"]) }, { merge: true }),
                     db.collection("invites")
                         .doc(inviteid)
                         .set({ type: "accepted" }, { merge: true })
