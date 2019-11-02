@@ -2,13 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:listassist/models/current-screen.dart';
-import 'package:listassist/services/db.dart';
 import 'package:provider/provider.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:listassist/services/auth.dart';
 import 'package:listassist/widgets/sidebar.dart';
 import 'package:listassist/widgets/authentication.dart';
-import 'models/Group.dart';
 import 'models/User.dart';
 
 void main() => runApp(MyApp());
@@ -45,6 +43,8 @@ class MainApp extends StatefulWidget {
 }
 
 class _MainAppState extends State<MainApp> {
+
+
   @override
   Widget build(BuildContext context) {
     User user = Provider.of<User>(context);
@@ -53,13 +53,10 @@ class _MainAppState extends State<MainApp> {
     return AnimatedSwitcher(
       duration: Duration(milliseconds: 600),
       child: user != null ?
-        StreamProvider<Group>.value(
-          value: databaseService.streamGroupsFromUser(),
-          child: Scaffold(
-            key: mainScaffoldKey,
-            body: Body(),
-            drawer: Sidebar(),
-          ),
+        Scaffold(
+          key: mainScaffoldKey,
+          body: Body(),
+          drawer: Sidebar(),
         ) : Scaffold(
        key: authScaffoldKey,
        body: AnimatedSwitcher(

@@ -19,9 +19,8 @@ class GroupItem extends StatelessWidget {
             MaterialPageRoute(builder: (context) {
               return Provider<Group>.value(
                 value: group,
-                child: GroupDetail()
+                child: GroupDetail(),
               );
-//              return GroupDetail();
             }),
           ),
           child: Card(
@@ -42,6 +41,7 @@ class GroupItem extends StatelessWidget {
         ),
       )
     :
-    SpinKitDoubleBounce(color: Colors.blueAccent);
+    //Nicht anzeigen falls z.B. eine ungültige ID angegeben wurde
+    Container();
   }
 }

@@ -1,10 +1,14 @@
+import 'package:custom_navigator/custom_navigator.dart';
 import 'package:flutter/material.dart';
-import 'package:listassist/widgets/group-view.dart';
-import 'package:provider/provider.dart';
+import 'package:listassist/models/Group.dart';
 import 'package:listassist/models/User.dart';
+import 'package:listassist/services/db.dart';
+import 'package:listassist/widgets/group-view.dart';
 import 'package:listassist/models/current-screen.dart';
 import 'package:listassist/services/auth.dart';
+import 'package:listassist/widgets/invite-view.dart';
 import 'package:listassist/widgets/shoppinglist-view.dart';
+import 'package:provider/provider.dart';
 
 
 class Sidebar extends StatefulWidget {
@@ -16,7 +20,6 @@ class _Sidebar extends State<Sidebar> {
   @override
   Widget build(BuildContext context) {
     User user = Provider.of<User>(context);
-
     return Drawer(
       child: Column(
         children: <Widget>[
@@ -24,8 +27,8 @@ class _Sidebar extends State<Sidebar> {
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.primary,
             ),
-            accountName: Text(user.displayName),
-            accountEmail: Text(user.email),
+            accountName: Text(user.displayName ?? ""),
+            accountEmail: Text(user.email ?? ""),
             currentAccountPicture: CircleAvatar(
               backgroundImage: NetworkImage(user.photoUrl),
             ),
@@ -34,7 +37,7 @@ class _Sidebar extends State<Sidebar> {
             leading: Icon(Icons.list),
             title: Text("Einkaufslisten"),
             onTap: () {
-              ScreenModel.of(context).setScreen(ShoppingListView(), "Einkaufslisten");
+              ScreenModel.of(context).setScreen(ShoppingListView());
               Navigator.pop(context);
             },
           ),
@@ -57,7 +60,13 @@ class _Sidebar extends State<Sidebar> {
             leading: Icon(Icons.group),
             title: Text("Gruppen"),
             onTap: () {
-              ScreenModel.of(context).setScreen(GroupView(), "Gruppen");
+              ScreenModel.of(context).setScreen(StreamProvider<List<Stream<Group>>>.value(
+                value: databaseService.streamGroupsFromUser(user.uid),
+                child: CustomNavigator(
+                  home: GroupView(),
+                  pageRoute: PageRoutes.materialPageRoute,
+                )
+              ));
               Navigator.pop(context);
             },
           ),
@@ -65,6 +74,7 @@ class _Sidebar extends State<Sidebar> {
             leading: Icon(Icons.mail),
             title: Text("Einladungen"),
             onTap: () {
+              ScreenModel.of(context).setScreen(InviteView());
               Navigator.pop(context);
             },
           ),

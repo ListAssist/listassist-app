@@ -17,7 +17,7 @@ class User {
         uid: data["uid"],
         email: data["email"],
         photoUrl: data["photoURL"] ?? "",
-        displayName: data["displayName"] ?? '',
+        displayName: data["displayName"] ?? "",
         lastLogin: data["lastLogin"] ?? null
     );
   }
