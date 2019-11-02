@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:listassist/models/Group.dart';
-import 'package:listassist/services/db.dart';
-import 'package:listassist/widgets/group-userlist.dart';
+import 'package:listassist/widgets/group/group-userlist.dart';
 import 'package:provider/provider.dart';
 
 class GroupDetail extends StatefulWidget {

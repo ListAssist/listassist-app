@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:listassist/widgets/shoppinglist-view.dart';
+import 'package:listassist/widgets/shoppinglist/shoppinglist-view.dart';
 import 'package:scoped_model/scoped_model.dart';
 
 class ScreenModel extends Model {

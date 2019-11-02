@@ -1,8 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:listassist/models/User.dart';
-import 'package:listassist/validators/email.dart';
-import 'package:provider/provider.dart';
 
 class AddGroup extends StatefulWidget {
   @override

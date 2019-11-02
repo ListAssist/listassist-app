@@ -1,8 +1,6 @@
 import 'dart:io';
-
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:listassist/models/User.dart';
-import 'package:path/path.dart';
 
 class StorageService {
   final FirebaseStorage _storage =

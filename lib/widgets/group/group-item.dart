@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:listassist/models/Group.dart';
-import 'package:listassist/widgets/group-detail.dart';
+import 'package:listassist/widgets/group/group-detail.dart';
 import 'package:provider/provider.dart';
 
 

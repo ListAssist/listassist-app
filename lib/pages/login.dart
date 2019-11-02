@@ -5,7 +5,7 @@ import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:listassist/services/auth.dart';
 import 'package:listassist/validators/email.dart';
 import 'package:listassist/validators/password.dart';
-import 'package:listassist/widgets/formfield.dart';
+import 'package:listassist/widgets/forms/formfield.dart';
 
 class LoginPage extends StatelessWidget {
   @override

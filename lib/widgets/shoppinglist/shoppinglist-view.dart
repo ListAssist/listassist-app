@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:listassist/main.dart';
-import 'package:listassist/widgets/shopping-list.dart';
-import 'package:listassist/widgets/add-shoppinglist.dart';
+import 'package:listassist/widgets/shoppinglist/shopping-list.dart';
+import 'package:listassist/widgets/shoppinglist/add-shoppinglist.dart';
 
 class ShoppingListView extends StatelessWidget {
   @override

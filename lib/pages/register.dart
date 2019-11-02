@@ -5,7 +5,7 @@ import 'package:listassist/validators/email.dart';
 import 'package:listassist/validators/password.dart';
 import 'package:listassist/validators/username.dart';
 
-import 'package:listassist/widgets/formfield.dart';
+import 'package:listassist/widgets/forms/formfield.dart';
 import 'login.dart';
 
 class RegisterPage extends StatelessWidget {

@@ -1,11 +1,9 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:listassist/models/User.dart';
-import 'package:listassist/services/db.dart';
-import 'package:listassist/widgets/profilesettings-view.dart';
-import 'package:listassist/widgets/notificationsettings-view.dart';
+import 'package:listassist/widgets/settings/profilesettings-view.dart';
+import 'package:listassist/widgets/settings/notificationsettings-view.dart';
 import 'package:listassist/services/auth.dart';
-import 'package:listassist/widgets/shoppinglistsettings-view.dart';
+import 'package:listassist/widgets/settings/shoppinglistsettings-view.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
