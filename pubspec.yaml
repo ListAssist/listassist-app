@@ -47,6 +47,9 @@ dependencies:
   flutter_speed_dial:
   path_provider:
   image_picker:
+  custom_navigator:
+  progress_dialog:
+  image_crop:
 
 dev_dependencies:
   flutter_test:

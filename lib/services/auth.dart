@@ -134,7 +134,7 @@ class AuthService {
       AuthResult res = await _auth.signInWithCredential(credential);
       FirebaseUser user = res.user;
       /** Update user data if the profile picture or the email changed for example **/
-      updateData(user);
+      updateData(user, type);
 
       loading.add(false);
       return user;
@@ -145,7 +145,7 @@ class AuthService {
   }
 
   /// Updates user data from 3rd party to firestore
-  void updateData(FirebaseUser user) async {
+  void updateData(FirebaseUser user, AuthenticationType type) async {
     /** Get users document **/
     DocumentReference userRef = _db.collection("users").document(user.uid);
 
@@ -155,13 +155,30 @@ class AuthService {
       "email": user.email,
       "photoURL": user.photoUrl,
       "displayName": user.displayName,
-      "lastLogin": DateTime.now()
+      "lastLogin": DateTime.now(),
+      "type": authenticationEnumToString(type)
     }, merge: true);
   }
 
   /// Logout client and kill current session
   void signOut() async {
     await _auth.signOut();
+  }
+
+  String authenticationEnumToString(AuthenticationType type) {
+    String finalString = "";
+    switch (type) {
+      case AuthenticationType.Facebook:
+        finalString = "facebook";
+        break;
+      case AuthenticationType.Google:
+        finalString = "google";
+        break;
+      case AuthenticationType.Twitter:
+        finalString = "twitter";
+        break;
+    }
+    return finalString;
   }
 }
 

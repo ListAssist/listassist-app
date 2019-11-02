@@ -49,12 +49,7 @@ class _MainAppState extends State<MainApp> {
     User user = Provider.of<User>(context);
     bool loading = Provider.of<bool>(context);
 
-    return MaterialApp(
-        title: "ListAssist",
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-        ),
-        home: AnimatedSwitcher(
+    return AnimatedSwitcher(
             duration: Duration(milliseconds: 600),
             child: user != null ?
             Scaffold(
@@ -71,8 +66,7 @@ class _MainAppState extends State<MainApp> {
              ),
              resizeToAvoidBottomInset: false,
            )
-        )
-    );
+        );
   }
 }
 class Body extends StatefulWidget {
