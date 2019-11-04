@@ -178,88 +178,85 @@ class _PictureShowState extends State<PictureShow> {
               ),
             ],
             if (_imageFile != null) ...[
-              ClipRect(
-                clipBehavior: Clip.hardEdge,
-                child: GestureDetector(
-                    onPanStart: (DragStartDetails details) {
-                      // get distance from points to check if is in circle
-                      int indexMatch = -1;
-                      for (int i = 0; i < _points.length; i++) {
-                        double distance = sqrt(pow(details.localPosition.dx - _points[i].dx, 2) + pow(details.localPosition.dy - _points[i].dy, 2));
-                        if (distance <= 30) {
-                          indexMatch = i;
-                          break;
-                        }
+              GestureDetector(
+                  onPanStart: (DragStartDetails details) {
+                    // get distance from points to check if is in circle
+                    int indexMatch = -1;
+                    for (int i = 0; i < _points.length; i++) {
+                      double distance = sqrt(pow(details.localPosition.dx - _points[i].dx, 2) + pow(details.localPosition.dy - _points[i].dy, 2));
+                      if (distance <= 30) {
+                        indexMatch = i;
+                        break;
                       }
-                      if (indexMatch != -1) {
-                        _currentlyDraggedIndex = indexMatch;
+                    }
+                    if (indexMatch != -1) {
+                      _currentlyDraggedIndex = indexMatch;
+                    }
+                  },
+                  onPanUpdate: (DragUpdateDetails details) {
+                    if (_currentlyDraggedIndex != -1) {
+                      Offset correctedOffset = details.localPosition;
+
+                      /// Check if out of bound
+                      if (details.localPosition.dy - RectanglePainter.outputSubrect.top < 0) {
+                        correctedOffset = Offset(correctedOffset.dx, RectanglePainter.outputSubrect.top);
+                      } else if (details.localPosition.dy > RectanglePainter.outputSubrect.bottom) {
+                        correctedOffset = Offset(correctedOffset.dx, RectanglePainter.outputSubrect.bottom);
                       }
-                    },
-                    onPanUpdate: (DragUpdateDetails details) {
-                      if (_currentlyDraggedIndex != -1) {
-                        Offset correctedOffset = details.localPosition;
+                      if (details.localPosition.dx < 0) {
+                        correctedOffset = Offset(0, correctedOffset.dy);
+                      } else if (details.localPosition.dx > RectanglePainter.outputSubrect.right) {
+                        correctedOffset = Offset(RectanglePainter.outputSubrect.right, correctedOffset.dy);
+                      }
 
-                        /// Check if out of bound
-                        if (details.localPosition.dy - RectanglePainter.outputSubrect.top < 0) {
-                          correctedOffset = Offset(correctedOffset.dx, RectanglePainter.outputSubrect.top);
-                        } else if (details.localPosition.dy > RectanglePainter.outputSubrect.bottom) {
-                          correctedOffset = Offset(correctedOffset.dx, RectanglePainter.outputSubrect.bottom);
-                        }
-                        if (details.localPosition.dx < 0) {
-                          correctedOffset = Offset(0, correctedOffset.dy);
-                        } else if (details.localPosition.dx > RectanglePainter.outputSubrect.right) {
-                          correctedOffset = Offset(RectanglePainter.outputSubrect.right, correctedOffset.dy);
-                        }
-
-                        /// Check if angles are correct of each point of polygon using law of cosine
-                        List<ui.Offset> futurePoints = List.from(_points);
-                        futurePoints[_currentlyDraggedIndex] = correctedOffset;
-                        if (calculateAngle(futurePoints, 0, 1, 3) &&
-                            calculateAngle(futurePoints, 1, 2, 0) &&
-                            calculateAngle(futurePoints, 2, 3, 1) &&
-                            calculateAngle(futurePoints, 3, 0, 2)) {
-                          setState(() {
-                            _points = futurePoints;
-                            _angleOverflow = false;
-                          });
-                        } else {
-                          setState(() {
-                            _angleOverflow = true;
-                          });
-                        }
-                      } else {
-                        /// Check if one point will be out of bound
-                        List<ui.Offset> futurePoints = _points.map((Offset point) {
-                          Offset correctedOffset = point + details.delta;
-                          /// Y Axis collisions
-                          if (correctedOffset.dy - RectanglePainter.outputSubrect.top < 0) {
-                            correctedOffset = Offset(correctedOffset.dx, RectanglePainter.outputSubrect.top);
-                          } else if (correctedOffset.dy > RectanglePainter.outputSubrect.bottom) {
-                            correctedOffset = Offset(correctedOffset.dx, RectanglePainter.outputSubrect.bottom);
-                          }
-                          /// X Axis collisions
-                          if (correctedOffset.dx < 0) {
-                            correctedOffset = Offset(0, correctedOffset.dy);
-                          } else if (correctedOffset.dx > RectanglePainter.outputSubrect.right) {
-                            correctedOffset = Offset(RectanglePainter.outputSubrect.right, correctedOffset.dy);
-                          }
-                          return correctedOffset;
-                        }).toList();
+                      /// Check if angles are correct of each point of polygon using law of cosine
+                      List<ui.Offset> futurePoints = List.from(_points);
+                      futurePoints[_currentlyDraggedIndex] = correctedOffset;
+                      if (calculateAngle(futurePoints, 0, 1, 3) &&
+                          calculateAngle(futurePoints, 1, 2, 0) &&
+                          calculateAngle(futurePoints, 2, 3, 1) &&
+                          calculateAngle(futurePoints, 3, 0, 2)) {
                         setState(() {
                           _points = futurePoints;
+                          _angleOverflow = false;
+                        });
+                      } else {
+                        setState(() {
+                          _angleOverflow = true;
                         });
                       }
-                    },
-                    onPanEnd: (_) {
+                    } else {
+                      /// Check if one point will be out of bound
+                      List<ui.Offset> futurePoints = _points.map((Offset point) {
+                        Offset correctedOffset = point + details.delta;
+                        /// Y Axis collisions
+                        if (correctedOffset.dy - RectanglePainter.outputSubrect.top < 0) {
+                          correctedOffset = Offset(correctedOffset.dx, RectanglePainter.outputSubrect.top);
+                        } else if (correctedOffset.dy > RectanglePainter.outputSubrect.bottom) {
+                          correctedOffset = Offset(correctedOffset.dx, RectanglePainter.outputSubrect.bottom);
+                        }
+                        /// X Axis collisions
+                        if (correctedOffset.dx < 0) {
+                          correctedOffset = Offset(0, correctedOffset.dy);
+                        } else if (correctedOffset.dx > RectanglePainter.outputSubrect.right) {
+                          correctedOffset = Offset(RectanglePainter.outputSubrect.right, correctedOffset.dy);
+                        }
+                        return correctedOffset;
+                      }).toList();
                       setState(() {
-                        _currentlyDraggedIndex = -1;
+                        _points = futurePoints;
                       });
-                    },
-                    child: CustomPaint(
-                      size: Size.fromHeight(MediaQuery.of(context).size.height - appBar.preferredSize.height - 24),
-                      painter: RectanglePainter(points: _points, angleOverflow: _angleOverflow, image: _image),
-                    )
-                ),
+                    }
+                  },
+                  onPanEnd: (_) {
+                    setState(() {
+                      _currentlyDraggedIndex = -1;
+                    });
+                  },
+                  child: CustomPaint(
+                    size: Size.fromHeight(MediaQuery.of(context).size.height - appBar.preferredSize.height - 24),
+                    painter: RectanglePainter(points: _points, angleOverflow: _angleOverflow, image: _image),
+                  )
               ),
             ]
           ],
