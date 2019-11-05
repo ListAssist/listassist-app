@@ -1,17 +1,18 @@
 import 'dart:io';
 import 'dart:math';
+import 'dart:typed_data';
 import 'dart:ui' as ui;
+import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:listassist/models/User.dart';
-import 'package:listassist/services/auth.dart';
-import 'package:listassist/services/storage.dart';
+import 'package:listassist/services/snackbar.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:provider/provider.dart';
+import 'dart:convert';
 
 class PictureShow extends StatefulWidget {
   @override
@@ -24,23 +25,26 @@ class _PictureShowState extends State<PictureShow> {
   List<ui.Offset> _points = [ui.Offset(90, 120), ui.Offset(90, 370), ui.Offset(320, 370), ui.Offset(320, 120)];
   bool _angleOverflow = false;
   int _currentlyDraggedIndex = -1;
+  /// adb reverse tcp:5000 tcp:5000
+  final Dio dio = Dio()
+  ..options.baseUrl = "http://127.0.0.1:5000/";
 
   Future _pickImage(ImageSource imageSource) async {
     try {
       File imageFile = await ImagePicker.pickImage(source: imageSource);
-      ui.Image finalImg = await _load(imageFile.path);
+      ui.Image finalImg = await _load(imageFile);
       setState(() {
         _imageFile = imageFile;
         _image = finalImg;
       });
     } catch(e)  {
-      print(e);
+      InfoSnackbar.showInfoSnackBar(e.toString());
     }
   }
 
-  Future<ui.Image> _load(String asset) async {
-    ByteData data = await rootBundle.load(asset);
-    ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
+  Future<ui.Image> _load(File file) async {
+    Uint8List bytes = file.readAsBytesSync();
+    ui.Codec codec = await ui.instantiateImageCodec(bytes);
     ui.FrameInfo fi = await codec.getNextFrame();
     return fi.image;
   }
@@ -57,6 +61,17 @@ class _PictureShowState extends State<PictureShow> {
     double c = sqrt(pow(futurePoints[afterIndex].dx - futurePoints[beforeIndex].dx, 2) + pow(futurePoints[afterIndex].dy - futurePoints[beforeIndex].dy, 2));
     double angle = acos((pow(a, 2) + pow(b, 2) - pow(c, 2)) / (2 * a * b)) * (180 / pi);
     return angle < 120 && angle > 20;
+  }
+
+  List<Map<String, double>> exportPoints() {
+    double ratioX = _image.width / RectanglePainter.outputSubrect.width;
+    double ratioY = _image.height / RectanglePainter.outputSubrect.height;
+    return _points.map((Offset point) {
+      return {
+        "x": point.dx * ratioX,
+        "y": (point.dy - RectanglePainter.outputSubrect.top) * ratioY
+      };
+    }).toList();
   }
 
   @override
@@ -101,14 +116,20 @@ class _PictureShowState extends State<PictureShow> {
               backgroundColor: Colors.green,
               label: "Complete",
               labelStyle: TextStyle(fontSize: 18.0),
-              onTap: () {
+              onTap: () async {
+                FormData formData = new FormData.fromMap({
+                  "bill": await MultipartFile.fromFile(_imageFile.path),
+                  "coordinates": jsonEncode(exportPoints())
+                });
+                var response = await dio.post("/", data: formData);
+                /*
                 progressDialog.show();
                 final task = storageService.upload(_imageFile, user);
                 task.events.listen((event) async {
                   if (!progressDialog.isShowing()) {
                     task.cancel();
                     progressDialog.dismiss();
-                    /// ResultHandler.showInfoSnackbar(Text("Hochladevorgang unterbrochen"), auth: false);
+                    InfoSnackbar.showErrorSnackBar("Hochladevorgang wurde abgebrochen");
                     return;
                   }
 
@@ -126,6 +147,7 @@ class _PictureShowState extends State<PictureShow> {
                     }
                   }
                 });
+                 */
               }
           ),
           SpeedDialChild(
