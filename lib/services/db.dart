@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:listassist/models/Group.dart';
 import 'package:listassist/models/Invite.dart';
+import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
 
 class DatabaseService {
@@ -46,6 +47,31 @@ class DatabaseService {
         .where("type", isEqualTo: "pending")
         .snapshots()
         .map((snap) => snap.documents.map((d) => Invite.fromFirestore(d)).toList());
+  }
+
+
+  void createList(String uid, ShoppingList list) {
+    var items = list.items.map((e) => e.toJson()).toList();
+
+    _db
+        .collection("users")
+        .document(uid)
+        .collection("lists")
+        .add({"name": list.name , "type": list.type, "items" : items});
+  }
+
+  void updateProfileName(String uid, String newName) {
+    _db
+        .collection('users')
+        .document(uid)
+        .updateData({'displayName': newName});
+  }
+
+  void updateEmail(String uid, String newEmail) {
+    _db
+        .collection('users')
+        .document(uid)
+        .updateData({'email': newEmail});
   }
 
 }

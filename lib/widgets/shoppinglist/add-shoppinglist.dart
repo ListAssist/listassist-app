@@ -1,16 +1,12 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:extended_math/extended_math.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
-class Item {
-  String name;
-  bool checked;
-
-  Item(String name, bool checked) {
-    this.name = name;
-    this.checked = checked;
-  }
-}
+import 'package:listassist/models/Item.dart';
+import 'package:listassist/models/ShoppingList.dart';
+import 'package:listassist/models/User.dart';
+import 'package:listassist/services/db.dart';
+import 'package:provider/provider.dart';
 
 class AddShoppinglist extends StatefulWidget {
   @override
@@ -19,47 +15,62 @@ class AddShoppinglist extends StatefulWidget {
 
 class _AddShoppinglist extends State<AddShoppinglist> {
 
+  User user;
+
   final _productTextController = TextEditingController();
   final _nameTextController = TextEditingController();
 
-  bool _nameIsValid = true;
-  bool _productsIsValid = true;
+  bool _nameIsValid = false;
+  bool _productsIsNotEmpty = true;
+  bool _productIsValid = true;
+  bool _listIsValid = false;
 
   var rng = new Random();
 
   var _products = [
-  new Item("Apfel", false),
-  new Item("Kekse", false),
-  new Item("Seife", false),
-  new Item("Öl", false)];
+    new Item(name: "Apfel", bought: false),
+    new Item(name: "Kekse", bought: false),
+    new Item(name: "Seife", bought: false),
+    new Item(name: "Öl", bought: false)
+  ];
 
   void itemChange(bool val, int index){
     setState(() {
-      _products[index].checked = val;
+      _products[index].bought = val;
     });
   }
 
   _addProduct(product) {
+    _productsIsNotEmpty = true;
+    _productIsValid = true;
     for(var i = 0; i < _products.length; i++){
       if(_products[i].name == product){
+        _productIsValid = false;
         return;
       }
+    }
+    if(_nameIsValid){
+      _listIsValid = true;
     }
 
     setState(() {
       _productTextController.clear();
-      _products.add(new Item(product, false));
+      _products.add(new Item(name: product, bought: false));
     });
   }
 
   _createShoppingList() {
-      setState(() {
-        _nameTextController.text.length > 1 ? _nameIsValid = true : _nameIsValid = false;
-        _products.length > 0 ? _productsIsValid = true : _productsIsValid = false;
-      });
+      if(!_listIsValid) {
+        return;
+      }
 
-      if(!_nameIsValid) return;
-      if(!_productsIsValid) return;
+      databaseService.createList(user.uid, ShoppingList(
+        id: "",
+        created: Timestamp.now(),
+        name: _nameTextController.text,
+        type: "pending",
+        items: _products,
+      ));
   }
 
   FocusNode myFocusNode;
@@ -67,7 +78,6 @@ class _AddShoppinglist extends State<AddShoppinglist> {
   @override
   void initState() {
     super.initState();
-
     myFocusNode = FocusNode();
   }
 
@@ -83,6 +93,9 @@ class _AddShoppinglist extends State<AddShoppinglist> {
 
   @override
   Widget build(BuildContext context) {
+
+    user = Provider.of<User>(context);
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme
@@ -99,6 +112,20 @@ class _AddShoppinglist extends State<AddShoppinglist> {
                   child: TextField(
                     controller: _nameTextController,
                     autofocus: true,
+                    onChanged: (text){
+                      setState(() {
+                        if(text.length > 1){
+                          _nameIsValid = true;
+                          if(_productsIsNotEmpty) {
+                            _listIsValid = true;
+                          }
+                        } else {
+                          _nameIsValid = false;
+                          _listIsValid = false;
+                        }
+                        text.length > 1 ? _nameIsValid = true : _nameIsValid = false;
+                      });
+                    },
                     onSubmitted: (term) => {
                       FocusScope.of(context).requestFocus(myFocusNode),
                     },
@@ -106,7 +133,7 @@ class _AddShoppinglist extends State<AddShoppinglist> {
                       border: UnderlineInputBorder(),
                       contentPadding: EdgeInsets.all(3),
                       labelText: 'Name',
-                      errorText: _nameIsValid ? null : 'Bitte einen Namen eingeben',
+                      errorText: _nameIsValid ? null : 'Bitte einen gültigen Namen eingeben',
                     ),
                   )
               ),
@@ -133,7 +160,7 @@ class _AddShoppinglist extends State<AddShoppinglist> {
                                 border: UnderlineInputBorder(),
                                 contentPadding: EdgeInsets.all(3),
                                 labelText: 'Produkt eingeben',
-                                errorText: _productsIsValid ? null : 'Die Einkaufsliste benötigt Produkte',
+                                errorText: _productsIsNotEmpty ? _productIsValid ? null : 'Dieses Produkt ist bereits in der Einkaufsliste' : 'Die Einkaufsliste benötigt Produkte',
                               ),
                             ),
                           ),
@@ -154,7 +181,7 @@ class _AddShoppinglist extends State<AddShoppinglist> {
                           maxHeight: 530,
                         ),
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                          borderRadius: BorderRadius.all(Radius.circular(5)),
                           color: Color(0xffeeeeee),
                         ),
                         child: ListView.builder(
@@ -175,17 +202,26 @@ class _AddShoppinglist extends State<AddShoppinglist> {
                                       stops: [0, 0.3],
                                       colors: [Colors.red, Color(0xffeeeeee)],
                                     ),
-                                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                                    borderRadius: BorderRadius.all(Radius.circular(5)),
                                   ),
                                 ),
                                 onDismissed: (direction){
                                   setState(() {
                                     _products.removeAt(index);
+                                    if(_products.length > 0){
+                                      _productsIsNotEmpty = true;
+                                      if(_nameIsValid){
+                                        _listIsValid = true;
+                                      }
+                                    } else {
+                                      _productsIsNotEmpty = false;
+                                      _listIsValid = false;
+                                    }
                                   });
                                 },
                                 child: Container(
                                     child: CheckboxListTile(
-                                        value: _products[index].checked,
+                                        value: _products[index].bought,
                                         title: new Text("${_products[index].name}"),
                                         controlAffinity: ListTileControlAffinity.trailing,
                                         onChanged: (bool val) { itemChange(val, index); }
@@ -203,8 +239,8 @@ class _AddShoppinglist extends State<AddShoppinglist> {
       ),
       floatingActionButton: FloatingActionButton(
           child: Icon(Icons.check),
-          backgroundColor: Colors.green,
-          onPressed: () => _createShoppingList()
+          backgroundColor: _listIsValid ? Colors.green : Colors.grey,
+          onPressed: () => _listIsValid ? _createShoppingList() : null,
       ),
     );
   }
