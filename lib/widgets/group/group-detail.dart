@@ -4,6 +4,8 @@ import 'package:listassist/widgets/group/group-userlist.dart';
 import 'package:provider/provider.dart';
 
 class GroupDetail extends StatefulWidget {
+  final index;
+  GroupDetail({this.index});
   @override
   _GroupDetail createState() => _GroupDetail();
 }
@@ -13,7 +15,7 @@ class _GroupDetail extends State<GroupDetail> {
   @override
   Widget build(BuildContext context) {
     //FIXME: Provider not found
-    Group group = Provider.of<Group>(context);
+    Group group = Provider.of<List<Group>>(context)[widget.index];
     return DefaultTabController(
       length: 3,
       child: Scaffold(

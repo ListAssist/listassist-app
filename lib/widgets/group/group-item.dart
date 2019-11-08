@@ -6,21 +6,18 @@ import 'package:provider/provider.dart';
 
 
 class GroupItem extends StatelessWidget {
+  final index;
+  GroupItem({this.index});
 
   @override
   Widget build(BuildContext context) {
-    Group group = Provider.of<Group>(context);
+    Group group = Provider.of<List<Group>>(context)[index];
     return group != null ?
       Container(
         child: GestureDetector(
           onTap: () => Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) {
-              return Provider<Group>.value(
-                value: group,
-                child: GroupDetail(),
-              );
-            }),
+            MaterialPageRoute(builder: (context) => GroupDetail(index: index)),
           ),
           child: Card(
             child: Container(
