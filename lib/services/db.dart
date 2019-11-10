@@ -29,7 +29,7 @@ class DatabaseService {
             .collection("groups")
             .document(groupId)
             .snapshots()
-            .map<Group>((snap) => Group.fromMap(snap.data))
+            .map<Group>((snap) => Group.fromFirestore(snap))
           ).toList() : List<Stream<Group>>();
       });
 
