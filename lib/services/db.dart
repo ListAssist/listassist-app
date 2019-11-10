@@ -17,37 +17,37 @@ class DatabaseService {
         .map((snap) => User.fromMap(snap.data));
   }
 
-  Stream<List<Group>> streamGroupsFromUser(String uid) {
+  Stream<List<Stream<Group>>> streamGroupsFromUser(String uid) {
     print(uid);
-//    return _db
-//      .collection("groups_user")
-//      .document(uid)
-//      .snapshots()
-//      .map((list) {
-//        return list.data != null ? list.data["groups"]
-//          .map<Stream<Group>>((groupId) => _db
-//            .collection("groups")
-//            .document(groupId)
-//            .snapshots()
-//            .map<Group>((snap) => Group.fromMap(snap.data))
-//          ).toList() : List<Stream<Group>>();
-//      });
-
     return _db
-        .collection("groups_user")
-        .document(uid)
-        .snapshots()
-        .map<List<Group>>((list) {
-          print(list);
-          print(list.data);
-          return list.data != null ? list.data["groups"]
+      .collection("groups_user")
+      .document(uid)
+      .snapshots()
+      .map((list) {
+        return list.data != null ? list.data["groups"]
           .map<Stream<Group>>((groupId) => _db
             .collection("groups")
             .document(groupId)
             .snapshots()
             .map<Group>((snap) => Group.fromMap(snap.data))
-          ).toList() : List<Group>();
-    });
+          ).toList() : List<Stream<Group>>();
+      });
+
+//    return _db
+//        .collection("groups_user")
+//        .document(uid)
+//        .snapshots()
+//        .map<List<Group>>((list) {
+//          print(list);
+//          print(list.data);
+//          return list.data != null ? list.data["groups"]
+//          .map<Stream<Group>>((groupId) => _db
+//            .collection("groups")
+//            .document(groupId)
+//            .snapshots()
+//            .map<Group>((snap) => Group.fromMap(snap.data))
+//          ).toList() : List<Group>();
+//    });
 
 //    return db
 //            .collection("groups")

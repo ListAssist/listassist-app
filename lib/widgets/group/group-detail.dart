@@ -15,7 +15,7 @@ class _GroupDetail extends State<GroupDetail> {
   @override
   Widget build(BuildContext context) {
     //FIXME: Provider not found
-    Group group = Provider.of<List<Group>>(context)[widget.index];
+    Group group = Provider.of<Group>(context);
     return DefaultTabController(
       length: 3,
       child: Scaffold(
