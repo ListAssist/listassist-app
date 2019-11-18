@@ -158,7 +158,7 @@ class _PictureShowState extends State<PictureShow> {
             onTap: () {
               setState(() {
                 _clearPicture();
-                _points = [];
+                List<ui.Offset> _points = [ui.Offset(90, 120), ui.Offset(90, 370), ui.Offset(320, 370), ui.Offset(320, 120)];
               });
             },
           )

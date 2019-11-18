@@ -62,7 +62,6 @@ class AuthService {
         "lastLogin": DateTime.now(),
       }, merge: true);
 
-      loading.add(false);
       return user;
     } on PlatformException catch(e) {
       ResultHandler.handlePlatformException(e);
@@ -72,8 +71,6 @@ class AuthService {
 
   /// Create a session for an user with email and password
   Future<FirebaseUser> signInWithMail(String email, String password) async {
-    loading.add(true);
-
     try {
       AuthResult res = await _auth.signInWithEmailAndPassword(email: email, password: password);
       FirebaseUser user = res.user;

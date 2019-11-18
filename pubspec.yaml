@@ -52,6 +52,7 @@ dependencies:
   custom_navigator:
   image_crop:
   dio:
+  progress_indicator_button:
 
   # design
   fluttertoast:
