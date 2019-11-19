@@ -31,6 +31,7 @@ class MyApp extends StatelessWidget {
           title: "ListAssist",
           theme: ThemeData(
             primarySwatch: Colors.indigo,
+            brightness: Brightness.dark
           ),
           home: MainApp()
         ),

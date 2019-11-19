@@ -61,7 +61,8 @@ dependencies:
   flutter_vector_icons:
   flutter_speed_dial:
   flutter_spinkit:
-
+  fancy_bottom_navigation:
+  image_cropper:
 
 dev_dependencies:
   flutter_test:

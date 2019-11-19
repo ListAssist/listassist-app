@@ -2,17 +2,23 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
-import 'package:dio/dio.dart';
+import 'package:flutter/services.dart';
+import 'package:fancy_bottom_navigation/fancy_bottom_navigation.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:listassist/models/User.dart';
+import 'package:listassist/services/http.dart';
+import 'package:listassist/services/math.dart';
 import 'package:listassist/services/snackbar.dart';
+import 'package:listassist/widgets/camera-scanner/rectangle-painter.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:provider/provider.dart';
-import 'dart:convert';
+
+enum EditorType {Editor, Trainer, Recognizer}
 
 class PictureShow extends StatefulWidget {
   @override
@@ -22,23 +28,31 @@ class PictureShow extends StatefulWidget {
 class _PictureShowState extends State<PictureShow> {
   ui.Image _image;
   File _imageFile;
+  bool _imageLoading = false;
+
+  EditorType _currentEditorType = EditorType.Trainer;
+
   List<ui.Offset> _points = [ui.Offset(90, 120), ui.Offset(90, 370), ui.Offset(320, 370), ui.Offset(320, 120)];
   bool _angleOverflow = false;
   int _currentlyDraggedIndex = -1;
-  /// adb reverse tcp:5000 tcp:5000
-  final Dio dio = Dio()
-  ..options.baseUrl = "http://127.0.0.1:5000/";
+
+  int currentPage;
 
   Future _pickImage(ImageSource imageSource) async {
     try {
+      setState(() { _imageLoading = true; });
+
       File imageFile = await ImagePicker.pickImage(source: imageSource);
       ui.Image finalImg = await _load(imageFile);
       setState(() {
         _imageFile = imageFile;
         _image = finalImg;
+        _imageLoading = false;
       });
+      SystemChrome.setEnabledSystemUIOverlays([]);
     } catch(e)  {
-      InfoSnackbar.showInfoSnackBar(e.toString());
+      print(e.toString());
+      setState(() { _imageLoading = false; });
     }
   }
 
@@ -50,17 +64,11 @@ class _PictureShowState extends State<PictureShow> {
   }
 
   void _clearPicture() {
-    setState(() => _imageFile = null);
-  }
-
-  /// Calculate angle for point with law of cosine
-  /// @params are just the indeces of the points in the array
-  bool calculateAngle(List<ui.Offset> futurePoints, int mainIndex, int beforeIndex, int afterIndex) {
-    double a = sqrt(pow(futurePoints[mainIndex].dx - futurePoints[beforeIndex].dx, 2) + pow(futurePoints[mainIndex].dy - futurePoints[beforeIndex].dy, 2));
-    double b = sqrt(pow(futurePoints[mainIndex].dx - futurePoints[afterIndex].dx, 2) + pow(futurePoints[mainIndex].dy - futurePoints[afterIndex].dy, 2));
-    double c = sqrt(pow(futurePoints[afterIndex].dx - futurePoints[beforeIndex].dx, 2) + pow(futurePoints[afterIndex].dy - futurePoints[beforeIndex].dy, 2));
-    double angle = acos((pow(a, 2) + pow(b, 2) - pow(c, 2)) / (2 * a * b)) * (180 / pi);
-    return angle < 120 && angle > 20;
+    setState(() {
+      _imageFile = null;
+      List<ui.Offset> _points = [ui.Offset(90, 120), ui.Offset(90, 370), ui.Offset(320, 370), ui.Offset(320, 120)];
+    });
+    SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
   }
 
   List<Map<String, double>> exportPoints() {
@@ -104,10 +112,7 @@ class _PictureShowState extends State<PictureShow> {
         animatedIconTheme: IconThemeData(size: 22.0),
         closeManually: false,
         curve: Curves.easeIn,
-        overlayColor: Colors.black,
-        overlayOpacity: 0.35,
-        backgroundColor: Colors.blueAccent,
-        foregroundColor: Colors.white,
+        overlayOpacity: 0,
         elevation: 8.0,
         shape: CircleBorder(),
         children: [
@@ -115,14 +120,10 @@ class _PictureShowState extends State<PictureShow> {
               child: Icon(Icons.check),
               backgroundColor: Colors.green,
               label: "Complete",
-              labelStyle: TextStyle(fontSize: 18.0),
+              labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.black : Colors.white),
               onTap: () async {
-                FormData formData = new FormData.fromMap({
-                  "bill": await MultipartFile.fromFile(_imageFile.path),
-                  "coordinates": jsonEncode(exportPoints())
-                });
-                var response = await dio.post("/", data: formData);
-                /*
+                await httpService.getDetections(_imageFile, exportPoints());
+                  /*
                 progressDialog.show();
                 final task = storageService.upload(_imageFile, user);
                 task.events.listen((event) async {
@@ -154,192 +155,164 @@ class _PictureShowState extends State<PictureShow> {
             child: Icon(Icons.delete),
             backgroundColor: Colors.red,
             label: "Delete",
-            labelStyle: TextStyle(fontSize: 18.0),
+            labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.black : Colors.white),
             onTap: () {
-              setState(() {
                 _clearPicture();
-                List<ui.Offset> _points = [ui.Offset(90, 120), ui.Offset(90, 370), ui.Offset(320, 370), ui.Offset(320, 120)];
-              });
             },
           )
         ],
       ) : null,
-      appBar: appBar,
+      bottomNavigationBar: _imageFile != null ? FancyBottomNavigation(
+        initialSelection: 1,
+        tabs: [
+          TabData(iconData: Icons.crop, title: "Editor"),
+          TabData(iconData: Icons.extension, title: "Trainer"),
+          TabData(iconData: Icons.chrome_reader_mode, title: "Auto Detection")
+        ],
+        onTabChangedListener: (position) async {
+          setState(() {
+            _currentEditorType = EditorType.values[position];
+          });
+          /// Open Crop widget if user chooses to use cropping
+          if (_currentEditorType == EditorType.Editor) {
+            File cropped = await ImageCropper.cropImage(sourcePath: _imageFile.path);
+            if (cropped != null) {
+              ui.Image newImage = await _load(cropped);
+              setState(() async {
+                _imageFile = cropped;
+                _image = newImage;
+              });
+            }
+          }
+        }
+      ) : null,
+      appBar: _imageFile != null ? null : appBar,
       backgroundColor: _imageFile != null ? Colors.black : Colors.white,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            if (_imageFile == null) ...[
-              FlatButton(
-                onPressed: () => _pickImage(ImageSource.camera),
-                color: Colors.blueAccent,
-                padding: EdgeInsets.all(40.0),
-                child: Column(
-                  children: <Widget>[
-                    Icon(Icons.camera_alt, color: Colors.white,),
-                    Text("Aus der Kamera", style: TextStyle(color: Colors.white),)
-                  ],
+      body: AnimatedSwitcher(
+        duration: Duration(seconds: 1),
+        child: _imageLoading ?  SpinKitDoubleBounce(color: Theme.of(context).primaryColor) : Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              if (_imageFile == null) ...[
+                FlatButton(
+                  onPressed: () => _pickImage(ImageSource.camera),
+                  color: Colors.blueAccent,
+                  padding: EdgeInsets.all(40.0),
+                  child: Column(
+                    children: <Widget>[
+                      Icon(Icons.camera_alt, color: Colors.white,),
+                      Text("Aus der Kamera", style: TextStyle(color: Colors.white),)
+                    ],
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 40, bottom: 40),
-                child: Text("oder", textScaleFactor: 2,),
-              ),
-              FlatButton(
-                onPressed: () => _pickImage(ImageSource.gallery),
-                color: Colors.brown,
-                padding: EdgeInsets.all(40.0),
-                child: Column(
-                  children: <Widget>[
-                    Icon(Icons.photo, color: Colors.white,),
-                    Text("Aus der Gallerie", style: TextStyle(color: Colors.white),)
-                  ],
+                Padding(
+                  padding: const EdgeInsets.only(top: 40, bottom: 40),
+                  child: Text("oder", textScaleFactor: 2,),
                 ),
-              ),
+                FlatButton(
+                  onPressed: () => _pickImage(ImageSource.gallery),
+                  color: Colors.brown,
+                  padding: EdgeInsets.all(40.0),
+                  child: Column(
+                    children: <Widget>[
+                      Icon(Icons.photo, color: Colors.white,),
+                      Text("Aus der Gallerie", style: TextStyle(color: Colors.white),)
+                    ],
+                  ),
+                ),
+              ],
+              if (_imageFile != null) ...[
+                  GestureDetector(
+                      onPanStart: (DragStartDetails details) {
+                        // get distance from points to check if is in circle
+                        int indexMatch = -1;
+                        double lastDistance = -1;
+                        for (int i = 0; i < _points.length; i++) {
+                          double distance = sqrt(pow(details.localPosition.dx - _points[i].dx, 2) + pow(details.localPosition.dy - _points[i].dy, 2));
+                          if (distance <= 30) {
+                            if (distance < lastDistance || lastDistance == -1) {
+                              indexMatch = i;
+                              lastDistance = distance;
+                            }
+                          }
+                        }
+                        if (indexMatch != -1) {
+                          _currentlyDraggedIndex = indexMatch;
+                        }
+                      },
+                      onPanUpdate: (DragUpdateDetails details) {
+                        if (_currentlyDraggedIndex != -1) {
+                          Offset correctedOffset = details.localPosition;
+
+                          /// Check if out of bound
+                          if (details.localPosition.dy - RectanglePainter.outputSubrect.top < 0) {
+                            correctedOffset = Offset(correctedOffset.dx, RectanglePainter.outputSubrect.top);
+                          } else if (details.localPosition.dy > RectanglePainter.outputSubrect.bottom) {
+                            correctedOffset = Offset(correctedOffset.dx, RectanglePainter.outputSubrect.bottom);
+                          }
+                          if (details.localPosition.dx < RectanglePainter.outputSubrect.left) {
+                            correctedOffset = Offset(RectanglePainter.outputSubrect.left, correctedOffset.dy);
+                          } else if (details.localPosition.dx > RectanglePainter.outputSubrect.right) {
+                            correctedOffset = Offset(RectanglePainter.outputSubrect.right, correctedOffset.dy);
+                          }
+
+                          /// Check if angles are correct of each point of polygon using law of cosine
+                          List<ui.Offset> futurePoints = List.from(_points);
+                          futurePoints[_currentlyDraggedIndex] = correctedOffset;
+                          if (mathService.calculateAngle(futurePoints, 0, 1, 3) &&
+                              mathService.calculateAngle(futurePoints, 1, 2, 0) &&
+                              mathService.calculateAngle(futurePoints, 2, 3, 1) &&
+                              mathService.calculateAngle(futurePoints, 3, 0, 2)) {
+                            setState(() {
+                              _points = futurePoints;
+                              _angleOverflow = false;
+                            });
+                          } else {
+                            setState(() {
+                              _angleOverflow = true;
+                            });
+                          }
+                        } else {
+                          /// Check if one point will be out of bound
+                          List<ui.Offset> futurePoints = _points.map((Offset point) {
+                            Offset correctedOffset = point + details.delta;
+                            /// Y Axis collisions
+                            if (correctedOffset.dy - RectanglePainter.outputSubrect.top < 0) {
+                              correctedOffset = Offset(correctedOffset.dx, RectanglePainter.outputSubrect.top);
+                            } else if (correctedOffset.dy > RectanglePainter.outputSubrect.bottom) {
+                              correctedOffset = Offset(correctedOffset.dx, RectanglePainter.outputSubrect.bottom);
+                            }
+                            /// X Axis collisions
+                            if (correctedOffset.dx < RectanglePainter.outputSubrect.left) {
+                              correctedOffset = Offset(RectanglePainter.outputSubrect.left, correctedOffset.dy);
+                            } else if (correctedOffset.dx > RectanglePainter.outputSubrect.right) {
+                              correctedOffset = Offset(RectanglePainter.outputSubrect.right, correctedOffset.dy);
+                            }
+                            return correctedOffset;
+                          }).toList();
+                          setState(() {
+                            _points = futurePoints;
+                          });
+                        }
+                      },
+                      onPanEnd: (_) {
+                        setState(() {
+                          _currentlyDraggedIndex = -1;
+                        });
+                      },
+                      child: CustomPaint(
+                        size: Size.fromHeight(MediaQuery.of(context).size.height - appBar.preferredSize.height - 24),
+                        painter: RectanglePainter(points: _points, angleOverflow: _angleOverflow, image: _image, currentType: _currentEditorType),
+                      )
+                  ),
+              ]
             ],
-            if (_imageFile != null) ...[
-              GestureDetector(
-                  onPanStart: (DragStartDetails details) {
-                    // get distance from points to check if is in circle
-                    int indexMatch = -1;
-                    for (int i = 0; i < _points.length; i++) {
-                      double distance = sqrt(pow(details.localPosition.dx - _points[i].dx, 2) + pow(details.localPosition.dy - _points[i].dy, 2));
-                      if (distance <= 30) {
-                        indexMatch = i;
-                        break;
-                      }
-                    }
-                    if (indexMatch != -1) {
-                      _currentlyDraggedIndex = indexMatch;
-                    }
-                  },
-                  onPanUpdate: (DragUpdateDetails details) {
-                    if (_currentlyDraggedIndex != -1) {
-                      Offset correctedOffset = details.localPosition;
-
-                      /// Check if out of bound
-                      if (details.localPosition.dy - RectanglePainter.outputSubrect.top < 0) {
-                        correctedOffset = Offset(correctedOffset.dx, RectanglePainter.outputSubrect.top);
-                      } else if (details.localPosition.dy > RectanglePainter.outputSubrect.bottom) {
-                        correctedOffset = Offset(correctedOffset.dx, RectanglePainter.outputSubrect.bottom);
-                      }
-                      if (details.localPosition.dx < 0) {
-                        correctedOffset = Offset(0, correctedOffset.dy);
-                      } else if (details.localPosition.dx > RectanglePainter.outputSubrect.right) {
-                        correctedOffset = Offset(RectanglePainter.outputSubrect.right, correctedOffset.dy);
-                      }
-
-                      /// Check if angles are correct of each point of polygon using law of cosine
-                      List<ui.Offset> futurePoints = List.from(_points);
-                      futurePoints[_currentlyDraggedIndex] = correctedOffset;
-                      if (calculateAngle(futurePoints, 0, 1, 3) &&
-                          calculateAngle(futurePoints, 1, 2, 0) &&
-                          calculateAngle(futurePoints, 2, 3, 1) &&
-                          calculateAngle(futurePoints, 3, 0, 2)) {
-                        setState(() {
-                          _points = futurePoints;
-                          _angleOverflow = false;
-                        });
-                      } else {
-                        setState(() {
-                          _angleOverflow = true;
-                        });
-                      }
-                    } else {
-                      /// Check if one point will be out of bound
-                      List<ui.Offset> futurePoints = _points.map((Offset point) {
-                        Offset correctedOffset = point + details.delta;
-                        /// Y Axis collisions
-                        if (correctedOffset.dy - RectanglePainter.outputSubrect.top < 0) {
-                          correctedOffset = Offset(correctedOffset.dx, RectanglePainter.outputSubrect.top);
-                        } else if (correctedOffset.dy > RectanglePainter.outputSubrect.bottom) {
-                          correctedOffset = Offset(correctedOffset.dx, RectanglePainter.outputSubrect.bottom);
-                        }
-                        /// X Axis collisions
-                        if (correctedOffset.dx < 0) {
-                          correctedOffset = Offset(0, correctedOffset.dy);
-                        } else if (correctedOffset.dx > RectanglePainter.outputSubrect.right) {
-                          correctedOffset = Offset(RectanglePainter.outputSubrect.right, correctedOffset.dy);
-                        }
-                        return correctedOffset;
-                      }).toList();
-                      setState(() {
-                        _points = futurePoints;
-                      });
-                    }
-                  },
-                  onPanEnd: (_) {
-                    setState(() {
-                      _currentlyDraggedIndex = -1;
-                    });
-                  },
-                  child: CustomPaint(
-                    size: Size.fromHeight(MediaQuery.of(context).size.height - appBar.preferredSize.height - 24),
-                    painter: RectanglePainter(points: _points, angleOverflow: _angleOverflow, image: _image),
-                  )
-              ),
-            ]
-          ],
+          ),
         ),
       ),
     );
   }
 }
 
-class RectanglePainter extends CustomPainter {
-  List<Offset> points;
-  bool angleOverflow;
-  final ui.Image image;
-  static Rect outputSubrect;
-
-  RectanglePainter({@required this.points, @required this.angleOverflow, @required this.image});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    Color mainColor = angleOverflow ? Colors.red : Colors.indigo;
-    /// paint for lines
-    final paint = Paint()
-      ..color = mainColor
-      ..strokeCap = StrokeCap.square
-      ..style = PaintingStyle.fill
-      ..strokeWidth = 2;
-    /// paint for circle
-    final circlePaint = Paint()
-      ..color = mainColor
-      ..strokeCap = StrokeCap.square
-      ..style = PaintingStyle.fill
-      ..blendMode = BlendMode.multiply
-      ..strokeWidth = 2;
-    final double radius = 10;
-
-    final outputRect = Rect.fromPoints(ui.Offset.zero, ui.Offset(size.width, size.height));
-    final Size imageSize = Size(image.width.toDouble(), image.height.toDouble());
-    final FittedSizes sizes = applyBoxFit(BoxFit.contain, imageSize, outputRect.size);
-    final Rect inputSubrect = Alignment.center.inscribe(sizes.source, Offset.zero & imageSize);
-    /// outputSubrect is the real bounding box for the canvas
-    outputSubrect = Alignment.center.inscribe(sizes.destination, outputRect);
-    canvas.drawImageRect(image, inputSubrect, outputSubrect, paint);
-
-    for (int i = 0; i < points.length; i++) {
-      if (i + 1 == points.length) {
-        canvas.drawLine(points[i], points[0], paint);
-      } else {
-        canvas.drawLine(points[i], points[i + 1], paint);
-      }
-    }
-
-    for (int i = 0; i < points.length; i++) {
-      canvas.drawCircle(points[i], radius, circlePaint);
-      TextSpan span = TextSpan(style: TextStyle(color: Colors.white), text: "${i+1}");
-      TextPainter tp = TextPainter(text: span, textAlign: TextAlign.left, textDirection: TextDirection.ltr);
-      tp.layout();
-      tp.paint(canvas, Offset(points[i].dx - 3.5, points[i].dy - 8));
-    }
-  }
-
-  @override
-  bool shouldRepaint(RectanglePainter oldPainter) => oldPainter.points != points || angleOverflow ;
-
-}
