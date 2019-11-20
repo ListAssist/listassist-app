@@ -18,15 +18,15 @@ class SettingsView extends StatelessWidget {
       builder: (BuildContext context) {
         // return object of type Dialog
         return AlertDialog(
-          title: new Text(
+          title: Text(
               "Abmelden",
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22)
           ),
-          content: new Text("Möchten Sie sich von Ihrem ListAssist-Konto abmelden?"),
+          content: Text("Möchten Sie sich von Ihrem ListAssist-Konto abmelden?"),
           actions: <Widget>[
             // usually buttons at the bottom of the dialog
-            new FlatButton(
-              child: new Text(
+            FlatButton(
+              child: Text(
                   "ABBRECHEN",
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)
               ),
@@ -34,7 +34,7 @@ class SettingsView extends StatelessWidget {
                 Navigator.pop(context);
               },
             ),
-            new FlatButton(
+            FlatButton(
               child: new Text(
                   "OK",
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)

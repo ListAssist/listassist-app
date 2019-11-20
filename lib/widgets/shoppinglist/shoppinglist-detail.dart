@@ -65,7 +65,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
                 return Container(
                   child: CheckboxListTile(
                     value: inputs[index].checked,
-                    title: new Text("${inputs[index].name}", style: inputs[index].checked ? TextStyle(decoration: TextDecoration.lineThrough, decorationThickness: 3) : null),
+                    title: Text("${inputs[index].name}", style: inputs[index].checked ? TextStyle(decoration: TextDecoration.lineThrough, decorationThickness: 3) : null),
                     controlAffinity: ListTileControlAffinity.leading,
                     onChanged: (bool val) { itemChange(val, index); }
                   )
@@ -88,22 +88,25 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
           SpeedDialChild(
               child: Icon(Icons.check),
               backgroundColor: Colors.green,
+              labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
               label: "Complete",
-              labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.black : Colors.white),
+              labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
               onTap: _showDialog
           ),
           SpeedDialChild(
             child: Icon(Icons.delete),
             backgroundColor: Colors.red,
+            labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
             label: "Delete",
-            labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.black : Colors.white),
+            labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
             onTap: null,
           ),
           SpeedDialChild(
             child: Icon(Icons.camera),
             backgroundColor: Colors.blue,
             label: "Image Check",
-            labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.black : Colors.white),
+            labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
+            labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => PictureShow())),
           ),
         ],

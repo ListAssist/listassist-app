@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
+
 import 'package:flutter/services.dart';
 import 'package:fancy_bottom_navigation/fancy_bottom_navigation.dart';
 import 'package:flutter/cupertino.dart';
@@ -13,7 +14,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:listassist/models/User.dart';
 import 'package:listassist/services/http.dart';
 import 'package:listassist/services/math.dart';
-import 'package:listassist/services/snackbar.dart';
 import 'package:listassist/widgets/camera-scanner/rectangle-painter.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:provider/provider.dart';
@@ -27,16 +27,23 @@ class PictureShow extends StatefulWidget {
 
 class _PictureShowState extends State<PictureShow> {
   ui.Image _image;
+
   File _imageFile;
   bool _imageLoading = false;
 
   EditorType _currentEditorType = EditorType.Trainer;
 
-  List<ui.Offset> _points = [ui.Offset(90, 120), ui.Offset(90, 370), ui.Offset(320, 370), ui.Offset(320, 120)];
+  List<ui.Offset> _points = [];
   bool _angleOverflow = false;
   int _currentlyDraggedIndex = -1;
 
   int currentPage;
+
+  @override
+  void dispose() {
+    super.dispose();
+    SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
+  }
 
   Future _pickImage(ImageSource imageSource) async {
     try {
@@ -48,6 +55,7 @@ class _PictureShowState extends State<PictureShow> {
         _imageFile = imageFile;
         _image = finalImg;
         _imageLoading = false;
+        _points = mathService.getStartingPointsForImage(RectanglePainter.outputSubrect);
       });
       SystemChrome.setEnabledSystemUIOverlays([]);
     } catch(e)  {
@@ -66,7 +74,7 @@ class _PictureShowState extends State<PictureShow> {
   void _clearPicture() {
     setState(() {
       _imageFile = null;
-      List<ui.Offset> _points = [ui.Offset(90, 120), ui.Offset(90, 370), ui.Offset(320, 370), ui.Offset(320, 120)];
+      List<ui.Offset> _points = [];
     });
     SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
   }
@@ -89,7 +97,7 @@ class _PictureShowState extends State<PictureShow> {
     progressDialog.style(
         message: "Rechnung wird hochgeladen..",
         borderRadius: 10.0,
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
         progressWidget: SpinKitDoubleBounce(color: Colors.blue,),
         elevation: 10.0,
         insetAnimCurve: Curves.easeInOut,
@@ -120,7 +128,8 @@ class _PictureShowState extends State<PictureShow> {
               child: Icon(Icons.check),
               backgroundColor: Colors.green,
               label: "Complete",
-              labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.black : Colors.white),
+              labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
+              labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
               onTap: () async {
                 await httpService.getDetections(_imageFile, exportPoints());
                   /*
@@ -155,7 +164,8 @@ class _PictureShowState extends State<PictureShow> {
             child: Icon(Icons.delete),
             backgroundColor: Colors.red,
             label: "Delete",
-            labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.black : Colors.white),
+            labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
+            labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
             onTap: () {
                 _clearPicture();
             },
@@ -178,7 +188,7 @@ class _PictureShowState extends State<PictureShow> {
             File cropped = await ImageCropper.cropImage(sourcePath: _imageFile.path);
             if (cropped != null) {
               ui.Image newImage = await _load(cropped);
-              setState(() async {
+              setState(() {
                 _imageFile = cropped;
                 _image = newImage;
               });
@@ -187,7 +197,7 @@ class _PictureShowState extends State<PictureShow> {
         }
       ) : null,
       appBar: _imageFile != null ? null : appBar,
-      backgroundColor: _imageFile != null ? Colors.black : Colors.white,
+      backgroundColor: _imageFile != null ? Colors.black : (Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white),
       body: AnimatedSwitcher(
         duration: Duration(seconds: 1),
         child: _imageLoading ?  SpinKitDoubleBounce(color: Theme.of(context).primaryColor) : Center(
@@ -244,19 +254,7 @@ class _PictureShowState extends State<PictureShow> {
                       },
                       onPanUpdate: (DragUpdateDetails details) {
                         if (_currentlyDraggedIndex != -1) {
-                          Offset correctedOffset = details.localPosition;
-
-                          /// Check if out of bound
-                          if (details.localPosition.dy - RectanglePainter.outputSubrect.top < 0) {
-                            correctedOffset = Offset(correctedOffset.dx, RectanglePainter.outputSubrect.top);
-                          } else if (details.localPosition.dy > RectanglePainter.outputSubrect.bottom) {
-                            correctedOffset = Offset(correctedOffset.dx, RectanglePainter.outputSubrect.bottom);
-                          }
-                          if (details.localPosition.dx < RectanglePainter.outputSubrect.left) {
-                            correctedOffset = Offset(RectanglePainter.outputSubrect.left, correctedOffset.dy);
-                          } else if (details.localPosition.dx > RectanglePainter.outputSubrect.right) {
-                            correctedOffset = Offset(RectanglePainter.outputSubrect.right, correctedOffset.dy);
-                          }
+                          Offset correctedOffset = mathService.correctCollisions(details.localPosition, RectanglePainter.outputSubrect);
 
                           /// Check if angles are correct of each point of polygon using law of cosine
                           List<ui.Offset> futurePoints = List.from(_points);
@@ -275,23 +273,33 @@ class _PictureShowState extends State<PictureShow> {
                             });
                           }
                         } else {
-                          /// Check if one point will be out of bound
-                          List<ui.Offset> futurePoints = _points.map((Offset point) {
-                            Offset correctedOffset = point + details.delta;
-                            /// Y Axis collisions
-                            if (correctedOffset.dy - RectanglePainter.outputSubrect.top < 0) {
-                              correctedOffset = Offset(correctedOffset.dx, RectanglePainter.outputSubrect.top);
-                            } else if (correctedOffset.dy > RectanglePainter.outputSubrect.bottom) {
-                              correctedOffset = Offset(correctedOffset.dx, RectanglePainter.outputSubrect.bottom);
+                          /// Check if one point will be out of bound and if size is still okay
+                          List<ui.Offset> futurePoints = [];
+                          for(int i = 0; i < _points.length; i++) {
+                            Offset corrected = _points[i] + details.delta;
+
+                            Offset collisionCorrected = mathService.correctCollisions(corrected, RectanglePainter.outputSubrect);
+                            if (collisionCorrected.dx == corrected.dx && collisionCorrected.dy == corrected.dy) {
+                              int previousIndex = i - 1;
+                              int afterIndex = i + 1;
+                              if (previousIndex == -1) {
+                                previousIndex = 3;
+                              }
+                              if (afterIndex > 3) {
+                                afterIndex = 0;
+                              }
+
+                              double distanceToPrevious = mathService.pointDistance(corrected, _points[previousIndex]);
+                              double distanceToNext = mathService.pointDistance(corrected, _points[afterIndex]);
+                              if(distanceToNext < 50 || distanceToPrevious < 50) {
+                                futurePoints.add(_points[i]);
+                              } else {
+                                futurePoints.add(corrected);
+                              }
+                            } else {
+                              futurePoints.add(collisionCorrected);
                             }
-                            /// X Axis collisions
-                            if (correctedOffset.dx < RectanglePainter.outputSubrect.left) {
-                              correctedOffset = Offset(RectanglePainter.outputSubrect.left, correctedOffset.dy);
-                            } else if (correctedOffset.dx > RectanglePainter.outputSubrect.right) {
-                              correctedOffset = Offset(RectanglePainter.outputSubrect.right, correctedOffset.dy);
-                            }
-                            return correctedOffset;
-                          }).toList();
+                          }
                           setState(() {
                             _points = futurePoints;
                           });
