@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:listassist/models/User.dart';
 import 'package:listassist/services/db.dart';
 import 'package:listassist/validators/email.dart';
@@ -16,6 +19,8 @@ class _ProfileSettingsView extends State<ProfileSettingsView> {
   String _uid;
   String _displayName;
   String _email;
+
+  File _image;
 
   String _newName;
   String _newEmail;
@@ -65,6 +70,51 @@ class _ProfileSettingsView extends State<ProfileSettingsView> {
     }
   }
 
+  _showProfilePictureModal() async{
+    await mainBottomSheet(context);
+  }
+
+  mainBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+        context: context,
+        builder: (BuildContext context) {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              _createTile(
+                  context, 'Foto aufnehmen', Icons.camera_alt, ImageSource.camera),
+              _createTile(
+                  context, 'Galerie', Icons.photo_library, ImageSource.gallery),
+              //_createTile(context, 'Löschen', Icons.delete, _action3),
+            ],
+          );
+        }
+    );
+  }
+
+  ListTile _createTile(BuildContext context, String name, IconData icon, ImageSource imgSrc) {
+    return ListTile(
+      leading: Icon(icon),
+      title: Text(name),
+      onTap: () {
+        _pickImage(imgSrc);
+      },
+    );
+  }
+
+  Future _pickImage(ImageSource imageSource) async {
+    try {
+      File imageFile = await ImagePicker.pickImage(source: imageSource);
+
+      setState(() {
+        _image = imageFile;
+      });
+
+    } catch (e) {
+      print(e);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -91,7 +141,7 @@ class _ProfileSettingsView extends State<ProfileSettingsView> {
                   Container(
                     margin: const EdgeInsets.only(bottom: 10.0),
                     child: GestureDetector(
-                      onTap: () => modal.mainBottomSheet(context),
+                        onTap: _showProfilePictureModal,
                       child:
                         Hero(
                           tag: "profilePicture",
@@ -106,7 +156,7 @@ class _ProfileSettingsView extends State<ProfileSettingsView> {
                     margin: const EdgeInsets.only(bottom: 50.0),
 
                     child: GestureDetector(
-                        onTap: () => modal.mainBottomSheet(context),
+                        onTap: _showProfilePictureModal,
                         child:
                       Text(
                         "Foto ändern",
@@ -144,6 +194,10 @@ class _ProfileSettingsView extends State<ProfileSettingsView> {
                     validator: EmailValidator(),
                   ),
 
+
+                  _image == null
+                      ? Text("no Image selected")
+                      : Image.file(_image, height: 100,),
 
                 ])
         ),

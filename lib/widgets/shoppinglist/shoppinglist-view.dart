@@ -1,17 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:listassist/main.dart';
-import 'package:listassist/models/User.dart';
 import 'package:listassist/widgets/shoppinglist/shopping-list.dart';
 import 'package:listassist/widgets/shoppinglist/add-shoppinglist.dart';
-import 'package:provider/provider.dart';
 
 class ShoppingListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-
-    User user = Provider.of<User>(context);
-
-
 
     List<Widget> listItem = List();
     listItem.add(ShoppingList(title: "Automatische Einkaufsliste", total: 18, bought: 0,));
