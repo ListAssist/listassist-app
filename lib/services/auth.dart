@@ -8,8 +8,8 @@ import 'package:flutter_twitter_login/flutter_twitter_login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:listassist/models/User.dart';
 import 'package:listassist/services/db.dart';
+import 'package:listassist/services/snackbar.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:listassist/main.dart';
 import 'package:listassist/widgets/authentication/authentication.dart';
 
 enum AuthenticationType {Facebook, Google, Twitter}
@@ -61,7 +61,6 @@ class AuthService {
         "lastLogin": DateTime.now(),
       }, merge: true);
 
-      loading.add(false);
       return user;
     } on PlatformException catch(e) {
       ResultHandler.handlePlatformException(e);
@@ -71,8 +70,6 @@ class AuthService {
 
   /// Create a session for an user with email and password
   Future<FirebaseUser> signInWithMail(String email, String password) async {
-    loading.add(true);
-
     try {
       AuthResult res = await _auth.signInWithEmailAndPassword(email: email, password: password);
       FirebaseUser user = res.user;
@@ -193,7 +190,7 @@ class ResultHandler {
       case FacebookLoginStatus.loggedIn:
         return false;
       case FacebookLoginStatus.cancelledByUser:
-        showInfoSnackbar(Text("Login abgebrochen, bitte versuchen Sie es erneut."));
+        InfoSnackbar.showInfoSnackBar("Login abgebrochen, bitte versuchen Sie es erneut.");
         break;
       case FacebookLoginStatus.error:
         showError(Text("Login fehlgeschlagen"), Text("Login fehlgeschlagen, bitte versuchen Sie es erneut."));
@@ -210,23 +207,13 @@ class ResultHandler {
       case TwitterLoginStatus.loggedIn:
         return false;
       case TwitterLoginStatus.cancelledByUser:
-        showInfoSnackbar(Text("Login abgebrochen, bitte versuchen Sie es erneut."));
+        InfoSnackbar.showInfoSnackBar("Login abgebrochen, bitte versuchen Sie es erneut.");
         break;
       case TwitterLoginStatus.error:
         showError(Text("Login fehlgeschlagen"), Text("Login fehlgeschlagen, bitte versuchen Sie es erneut."));
         break;
     }
     return true;
-  }
-
-  static void showInfoSnackbar(Text message, {Duration duration = const Duration(seconds: 4), bool auth = true}) {
-    var key = auth ? authScaffoldKey : mainScaffoldKey;
-    key.currentState.showSnackBar(
-        SnackBar(
-          duration: duration,
-          content: message
-        )
-    );
   }
 
   static Future showError(Text title, Text message) async {
@@ -256,9 +243,8 @@ class ResultHandler {
         e.code == "ERROR_ACCOUNT_EXISTS_WITH_DIFFERENT_CREDENTIAL" ||
         e.code == "ERROR_EMAIL_ALREADY_IN_USE"
     ) {
-      showInfoSnackbar(
-        Text("Ein Account mit dieser E-Mail Adresse existiert bereits. Haben Sie vielleicht einen anderen Login-typ verwendet?"),
-        duration: Duration(seconds: 6),
+      InfoSnackbar.showInfoSnackBar(
+        "Ein Account mit dieser E-Mail Adresse existiert bereits. Haben Sie vielleicht einen anderen Login-typ verwendet?"
       );
     } else if (
         e.code == "ERROR_USER_NOT_FOUND" ||
@@ -271,7 +257,7 @@ class ResultHandler {
         e.code ==  "ERROR_DISABLED" ||
         e.code == "ERROR_USER_DISABLED"
     ) {
-      showInfoSnackbar(Text("Dein Account ist derzeit deaktiviert."));
+      InfoSnackbar.showInfoSnackBar("Dein Account ist derzeit deaktiviert.");
     } else if (
         e.code == "ERROR_NETWORK_REQUEST_FAILED" ||
         e.code == "ERROR_NETWORK_REQUEST_FAILED" ||
@@ -279,7 +265,7 @@ class ResultHandler {
     ) {
       showError(Text("Login fehlgeschlagen"), Text("Bitte überprüfen Sie Ihre Internetverbindung."));
     } else if (e.code.contains("Error performing")) {
-      showInfoSnackbar(Text("Please verify your email by clicking on the link which was sent to your email you entered."), auth: false);
+      InfoSnackbar.showInfoSnackBar("Please verify your email by clicking on the link which was sent to your email you entered.");
     } else {
         print("UNHANDLED ERROR!!!!!!!!!!!!!!!!!!");
         print(e.toString());
