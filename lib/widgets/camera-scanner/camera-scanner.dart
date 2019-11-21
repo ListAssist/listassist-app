@@ -181,7 +181,12 @@ class CameraScannerState extends State<CameraScanner> {
           });
           /// Open Crop widget if user chooses to use cropping
           if (_currentEditorType == EditorType.Editor) {
-            File cropped = await ImageCropper.cropImage(sourcePath: _imageFile.path);
+            File cropped = await ImageCropper.cropImage(
+                sourcePath: _imageFile.path,
+                androidUiSettings: AndroidUiSettings(toolbarTitle: "Foto bearbeiten"),
+                compressFormat: ImageCompressFormat.png,
+                compressQuality: 100
+            );
             if (cropped != null) {
               ui.Image newImage = await cameraService.loadLowLevelFromFile(cropped);
               setState(() {
@@ -214,7 +219,7 @@ class CameraScannerState extends State<CameraScanner> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(top: 40, bottom: 40),
+                  padding: EdgeInsets.only(top: 40, bottom: 40),
                   child: Text("oder", textScaleFactor: 2,),
                 ),
                 FlatButton(

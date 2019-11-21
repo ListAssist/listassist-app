@@ -46,6 +46,7 @@ class RectanglePainter extends CustomPainter {
     Rect tempOutputSubrect = Alignment.center.inscribe(sizes.destination, outputRect);
     if (RectanglePainter.outputSubrect == null) {
       outputSubrect = tempOutputSubrect;
+      callback(tempOutputSubrect);
     } else if (tempOutputSubrect != RectanglePainter.outputSubrect) {
       callback(tempOutputSubrect);
       outputSubrect = tempOutputSubrect;
