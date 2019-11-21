@@ -16,7 +16,9 @@ class RectanglePainter extends CustomPainter {
   ui.Image image;
   static Rect outputSubrect;
 
-  RectanglePainter({@required this.points, @required this.angleOverflow, @required this.image, @required this.currentType});
+  Function callback;
+
+  RectanglePainter({@required this.points, @required this.angleOverflow, @required this.image, @required this.currentType, @required this.callback});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -41,7 +43,14 @@ class RectanglePainter extends CustomPainter {
     final FittedSizes sizes = applyBoxFit(BoxFit.contain, imageSize, outputRect.size);
     final Rect inputSubrect = Alignment.center.inscribe(sizes.source, Offset.zero & imageSize);
     /// outputSubrect is the real bounding box for the canvas
-    outputSubrect = Alignment.center.inscribe(sizes.destination, outputRect);
+    Rect tempOutputSubrect = Alignment.center.inscribe(sizes.destination, outputRect);
+    if (RectanglePainter.outputSubrect == null) {
+      outputSubrect = tempOutputSubrect;
+    } else if (tempOutputSubrect != RectanglePainter.outputSubrect) {
+      callback(tempOutputSubrect);
+      outputSubrect = tempOutputSubrect;
+    }
+
     canvas.drawImageRect(image, inputSubrect, outputSubrect, paint);
 
     if (currentType == EditorType.Trainer) {
