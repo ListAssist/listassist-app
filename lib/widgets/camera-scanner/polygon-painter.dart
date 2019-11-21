@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'dart:ui' as ui;
@@ -7,9 +5,10 @@ import 'dart:ui' as ui;
 import 'package:listassist/widgets/camera-scanner/camera-scanner.dart';
 
 
-class RectanglePainter extends CustomPainter {
+class PolygonPainter extends CustomPainter {
   List<ui.Offset> points;
-  bool angleOverflow;
+  bool overflow;
+  double radius;
 
   EditorType currentType;
 
@@ -18,25 +17,31 @@ class RectanglePainter extends CustomPainter {
 
   Function callback;
 
-  RectanglePainter({@required this.points, @required this.angleOverflow, @required this.image, @required this.currentType, @required this.callback});
+  PolygonPainter({@required this.points, @required this.overflow, @required this.radius, @required this.image, @required this.currentType, @required this.callback});
 
   @override
   void paint(Canvas canvas, Size size) {
-    Color mainColor = angleOverflow ? Colors.red : Colors.indigo;
+    Color mainColor = overflow ? Color.fromRGBO(52, 152, 219, 0.2) : Color.fromRGBO(231, 76, 60, 0.2);
     /// paint for lines
     final paint = Paint()
+      ..color = overflow ? Color.fromRGBO(231, 76, 60, 1) : Color.fromRGBO(52, 152, 219, 1)
+      ..strokeCap = StrokeCap.square
+      ..style = PaintingStyle.fill
+      ..strokeWidth = 2;
+    /// paint for lines
+    final imagePaint = Paint();
+    /// paint for fill
+    final fillPaint = Paint()
       ..color = mainColor
       ..strokeCap = StrokeCap.square
       ..style = PaintingStyle.fill
       ..strokeWidth = 2;
     /// paint for circle
     final circlePaint = Paint()
-      ..color = mainColor
+      ..color = overflow ? Color.fromRGBO(231, 76, 60, 0.4) : Color.fromRGBO(52, 152, 219, 0.4)
       ..strokeCap = StrokeCap.square
       ..style = PaintingStyle.fill
-      ..blendMode = BlendMode.multiply
       ..strokeWidth = 2;
-    final double radius = 10;
 
     final outputRect = Rect.fromPoints(ui.Offset.zero, ui.Offset(size.width, size.height));
     final Size imageSize = Size(image.width.toDouble(), image.height.toDouble());
@@ -44,15 +49,15 @@ class RectanglePainter extends CustomPainter {
     final Rect inputSubrect = Alignment.center.inscribe(sizes.source, Offset.zero & imageSize);
     /// outputSubrect is the real bounding box for the canvas
     Rect tempOutputSubrect = Alignment.center.inscribe(sizes.destination, outputRect);
-    if (RectanglePainter.outputSubrect == null) {
+    if (PolygonPainter.outputSubrect == null) {
       outputSubrect = tempOutputSubrect;
       callback(tempOutputSubrect);
-    } else if (tempOutputSubrect != RectanglePainter.outputSubrect) {
+    } else if (tempOutputSubrect != PolygonPainter.outputSubrect) {
       callback(tempOutputSubrect);
       outputSubrect = tempOutputSubrect;
     }
 
-    canvas.drawImageRect(image, inputSubrect, outputSubrect, paint);
+    canvas.drawImageRect(image, inputSubrect, outputSubrect, imagePaint);
 
     if (currentType == EditorType.Trainer) {
       for (int i = 0; i < points.length; i++) {
@@ -63,17 +68,21 @@ class RectanglePainter extends CustomPainter {
         }
       }
 
+      int numberCounter = 1;
       for (int i = 0; i < points.length; i++) {
         canvas.drawCircle(points[i], radius, circlePaint);
-        TextSpan span = TextSpan(style: TextStyle(color: Colors.white), text: "${i+1}");
-        TextPainter tp = TextPainter(text: span, textAlign: TextAlign.left, textDirection: TextDirection.ltr);
-        tp.layout();
-        tp.paint(canvas, Offset(points[i].dx - 3.5, points[i].dy - 8));
+        if (i % 2 == 0) {
+          TextSpan span = TextSpan(style: TextStyle(color: Colors.white), text: numberCounter.toString());
+          TextPainter tp = TextPainter(text: span, textAlign: TextAlign.left, textDirection: TextDirection.ltr);
+          tp.layout();
+          tp.paint(canvas, Offset(points[i].dx - 3.5, points[i].dy - 8));
+          numberCounter++;
+        }
       }
     }
   }
 
   @override
-  bool shouldRepaint(RectanglePainter oldPainter) => oldPainter.points != points || angleOverflow ;
+  bool shouldRepaint(PolygonPainter oldPainter) => oldPainter.points != points || overflow ;
 
 }
