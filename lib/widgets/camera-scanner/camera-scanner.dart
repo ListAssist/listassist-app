@@ -12,6 +12,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:listassist/models/User.dart';
+import 'package:listassist/services/camera.dart';
 import 'package:listassist/services/http.dart';
 import 'package:listassist/services/math.dart';
 import 'package:listassist/widgets/camera-scanner/rectangle-painter.dart';
@@ -20,12 +21,12 @@ import 'package:provider/provider.dart';
 
 enum EditorType {Editor, Trainer, Recognizer}
 
-class PictureShow extends StatefulWidget {
+class CameraScanner extends StatefulWidget {
   @override
-  _PictureShowState createState() => _PictureShowState();
+  CameraScannerState createState() => CameraScannerState();
 }
 
-class _PictureShowState extends State<PictureShow> {
+class CameraScannerState extends State<CameraScanner> {
   ui.Image _image;
 
   File _imageFile;
@@ -45,15 +46,17 @@ class _PictureShowState extends State<PictureShow> {
     SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
   }
 
+  void setPoints(Rect boundingBox) {
+    _points = mathService.getStartingPointsForImage(boundingBox);
+  }
+
   Future _pickImage(ImageSource imageSource) async {
     try {
       setState(() { _imageLoading = true; });
-
-      File imageFile = await ImagePicker.pickImage(source: imageSource);
-      ui.Image finalImg = await _load(imageFile);
+      Map<String, dynamic> imageFormats = await cameraService.pickImage(imageSource);
       setState(() {
-        _imageFile = imageFile;
-        _image = finalImg;
+        _imageFile = imageFormats["imageFile"];
+        _image = imageFormats["lowLevelImage"];
         _imageLoading = false;
         _points = mathService.getStartingPointsForImage(RectanglePainter.outputSubrect);
       });
@@ -62,13 +65,6 @@ class _PictureShowState extends State<PictureShow> {
       print(e.toString());
       setState(() { _imageLoading = false; });
     }
-  }
-
-  Future<ui.Image> _load(File file) async {
-    Uint8List bytes = file.readAsBytesSync();
-    ui.Codec codec = await ui.instantiateImageCodec(bytes);
-    ui.FrameInfo fi = await codec.getNextFrame();
-    return fi.image;
   }
 
   void _clearPicture() {
@@ -187,7 +183,7 @@ class _PictureShowState extends State<PictureShow> {
           if (_currentEditorType == EditorType.Editor) {
             File cropped = await ImageCropper.cropImage(sourcePath: _imageFile.path);
             if (cropped != null) {
-              ui.Image newImage = await _load(cropped);
+              ui.Image newImage = await cameraService.loadLowLevelFromFile(cropped);
               setState(() {
                 _imageFile = cropped;
                 _image = newImage;
@@ -312,7 +308,7 @@ class _PictureShowState extends State<PictureShow> {
                       },
                       child: CustomPaint(
                         size: Size.fromHeight(MediaQuery.of(context).size.height - appBar.preferredSize.height - 24),
-                        painter: RectanglePainter(points: _points, angleOverflow: _angleOverflow, image: _image, currentType: _currentEditorType),
+                        painter: RectanglePainter(points: _points, angleOverflow: _angleOverflow, image: _image, currentType: _currentEditorType, callback: setPoints),
                       )
                   ),
               ]
