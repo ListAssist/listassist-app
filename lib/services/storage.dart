@@ -13,6 +13,7 @@ class StorageService {
         .now()}.png';
     return _storage.ref().child(filePath).putFile(imageFile);
   }
+
 }
 
 final StorageService storageService = StorageService();

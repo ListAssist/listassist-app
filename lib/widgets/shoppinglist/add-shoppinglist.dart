@@ -233,8 +233,6 @@ class _AddShoppinglist extends State<AddShoppinglist> {
     "Dörrfleisch vom Rind"
   });
 
-  List<String> _test = <String>["kek", "kekomat"];
-
 
   @override
   Widget build(BuildContext context) {

@@ -157,6 +157,16 @@ class AuthService {
     }, merge: true);
   }
 
+  Future setProfilePicture(User user, String newPhotoURL) async{
+    /** Get users document **/
+    DocumentReference userRef = _db.collection("users").document(user.uid);
+
+    /** Update user profile picture with new **/
+    return await userRef.setData({
+      "photoURL": newPhotoURL,
+    }, merge: true);
+  }
+
   /// Logout client and kill current session
   void signOut() async {
     await _auth.signOut();

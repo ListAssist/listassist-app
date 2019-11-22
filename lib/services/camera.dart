@@ -15,7 +15,7 @@ class CameraService {
     };
   }
 
-  Future<File> pickImageFile(ImageSource imageSource, bool type) async {
+  Future<File> pickImageFile(ImageSource imageSource) async {
     File imageFile = await ImagePicker.pickImage(source: imageSource);
     return imageFile;
   }
