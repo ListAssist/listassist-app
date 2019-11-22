@@ -107,7 +107,9 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
             label: "Image Check",
             labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
             labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => CameraScanner())),
+            onTap: () => {
+
+            },
           ),
         ],
       ),

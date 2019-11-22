@@ -8,7 +8,7 @@ import 'package:flutter_twitter_login/flutter_twitter_login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:listassist/models/User.dart';
 import 'package:listassist/services/db.dart';
-import 'package:listassist/services/snackbar.dart';
+import 'package:listassist/services/info-overlay.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:listassist/widgets/authentication/authentication.dart';
 
@@ -190,7 +190,7 @@ class ResultHandler {
       case FacebookLoginStatus.loggedIn:
         return false;
       case FacebookLoginStatus.cancelledByUser:
-        InfoSnackbar.showInfoSnackBar("Login abgebrochen, bitte versuchen Sie es erneut.");
+        InfoOverlay.showInfoSnackBar("Login abgebrochen, bitte versuchen Sie es erneut.");
         break;
       case FacebookLoginStatus.error:
         showError(Text("Login fehlgeschlagen"), Text("Login fehlgeschlagen, bitte versuchen Sie es erneut."));
@@ -207,7 +207,7 @@ class ResultHandler {
       case TwitterLoginStatus.loggedIn:
         return false;
       case TwitterLoginStatus.cancelledByUser:
-        InfoSnackbar.showInfoSnackBar("Login abgebrochen, bitte versuchen Sie es erneut.");
+        InfoOverlay.showInfoSnackBar("Login abgebrochen, bitte versuchen Sie es erneut.");
         break;
       case TwitterLoginStatus.error:
         showError(Text("Login fehlgeschlagen"), Text("Login fehlgeschlagen, bitte versuchen Sie es erneut."));
@@ -243,7 +243,7 @@ class ResultHandler {
         e.code == "ERROR_ACCOUNT_EXISTS_WITH_DIFFERENT_CREDENTIAL" ||
         e.code == "ERROR_EMAIL_ALREADY_IN_USE"
     ) {
-      InfoSnackbar.showInfoSnackBar(
+      InfoOverlay.showInfoSnackBar(
         "Ein Account mit dieser E-Mail Adresse existiert bereits. Haben Sie vielleicht einen anderen Login-typ verwendet?"
       );
     } else if (
@@ -257,7 +257,7 @@ class ResultHandler {
         e.code ==  "ERROR_DISABLED" ||
         e.code == "ERROR_USER_DISABLED"
     ) {
-      InfoSnackbar.showInfoSnackBar("Dein Account ist derzeit deaktiviert.");
+      InfoOverlay.showInfoSnackBar("Dein Account ist derzeit deaktiviert.");
     } else if (
         e.code == "ERROR_NETWORK_REQUEST_FAILED" ||
         e.code == "ERROR_NETWORK_REQUEST_FAILED" ||
@@ -265,7 +265,7 @@ class ResultHandler {
     ) {
       showError(Text("Login fehlgeschlagen"), Text("Bitte überprüfen Sie Ihre Internetverbindung."));
     } else if (e.code.contains("Error performing")) {
-      InfoSnackbar.showInfoSnackBar("Please verify your email by clicking on the link which was sent to your email you entered.");
+      InfoOverlay.showInfoSnackBar("Please verify your email by clicking on the link which was sent to your email you entered.");
     } else {
         print("UNHANDLED ERROR!!!!!!!!!!!!!!!!!!");
         print(e.toString());
