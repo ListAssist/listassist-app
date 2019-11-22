@@ -6,6 +6,7 @@ import 'package:listassist/widgets/shoppinglist/add-shoppinglist.dart';
 class ShoppingListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+
     List<Widget> listItem = List();
     listItem.add(ShoppingList(title: "Automatische Einkaufsliste", total: 18, bought: 0,));
     listItem.add(ShoppingList(title: "Grillen am Wochenende", total: 4, bought: 3,));

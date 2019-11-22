@@ -1,42 +1,46 @@
-import 'package:flutter/material.dart';
+import 'dart:io';
 
-class SettingsModal{
-  mainBottomSheet(BuildContext context){
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+
+class SettingsModal {
+  mainBottomSheet(BuildContext context) {
     showModalBottomSheet(
         context: context,
-        builder: (BuildContext context){
+        builder: (BuildContext context) {
           return Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              _createTile(context, 'Foto machen', Icons.camera_alt, _action1),
-              _createTile(context, 'Galerie', Icons.photo_library, _action2),
-              _createTile(context, 'Löschen', Icons.delete, _action3),
+              _createTile(
+                  context, 'Foto machen', Icons.camera_alt, ImageSource.camera),
+              _createTile(
+                  context, 'Galerie', Icons.photo_library, ImageSource.gallery),
+              //_createTile(context, 'Löschen', Icons.delete, _action3),
             ],
           );
         }
     );
   }
 
-  ListTile _createTile(BuildContext context, String name, IconData icon, Function action){
+  ListTile _createTile(BuildContext context, String name, IconData icon,
+      ImageSource imgSrc) {
     return ListTile(
       leading: Icon(icon),
       title: Text(name),
-      onTap: (){
-        Navigator.pop(context);
-        action();
+      onTap: () {
+        _pickImage(context, imgSrc);
       },
     );
   }
 
-  _action1(){
-    print('Foto machen');
-  }
 
-  _action2(){
-    print('Galerie');
-  }
+  _pickImage(BuildContext context, ImageSource imageSource) async {
+    try {
+      File imageFile = await ImagePicker.pickImage(source: imageSource);
 
-  _action3(){
-    print('Löschen');
+      Navigator.pop(context, imageFile);
+    } catch (e) {
+      print(e);
+    }
   }
 }
