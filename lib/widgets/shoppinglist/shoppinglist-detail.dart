@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:listassist/services/camera.dart';
+import 'package:listassist/services/info-overlay.dart';
 import 'package:listassist/widgets/camera-scanner/camera-scanner.dart';
 
 class Item {
@@ -107,13 +110,35 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
             label: "Image Check",
             labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
             labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
-            onTap: () => {
-
+            onTap: () {
+              InfoOverlay.mainBottomSheet(context, [
+                ListTile(
+                  leading: Icon(Icons.camera_alt),
+                  title: Text("Kamera"),
+                  onTap: () => _pickImage(context, ImageSource.camera),
+                ),
+                ListTile(
+                  leading: Icon(Icons.photo),
+                  title: Text("Galerie"),
+                  onTap: () => _pickImage(context, ImageSource.gallery),
+                )
+              ]);
             },
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _pickImage(BuildContext context, ImageSource imageSource) async {
+    try {
+      Map<String, dynamic> imageFormats = await cameraService.pickImage(imageSource);
+      var _imageFile = imageFormats["imageFile"];
+      var _image = imageFormats["lowLevelImage"];
+      Navigator.push(context, MaterialPageRoute(builder: (context) => CameraScanner(image: _image, imageFile: _imageFile,)));
+    } catch(e)  {
+      print(e.toString());
+    }
   }
 
   Future<void> _showDialog() async {

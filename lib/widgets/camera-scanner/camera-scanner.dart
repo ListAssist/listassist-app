@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:ui' as ui;
 
+import 'package:after_init/after_init.dart';
 import 'package:flutter/services.dart';
 import 'package:fancy_bottom_navigation/fancy_bottom_navigation.dart';
 import 'package:flutter/cupertino.dart';
@@ -9,7 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:image_cropper/image_cropper.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:listassist/models/User.dart';
 import 'package:listassist/services/camera.dart';
 import 'package:listassist/services/http.dart';
@@ -21,14 +21,19 @@ import 'package:provider/provider.dart';
 enum EditorType {Editor, Trainer, Recognizer}
 
 class CameraScanner extends StatefulWidget {
+  final ui.Image image;
+  final File imageFile;
+
+  const CameraScanner({Key key, @required this.image, @required this.imageFile}) : super(key: key);
+
   @override
   CameraScannerState createState() => CameraScannerState();
 }
 
-class CameraScannerState extends State<CameraScanner> {
+class CameraScannerState extends State<CameraScanner> with AfterInitMixin<CameraScanner> {
   ui.Image _image;
   File _imageFile;
-  bool _imageLoading = false;
+  final GlobalKey<FancyBottomNavigationState> bottomNavKey = GlobalKey<FancyBottomNavigationState>();
 
   EditorType _currentEditorType = EditorType.Trainer;
   final double radius = 12;
@@ -37,44 +42,50 @@ class CameraScannerState extends State<CameraScanner> {
   bool _overflow = false;
   int _currentlyDraggedIndex = -1;
 
+  Rect boundingBox;
+  Rect inputRect;
+
+
   @override
   void dispose() {
     super.dispose();
     SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
   }
 
-  void setPoints(Rect boundingBox) {
-    _points = calcService.getStartingPointsForImage(boundingBox);
+  @override
+  void initState() {
+    super.initState();
+    _image = widget.image;
+    _imageFile = widget.imageFile;
+    SystemChrome.setEnabledSystemUIOverlays([]);
   }
 
-  Future _pickImage(ImageSource imageSource) async {
-    try {
-      setState(() { _imageLoading = true; });
-      Map<String, dynamic> imageFormats = await cameraService.pickImage(imageSource);
-      setState(() {
-        _imageFile = imageFormats["imageFile"];
-        _image = imageFormats["lowLevelImage"];
-        _imageLoading = false;
-        _points = calcService.getStartingPointsForImage(PolygonPainter.outputSubrect);
-      });
-      SystemChrome.setEnabledSystemUIOverlays([]);
-    } catch(e)  {
-      print(e.toString());
-      setState(() { _imageLoading = false; });
-    }
+  @override
+  void didInitState() {
+    getInputRectAndBoundingRect();
+    setState(() {
+      _points = calcService.getStartingPointsForImage(boundingBox);
+    });
+  }
+
+  void getInputRectAndBoundingRect() {
+    final outputRect = Rect.fromPoints(ui.Offset.zero, ui.Offset(MediaQuery.of(context).size.width, MediaQuery.of(context).size.height - 12));
+    final Size imageSize = Size(_image.width.toDouble(), _image.height.toDouble());
+    final FittedSizes sizes = applyBoxFit(BoxFit.contain, imageSize, outputRect.size);
+    setState(() {
+      inputRect = Alignment.center.inscribe(sizes.source, Offset.zero & imageSize);
+      boundingBox = Alignment.center.inscribe(sizes.destination, outputRect);
+    });
   }
 
   void _clearPicture() {
-    setState(() {
-      _imageFile = null;
-      _points = [];
-    });
-    SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
+    Navigator.pop(context);
   }
 
   @override
   Widget build(BuildContext context) {
     final User user = Provider.of<User>(context);
+
     ProgressDialog progressDialog = ProgressDialog(context,type: ProgressDialogType.Download, isDismissible: true);
     progressDialog.style(
         message: "Rechnung wird hochgeladen..",
@@ -91,13 +102,8 @@ class CameraScannerState extends State<CameraScanner> {
             color: Colors.black, fontSize: 16.0, fontWeight: FontWeight.w600)
     );
 
-    final AppBar appBar = AppBar(
-      backgroundColor: Theme.of(context).colorScheme.primary,
-      title: Text("Rechungserkennung"),
-    );
-
     return Scaffold(
-      floatingActionButton: _imageFile != null ? SpeedDial(
+      floatingActionButton: SpeedDial(
         animatedIcon: AnimatedIcons.menu_close,
         animatedIconTheme: IconThemeData(size: 22.0),
         closeManually: false,
@@ -113,7 +119,7 @@ class CameraScannerState extends State<CameraScanner> {
               labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
               labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
               onTap: () async {
-                await httpService.getDetections(_imageFile, calcService.exportPoints([_points[0], _points[2], _points[4], _points[6]], _image, PolygonPainter.outputSubrect));
+                await httpService.getDetections(_imageFile, calcService.exportPoints([_points[0], _points[2], _points[4], _points[6]], _image, boundingBox));
                   /*
                 progressDialog.show();
                 final task = storageService.upload(_imageFile, user);
@@ -153,8 +159,9 @@ class CameraScannerState extends State<CameraScanner> {
             },
           )
         ],
-      ) : null,
-      bottomNavigationBar: _imageFile != null ? FancyBottomNavigation(
+      ),
+      bottomNavigationBar: FancyBottomNavigation(
+        key: bottomNavKey,
         initialSelection: 1,
         tabs: [
           TabData(iconData: Icons.crop, title: "Editor"),
@@ -178,138 +185,98 @@ class CameraScannerState extends State<CameraScanner> {
               setState(() {
                 _imageFile = cropped;
                 _image = newImage;
+                getInputRectAndBoundingRect();
+                _points = calcService.getStartingPointsForImage(boundingBox);
               });
             }
           }
         }
-      ) : null,
-      appBar: _imageFile != null ? null : appBar,
+      ),
       backgroundColor: _imageFile != null ? Colors.black : (Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white),
-      body: AnimatedSwitcher(
-        duration: Duration(seconds: 1),
-        child: _imageLoading ?  SpinKitDoubleBounce(color: Theme.of(context).primaryColor) : Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              if (_imageFile == null) ...[
-                FlatButton(
-                  onPressed: () => _pickImage(ImageSource.camera),
-                  color: Colors.blueAccent,
-                  padding: EdgeInsets.all(40.0),
-                  child: Column(
-                    children: <Widget>[
-                      Icon(Icons.camera_alt, color: Colors.white,),
-                      Text("Aus der Kamera", style: TextStyle(color: Colors.white),)
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.only(top: 40, bottom: 40),
-                  child: Text("oder", textScaleFactor: 2,),
-                ),
-                FlatButton(
-                  onPressed: () => _pickImage(ImageSource.gallery),
-                  color: Colors.brown,
-                  padding: EdgeInsets.all(40.0),
-                  child: Column(
-                    children: <Widget>[
-                      Icon(Icons.photo, color: Colors.white,),
-                      Text("Aus der Galerie", style: TextStyle(color: Colors.white),)
-                    ],
-                  ),
-                ),
-              ],
-              if (_imageFile != null) ...[
-                  GestureDetector(
-                      onPanStart: (DragStartDetails details) {
-                        // get distance from points to check if is in circle
-                        int indexMatch = -1;
-                        double lastDistance = -1;
-                        for (int i = 0; i < _points.length; i++) {
-                          double distance = sqrt(pow(details.localPosition.dx - _points[i].dx, 2) + pow(details.localPosition.dy - _points[i].dy, 2));
-                          if (distance <= radius) {
-                            if (distance < lastDistance || lastDistance == -1) {
-                              indexMatch = i;
-                              lastDistance = distance;
-                            }
-                          }
-                        }
-                        if (indexMatch != -1) {
-                          _currentlyDraggedIndex = indexMatch;
-                        }
-                      },
-                      onPanUpdate: (DragUpdateDetails details) {
-                        if (_currentlyDraggedIndex != -1) {
-                          if (_currentlyDraggedIndex % 2 == 0) {
-                            ui.Offset correctedOffset = calcService.correctCollisions(details.localPosition, PolygonPainter.outputSubrect);
-                            /// Check if angles are correct of each point of polygon using law of cosine
-                            List<ui.Offset> futurePoints = List.from(_points);
-                            futurePoints[_currentlyDraggedIndex] = correctedOffset;
-                            futurePoints = calcService.recalculateMiddlePoints(futurePoints);
-                            if (calcService.checkAngles(futurePoints)) {
-                              setState(() {
-                                _points = futurePoints;
-                                _overflow = false;
-                              });
-                            } else {
-                              setState(() {
-                                _overflow = true;
-                              });
-                            }
-                          } else {
-                            List<ui.Offset> newPoints = List.from(_points);
-                            /// case 1 and 5 are cases where the polygon gets pulled in the x direction
-                            /// case 3 and 7 are cases where the polygon gets pulled in the y direction
-                            switch (_currentlyDraggedIndex) {
-                              case 1:
-                                calcService.correctedPolygonCoordinates(newPoints, PolygonPainter.outputSubrect, details.delta, dy: false, fromIndex: 0, toIndex: 3);
-                                break;
-                              case 5:
-                                calcService.correctedPolygonCoordinates(newPoints, PolygonPainter.outputSubrect, details.delta, dy: false, fromIndex: 4, toIndex: 6);
-                                break;
-                              case 3:
-                                calcService.correctedPolygonCoordinates(newPoints, PolygonPainter.outputSubrect, details.delta, dx: false, fromIndex: 2, toIndex: 4);
-                                break;
-                              case 7:
-                                calcService.correctedPolygonCoordinates(newPoints, PolygonPainter.outputSubrect, details.delta, dx: false, fromIndex: 6, toIndex: 8);
-                                break;
-                            }
-                            /// check if angle is okay
-                            if (!calcService.checkAngles(newPoints) || !calcService.checkDistancesPoints(newPoints)) {
-                              setState(() {
-                                _overflow = true;
-                              });
-                            } else {
-                              setState(() {
-                                _points = newPoints;
-                                _overflow = false;
-                              });
-                            }
-                          }
-                        } else {
-                          /// Check if one point will be out of bound and if size is still okay
-                          List<ui.Offset> newPoints = List.from(_points);
-                          calcService.correctedPolygonCoordinates(newPoints, PolygonPainter.outputSubrect, details.delta);
-                          setState(() {
-                            _points = newPoints;
-                          });
-                        }
-                      },
-                      onPanEnd: (_) {
-                        setState(() {
-                          _currentlyDraggedIndex = -1;
-                        });
-                      },
-                      child: CustomPaint(
-                        size: Size.fromHeight(MediaQuery.of(context).size.height - appBar.preferredSize.height - 24),
-                        painter: PolygonPainter(points: _points, overflow: _overflow, radius: radius, image: _image, currentType: _currentEditorType, callback: setPoints),
-                      )
-                  ),
-              ]
-            ],
-          ),
-        ),
+      body: GestureDetector(
+          onPanStart: (DragStartDetails details) {
+            // get distance from points to check if is in circle
+            int indexMatch = -1;
+            double lastDistance = -1;
+            for (int i = 0; i < _points.length; i++) {
+              double distance = sqrt(pow(details.localPosition.dx - _points[i].dx, 2) + pow(details.localPosition.dy - _points[i].dy, 2));
+              if (distance <= radius) {
+                if (distance < lastDistance || lastDistance == -1) {
+                  indexMatch = i;
+                  lastDistance = distance;
+                }
+              }
+            }
+            if (indexMatch != -1) {
+              _currentlyDraggedIndex = indexMatch;
+            }
+          },
+          onPanUpdate: (DragUpdateDetails details) {
+            if (_currentlyDraggedIndex != -1) {
+              if (_currentlyDraggedIndex % 2 == 0) {
+                ui.Offset correctedOffset = calcService.correctCollisions(details.localPosition, boundingBox);
+                /// Check if angles are correct of each point of polygon using law of cosine
+                List<ui.Offset> futurePoints = List.from(_points);
+                futurePoints[_currentlyDraggedIndex] = correctedOffset;
+                futurePoints = calcService.recalculateMiddlePoints(futurePoints);
+                if (calcService.checkAngles(futurePoints)) {
+                  setState(() {
+                    _points = futurePoints;
+                    _overflow = false;
+                  });
+                } else {
+                  setState(() {
+                    _overflow = true;
+                  });
+                }
+              } else {
+                List<ui.Offset> newPoints = List.from(_points);
+                /// case 1 and 5 are cases where the polygon gets pulled in the x direction
+                /// case 3 and 7 are cases where the polygon gets pulled in the y direction
+                switch (_currentlyDraggedIndex) {
+                  case 1:
+                    calcService.correctedPolygonCoordinates(newPoints, boundingBox, details.delta, dy: false, fromIndex: 0, toIndex: 3);
+                    break;
+                  case 5:
+                    calcService.correctedPolygonCoordinates(newPoints, boundingBox, details.delta, dy: false, fromIndex: 4, toIndex: 6);
+                    break;
+                  case 3:
+                    calcService.correctedPolygonCoordinates(newPoints, boundingBox, details.delta, dx: false, fromIndex: 2, toIndex: 4);
+                    break;
+                  case 7:
+                    calcService.correctedPolygonCoordinates(newPoints, boundingBox, details.delta, dx: false, fromIndex: 6, toIndex: 8);
+                    break;
+                }
+                /// check if angle is okay
+                if (!calcService.checkAngles(newPoints) || !calcService.checkDistancesPoints(newPoints)) {
+                  setState(() {
+                    _overflow = true;
+                  });
+                } else {
+                  setState(() {
+                    _points = newPoints;
+                    _overflow = false;
+                  });
+                }
+              }
+            } else {
+              /// Check if one point will be out of bound and if size is still okay
+              List<ui.Offset> newPoints = List.from(_points);
+              calcService.correctedPolygonCoordinates(newPoints, boundingBox, details.delta);
+              setState(() {
+                _points = newPoints;
+              });
+            }
+          },
+          onPanEnd: (_) {
+            setState(() {
+              _currentlyDraggedIndex = -1;
+            });
+          },
+          child: CustomPaint(
+            size: Size(MediaQuery.of(context).size.width, MediaQuery.of(context).size.height - 60),
+            painter: PolygonPainter(points: _points, overflow: _overflow, radius: radius, image: _image, currentType: _currentEditorType, boundingBox: boundingBox, inputRect: inputRect),
+          )
       ),
     );
   }

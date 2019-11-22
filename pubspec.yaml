@@ -63,6 +63,7 @@ dependencies:
   flutter_spinkit:
   fancy_bottom_navigation:
   image_cropper:
+  after_init:
 
 dev_dependencies:
   flutter_test:
