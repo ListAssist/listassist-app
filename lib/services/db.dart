@@ -54,8 +54,18 @@ class DatabaseService {
         .collection("users")
         .document(uid)
         .collection("lists")
+        .where("type", isEqualTo: "pending")
         .snapshots()
         .map((snap) => snap.documents.map((d) => ShoppingList.fromFirestore(d)).toList());
+  }
+
+  Future completeList(String uid, String listid) {
+    return _db
+        .collection("users")
+        .document(uid)
+        .collection("lists")
+        .document(listid)
+        .setData({"type": "completed"}, merge: true).then((finished) => finished);
   }
 
 }

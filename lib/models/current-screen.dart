@@ -25,7 +25,6 @@ class FirstView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     User user = Provider.of<User>(context);
-    print(user.uid);
     return StreamProvider.value(
         value: databaseService.streamLists(user.uid),
         child: CustomNavigator(

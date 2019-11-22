@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:listassist/models/ShoppingList.dart';
+import 'package:listassist/models/User.dart';
+import 'package:listassist/services/db.dart';
+import 'package:listassist/services/snackbar.dart';
 import 'package:listassist/widgets/camera-scanner/picture-show.dart';
 import 'package:provider/provider.dart';
 
@@ -15,11 +18,13 @@ class ShoppingListDetail extends StatefulWidget {
 
 class _ShoppingListDetail extends State<ShoppingListDetail> {
 
-  String name = "";
+  ShoppingList list;
+  String uid = "";
 
   @override
   Widget build(BuildContext context) {
-    ShoppingList list = Provider.of<List<ShoppingList>>(context)[widget.index];
+    list = Provider.of<List<ShoppingList>>(context)[widget.index];
+    uid = Provider.of<User>(context).uid;
 
     void itemChange(bool val, int index){
       setState(() {
@@ -27,7 +32,6 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
       });
     }
 
-    name = list.name;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.primary,
@@ -74,7 +78,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
               backgroundColor: Colors.green,
               label: "Complete",
               labelStyle: TextStyle(fontSize: 18.0),
-              onTap: _showDialog
+              onTap: _showDialog,
           ),
           SpeedDialChild(
             child: Icon(Icons.delete),
@@ -112,7 +116,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
                     ),
                     children: <TextSpan> [
                       TextSpan(text: "Sind Sie sicher, dass Sie die Einkaufsliste "),
-                      TextSpan(text: "$name", style: TextStyle(fontWeight: FontWeight.bold)),
+                      TextSpan(text: "${list.name}", style: TextStyle(fontWeight: FontWeight.bold)),
                       TextSpan(text: " abschließen möchten?")
                     ]
                 )
@@ -131,7 +135,16 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
             FlatButton(
               child: Text("Abschließen"),
               onPressed: () {
-                Navigator.of(context).pop();
+                String name = list.name;
+                databaseService.completeList(uid, list.id)
+                .catchError((_) => {
+                  InfoSnackbar.showErrorSnackBar("Fehler beim abschließen der Einkaufsliste")
+                })
+                .then((_) {
+                  InfoSnackbar.showInfoSnackBar("Einkaufsliste $name abgeschlossen");
+                  Navigator.of(context).pop();
+                  Navigator.of(this.context).pop();
+                });
               },
             ),
           ],
