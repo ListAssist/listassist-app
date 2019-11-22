@@ -1,16 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:listassist/main.dart';
+import 'package:listassist/models/ShoppingList.dart' as model;
+import 'package:listassist/models/User.dart';
+import 'package:listassist/services/db.dart';
+import 'package:listassist/widgets/authentication/authentication.dart';
 import 'package:listassist/widgets/shoppinglist/shopping-list.dart';
 import 'package:listassist/widgets/shoppinglist/add-shoppinglist.dart';
+import 'package:provider/provider.dart';
 
 class ShoppingListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    List<Widget> listItem = List();
-    listItem.add(ShoppingList(title: "Automatische Einkaufsliste", total: 18, bought: 0,));
-    listItem.add(ShoppingList(title: "Grillen am Wochenende", total: 4, bought: 3,));
-    listItem.add(ShoppingList());
+//    List<Widget> listItem = List();
+//    listItem.add(ShoppingList(title: "Automatische Einkaufsliste", total: 18, bought: 0,));
+//    listItem.add(ShoppingList(title: "Grillen am Wochenende", total: 4, bought: 3,));
+//    listItem.add(ShoppingList());
 
+    User user = Provider.of<User>(context);
     return DefaultTabController(
       length: 2,
       child: Scaffold(
@@ -38,19 +45,29 @@ class ShoppingListView extends StatelessWidget {
         ),
         body: TabBarView(
           children: [
-            ListView.separated(
-              separatorBuilder: (ctx, i) => Divider(
-                indent: 10,
-                endIndent: 10,
-                color: Colors.grey,
-              ),
-              itemCount: listItem.length,
-              itemBuilder: (ctx, index) => listItem[index]
-            ),
+            ShoppingLists(),
             Text("VERLAUF DER EINKAUFSLISTEN"),
           ],
         ),
       )
     );
+  }
+}
+
+class ShoppingLists extends StatelessWidget {
+
+
+  @override
+  Widget build(BuildContext context) {
+    List<model.ShoppingList> lists = Provider.of<List<model.ShoppingList>>(context);
+    return lists != null ? ListView.separated(
+        separatorBuilder: (ctx, i) => Divider(
+          indent: 10,
+          endIndent: 10,
+          color: Colors.grey,
+        ),
+        itemCount: lists.length,
+        itemBuilder: (ctx, index) => ShoppingList(index: index)
+    ) : SpinKitDoubleBounce(color: Colors.blueAccent,);
   }
 }

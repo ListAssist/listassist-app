@@ -18,13 +18,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ScopedModel<ScreenModel>(
-      model: ScreenModel(),
-      child: MultiProvider(
-        providers: [
-          StreamProvider<User>.value(value: authService.userDoc,),
-          StreamProvider<bool>.value(value: authService.loading.asBroadcastStream())
-        ],
+    return MultiProvider(
+      providers: [
+        StreamProvider<User>.value(value: authService.userDoc,),
+        StreamProvider<bool>.value(value: authService.loading.asBroadcastStream())
+      ],
+      child: ScopedModel<ScreenModel>(
+        model: ScreenModel(),
         child: MaterialApp(
           title: "ListAssist",
           theme: ThemeData(
@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
           ),
           home: MainApp()
         ),
-      )
+      ),
     );
   }
 }
