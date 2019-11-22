@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 /// Reserved for later use..
-class InfoSnackbar {
+class InfoOverlay {
 
   static void showInfoSnackBar(String message) {
     Fluttertoast.showToast(

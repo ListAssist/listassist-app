@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'dart:math';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/services.dart';
@@ -14,8 +13,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:listassist/models/User.dart';
 import 'package:listassist/services/camera.dart';
 import 'package:listassist/services/http.dart';
-import 'package:listassist/services/math.dart';
-import 'package:listassist/widgets/camera-scanner/rectangle-painter.dart';
+import 'package:listassist/services/calc.dart';
+import 'package:listassist/widgets/camera-scanner/polygon-painter.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:provider/provider.dart';
 
@@ -28,17 +27,15 @@ class CameraScanner extends StatefulWidget {
 
 class CameraScannerState extends State<CameraScanner> {
   ui.Image _image;
-
   File _imageFile;
   bool _imageLoading = false;
 
   EditorType _currentEditorType = EditorType.Trainer;
+  final double radius = 12;
 
   List<ui.Offset> _points = [];
-  bool _angleOverflow = false;
+  bool _overflow = false;
   int _currentlyDraggedIndex = -1;
-
-  int currentPage;
 
   @override
   void dispose() {
@@ -47,7 +44,7 @@ class CameraScannerState extends State<CameraScanner> {
   }
 
   void setPoints(Rect boundingBox) {
-    _points = mathService.getStartingPointsForImage(boundingBox);
+    _points = calcService.getStartingPointsForImage(boundingBox);
   }
 
   Future _pickImage(ImageSource imageSource) async {
@@ -58,7 +55,7 @@ class CameraScannerState extends State<CameraScanner> {
         _imageFile = imageFormats["imageFile"];
         _image = imageFormats["lowLevelImage"];
         _imageLoading = false;
-        _points = mathService.getStartingPointsForImage(RectanglePainter.outputSubrect);
+        _points = calcService.getStartingPointsForImage(PolygonPainter.outputSubrect);
       });
       SystemChrome.setEnabledSystemUIOverlays([]);
     } catch(e)  {
@@ -70,20 +67,9 @@ class CameraScannerState extends State<CameraScanner> {
   void _clearPicture() {
     setState(() {
       _imageFile = null;
-      List<ui.Offset> _points = [];
+      _points = [];
     });
     SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
-  }
-
-  List<Map<String, double>> exportPoints() {
-    double ratioX = _image.width / RectanglePainter.outputSubrect.width;
-    double ratioY = _image.height / RectanglePainter.outputSubrect.height;
-    return _points.map((Offset point) {
-      return {
-        "x": point.dx * ratioX,
-        "y": (point.dy - RectanglePainter.outputSubrect.top) * ratioY
-      };
-    }).toList();
   }
 
   @override
@@ -127,7 +113,7 @@ class CameraScannerState extends State<CameraScanner> {
               labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
               labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
               onTap: () async {
-                await httpService.getDetections(_imageFile, exportPoints());
+                await httpService.getDetections(_imageFile, calcService.exportPoints([_points[0], _points[2], _points[4], _points[6]], _image, PolygonPainter.outputSubrect));
                   /*
                 progressDialog.show();
                 final task = storageService.upload(_imageFile, user);
@@ -181,7 +167,12 @@ class CameraScannerState extends State<CameraScanner> {
           });
           /// Open Crop widget if user chooses to use cropping
           if (_currentEditorType == EditorType.Editor) {
-            File cropped = await ImageCropper.cropImage(sourcePath: _imageFile.path);
+            File cropped = await ImageCropper.cropImage(
+                sourcePath: _imageFile.path,
+                androidUiSettings: AndroidUiSettings(toolbarTitle: "Foto bearbeiten"),
+                compressFormat: ImageCompressFormat.png,
+                compressQuality: 100
+            );
             if (cropped != null) {
               ui.Image newImage = await cameraService.loadLowLevelFromFile(cropped);
               setState(() {
@@ -214,7 +205,7 @@ class CameraScannerState extends State<CameraScanner> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(top: 40, bottom: 40),
+                  padding: EdgeInsets.only(top: 40, bottom: 40),
                   child: Text("oder", textScaleFactor: 2,),
                 ),
                 FlatButton(
@@ -224,7 +215,7 @@ class CameraScannerState extends State<CameraScanner> {
                   child: Column(
                     children: <Widget>[
                       Icon(Icons.photo, color: Colors.white,),
-                      Text("Aus der Gallerie", style: TextStyle(color: Colors.white),)
+                      Text("Aus der Galerie", style: TextStyle(color: Colors.white),)
                     ],
                   ),
                 ),
@@ -237,7 +228,7 @@ class CameraScannerState extends State<CameraScanner> {
                         double lastDistance = -1;
                         for (int i = 0; i < _points.length; i++) {
                           double distance = sqrt(pow(details.localPosition.dx - _points[i].dx, 2) + pow(details.localPosition.dy - _points[i].dy, 2));
-                          if (distance <= 30) {
+                          if (distance <= radius) {
                             if (distance < lastDistance || lastDistance == -1) {
                               indexMatch = i;
                               lastDistance = distance;
@@ -250,54 +241,58 @@ class CameraScannerState extends State<CameraScanner> {
                       },
                       onPanUpdate: (DragUpdateDetails details) {
                         if (_currentlyDraggedIndex != -1) {
-                          Offset correctedOffset = mathService.correctCollisions(details.localPosition, RectanglePainter.outputSubrect);
-
-                          /// Check if angles are correct of each point of polygon using law of cosine
-                          List<ui.Offset> futurePoints = List.from(_points);
-                          futurePoints[_currentlyDraggedIndex] = correctedOffset;
-                          if (mathService.calculateAngle(futurePoints, 0, 1, 3) &&
-                              mathService.calculateAngle(futurePoints, 1, 2, 0) &&
-                              mathService.calculateAngle(futurePoints, 2, 3, 1) &&
-                              mathService.calculateAngle(futurePoints, 3, 0, 2)) {
-                            setState(() {
-                              _points = futurePoints;
-                              _angleOverflow = false;
-                            });
+                          if (_currentlyDraggedIndex % 2 == 0) {
+                            ui.Offset correctedOffset = calcService.correctCollisions(details.localPosition, PolygonPainter.outputSubrect);
+                            /// Check if angles are correct of each point of polygon using law of cosine
+                            List<ui.Offset> futurePoints = List.from(_points);
+                            futurePoints[_currentlyDraggedIndex] = correctedOffset;
+                            futurePoints = calcService.recalculateMiddlePoints(futurePoints);
+                            if (calcService.checkAngles(futurePoints)) {
+                              setState(() {
+                                _points = futurePoints;
+                                _overflow = false;
+                              });
+                            } else {
+                              setState(() {
+                                _overflow = true;
+                              });
+                            }
                           } else {
-                            setState(() {
-                              _angleOverflow = true;
-                            });
+                            List<ui.Offset> newPoints = List.from(_points);
+                            /// case 1 and 5 are cases where the polygon gets pulled in the x direction
+                            /// case 3 and 7 are cases where the polygon gets pulled in the y direction
+                            switch (_currentlyDraggedIndex) {
+                              case 1:
+                                calcService.correctedPolygonCoordinates(newPoints, PolygonPainter.outputSubrect, details.delta, dy: false, fromIndex: 0, toIndex: 3);
+                                break;
+                              case 5:
+                                calcService.correctedPolygonCoordinates(newPoints, PolygonPainter.outputSubrect, details.delta, dy: false, fromIndex: 4, toIndex: 6);
+                                break;
+                              case 3:
+                                calcService.correctedPolygonCoordinates(newPoints, PolygonPainter.outputSubrect, details.delta, dx: false, fromIndex: 2, toIndex: 4);
+                                break;
+                              case 7:
+                                calcService.correctedPolygonCoordinates(newPoints, PolygonPainter.outputSubrect, details.delta, dx: false, fromIndex: 6, toIndex: 8);
+                                break;
+                            }
+                            /// check if angle is okay
+                            if (!calcService.checkAngles(newPoints) || !calcService.checkDistancesPoints(newPoints)) {
+                              setState(() {
+                                _overflow = true;
+                              });
+                            } else {
+                              setState(() {
+                                _points = newPoints;
+                                _overflow = false;
+                              });
+                            }
                           }
                         } else {
                           /// Check if one point will be out of bound and if size is still okay
-                          List<ui.Offset> futurePoints = [];
-                          for(int i = 0; i < _points.length; i++) {
-                            Offset corrected = _points[i] + details.delta;
-
-                            Offset collisionCorrected = mathService.correctCollisions(corrected, RectanglePainter.outputSubrect);
-                            if (collisionCorrected.dx == corrected.dx && collisionCorrected.dy == corrected.dy) {
-                              int previousIndex = i - 1;
-                              int afterIndex = i + 1;
-                              if (previousIndex == -1) {
-                                previousIndex = 3;
-                              }
-                              if (afterIndex > 3) {
-                                afterIndex = 0;
-                              }
-
-                              double distanceToPrevious = mathService.pointDistance(corrected, _points[previousIndex]);
-                              double distanceToNext = mathService.pointDistance(corrected, _points[afterIndex]);
-                              if(distanceToNext < 50 || distanceToPrevious < 50) {
-                                futurePoints.add(_points[i]);
-                              } else {
-                                futurePoints.add(corrected);
-                              }
-                            } else {
-                              futurePoints.add(collisionCorrected);
-                            }
-                          }
+                          List<ui.Offset> newPoints = List.from(_points);
+                          calcService.correctedPolygonCoordinates(newPoints, PolygonPainter.outputSubrect, details.delta);
                           setState(() {
-                            _points = futurePoints;
+                            _points = newPoints;
                           });
                         }
                       },
@@ -308,7 +303,7 @@ class CameraScannerState extends State<CameraScanner> {
                       },
                       child: CustomPaint(
                         size: Size.fromHeight(MediaQuery.of(context).size.height - appBar.preferredSize.height - 24),
-                        painter: RectanglePainter(points: _points, angleOverflow: _angleOverflow, image: _image, currentType: _currentEditorType, callback: setPoints),
+                        painter: PolygonPainter(points: _points, overflow: _overflow, radius: radius, image: _image, currentType: _currentEditorType, callback: setPoints),
                       )
                   ),
               ]
