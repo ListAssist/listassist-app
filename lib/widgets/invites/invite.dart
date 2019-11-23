@@ -74,7 +74,7 @@ class _InviteState extends State<Invite> {
               children: <Widget>[
                 RichText(text:
                 TextSpan(
-                    style: new TextStyle(
+                    style: TextStyle(
                       color: Theme.of(context).textTheme.title.color,
                     ),
                     children: <TextSpan> [

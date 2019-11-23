@@ -25,13 +25,13 @@ class _AddShoppinglist extends State<AddShoppinglist> {
   bool _productIsValid = true;
   bool _listIsValid = false;
 
-  var rng = new Random();
+  var rng = Random();
 
   var _products = [
-    new Item(name: "Apfel", bought: false),
-    new Item(name: "Kekse", bought: false),
-    new Item(name: "Seife", bought: false),
-    new Item(name: "Öl", bought: false)
+    Item(name: "Apfel", bought: false),
+    Item(name: "Kekse", bought: false),
+    Item(name: "Seife", bought: false),
+    Item(name: "Öl", bought: false)
   ];
 
   void itemChange(bool val, int index){
@@ -55,7 +55,7 @@ class _AddShoppinglist extends State<AddShoppinglist> {
 
     setState(() {
       _productTextController.clear();
-      _products.add(new Item(name: product, bought: false));
+      _products.add(Item(name: product, bought: false));
     });
   }
 
@@ -394,7 +394,7 @@ class _AddShoppinglist extends State<AddShoppinglist> {
                                 child: Container(
                                     child: CheckboxListTile(
                                         value: _products[index].bought,
-                                        title: new Text("${_products[index].name}"),
+                                        title: Text("${_products[index].name}"),
                                         controlAffinity: ListTileControlAffinity.leading,
                                         onChanged: (bool val) { itemChange(val, index); },
                                         secondary: IconButton(

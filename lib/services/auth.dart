@@ -226,7 +226,7 @@ class ResultHandler {
     return true;
   }
 
-  static Future showError(Text title, Text message) async {
+  static Future<void> showError(Text title, Text message) async {
     await showDialog(
       context: authContext,
       builder: (BuildContext context) {
@@ -234,8 +234,8 @@ class ResultHandler {
           title: title,
           content: message,
           actions: <Widget>[
-            new FlatButton(
-              child: new Text("Schließen"),
+            FlatButton(
+              child: Text("Schließen"),
               onPressed: () {
                 Navigator.of(context).pop();
               },

@@ -10,7 +10,7 @@ class HttpService {
 
   /// Send coordinates of box to api to evaluate image
   Future<List<Detection>> getDetections(File imageFile, List<Map<String, double>> exportedPoints, {Function onProgress}) async {
-    FormData formData = new FormData.fromMap({
+    FormData formData = FormData.fromMap({
       "bill": await MultipartFile.fromFile(imageFile.path),
       "coordinates": jsonEncode(exportedPoints)
     });

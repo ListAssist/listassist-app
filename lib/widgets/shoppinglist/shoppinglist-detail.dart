@@ -56,7 +56,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
                 return Container(
                   child: CheckboxListTile(
                     value: list.items[index].bought,
-                    title: new Text("${list.items[index].name}", style: list.items[index].bought ? TextStyle(decoration: TextDecoration.lineThrough, decorationThickness: 3) : null),
+                    title: Text("${list.items[index].name}", style: list.items[index].bought ? TextStyle(decoration: TextDecoration.lineThrough, decorationThickness: 3) : null),
                     controlAffinity: ListTileControlAffinity.leading,
                     onChanged: (bool val) { itemChange(val, index); }
                   )
@@ -141,7 +141,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
               children: <Widget>[
                 RichText(text:
                 TextSpan(
-                    style: new TextStyle(
+                    style: TextStyle(
                       color: Theme.of(context).textTheme.title.color,
                     ),
                     children: <TextSpan> [
