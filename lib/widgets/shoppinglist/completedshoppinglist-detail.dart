@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:listassist/assets/custom_icons_icons.dart';
 import 'package:listassist/models/Item.dart';
+import 'package:listassist/services/date_formatter.dart';
 import 'package:provider/provider.dart';
 import 'package:listassist/models/CompletedShoppingList.dart';
 
@@ -13,9 +14,6 @@ class CompletedShoppingListDetail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     CompletedShoppingList list = Provider.of<List<CompletedShoppingList>>(context)[this.index];
-    DateTime completed = list.completed.toDate();
-    String dateCompleted = "${completed.day}.${completed.month}.${completed.year}";
-    String timeCompleted = "${completed.hour}:${completed.minute}";
     List<Item> completedItems = List<Item>();
     list.items.forEach((i) { if(i.bought) { completedItems.add(i); } });
     return Scaffold(
@@ -28,7 +26,7 @@ class CompletedShoppingListDetail extends StatelessWidget {
         children: <Widget>[
           Container(
               padding: EdgeInsets.all(10.0),
-              child: Text("Einkauf am $dateCompleted erledigt", style: Theme.of(context).textTheme.headline)
+              child: Text("Einkauf am ${DateFormatter.getDate(list.completed.toDate())} erledigt", style: Theme.of(context).textTheme.headline)
           ),
           Expanded(
               child: ListView.builder(

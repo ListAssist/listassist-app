@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:listassist/models/CompletedShoppingList.dart' as model;
+import 'package:listassist/services/date_formatter.dart';
 import 'package:provider/provider.dart';
 import 'completedshoppinglist-detail.dart';
 
@@ -26,6 +27,7 @@ class CompletedShoppingList extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Text(list.name, style: Theme.of(context).textTheme.title),
+                Text("Erledigt am ${DateFormatter.getDate(list.completed.toDate())}")
               ],
             ),
           ),
