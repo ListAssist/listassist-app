@@ -42,7 +42,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
         children: <Widget>[
           Container(
             padding: EdgeInsets.all(10.0),
-            child: Text("${list.items.map((e) => e.bought ? 1 : 0).reduce((a, b) => a + b)} von ${list.items.length} Sachen gekauft", style: Theme.of(context).textTheme.headline)
+            child: Text("${list.items.map((e) => e.bought ? 1 : 0).reduce((a, b) => a + b)} von ${list.items.length} Produkten gekauft", style: Theme.of(context).textTheme.headline)
           ),
           Expanded(
             child: ListView.builder(
