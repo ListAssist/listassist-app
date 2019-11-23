@@ -77,7 +77,10 @@ class DatabaseService {
         .document(uid)
         .collection("lists")
         .document(listid)
-        .setData({"type": "completed", "completed": Timestamp.now()}, merge: true).then((finished) => finished);
+        .setData(
+        {"type": "completed", "completed": Timestamp.now()}, merge: true).then((
+        finished) => finished);
+  }
 
   void createList(String uid, ShoppingList list) {
     var items = list.items.map((e) => e.toJson()).toList();
