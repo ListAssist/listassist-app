@@ -3,7 +3,6 @@ import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
 import 'package:listassist/services/db.dart';
-import 'package:listassist/services/snackbar.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:listassist/services/camera.dart';
@@ -175,11 +174,11 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
                 );
                 databaseService.completeList(uid, list.id)
                 .catchError((_) {
-                  InfoSnackbar.showErrorSnackBar("Fehler beim abschließen der Einkaufsliste");
+                  InfoOverlay.showErrorSnackBar("Fehler beim abschließen der Einkaufsliste");
                   useCache = false;
                 })
                 .then((_) {
-                  InfoSnackbar.showInfoSnackBar("Einkaufsliste ${list.name} abgeschlossen");
+                  InfoOverlay.showInfoSnackBar("Einkaufsliste ${list.name} abgeschlossen");
                   Navigator.of(context).pop();
                   Navigator.of(this.context).pop();
                 });
