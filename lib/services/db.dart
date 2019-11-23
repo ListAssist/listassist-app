@@ -78,6 +78,29 @@ class DatabaseService {
         .collection("lists")
         .document(listid)
         .setData({"type": "completed", "completed": Timestamp.now()}, merge: true).then((finished) => finished);
+
+  void createList(String uid, ShoppingList list) {
+    var items = list.items.map((e) => e.toJson()).toList();
+
+    _db
+        .collection("users")
+        .document(uid)
+        .collection("lists")
+        .add({"name": list.name , "type": list.type, "items" : items});
+  }
+
+  void updateProfileName(String uid, String newName) {
+    _db
+        .collection('users')
+        .document(uid)
+        .updateData({'displayName': newName});
+  }
+
+  void updateEmail(String uid, String newEmail) {
+    _db
+        .collection('users')
+        .document(uid)
+        .updateData({'email': newEmail});
   }
 
 }

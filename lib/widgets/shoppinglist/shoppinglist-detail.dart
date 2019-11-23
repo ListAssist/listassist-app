@@ -4,8 +4,11 @@ import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
 import 'package:listassist/services/db.dart';
 import 'package:listassist/services/snackbar.dart';
-import 'package:listassist/widgets/camera-scanner/picture-show.dart';
 import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:listassist/services/camera.dart';
+import 'package:listassist/services/info-overlay.dart';
+import 'package:listassist/widgets/camera-scanner/camera-scanner.dart';
 
 
 class ShoppingListDetail extends StatefulWidget {
@@ -69,37 +72,62 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
         animatedIconTheme: IconThemeData(size: 22.0),
         closeManually: false,
         curve: Curves.easeIn,
-        overlayColor: Colors.black,
         overlayOpacity: 0.35,
-        backgroundColor: Colors.blueAccent,
-        foregroundColor: Colors.white,
+        backgroundColor: Theme.of(context).primaryColor,
         elevation: 8.0,
         shape: CircleBorder(),
         children: [
           SpeedDialChild(
               child: Icon(Icons.check),
               backgroundColor: Colors.green,
+              labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
               label: "Complete",
-              labelStyle: TextStyle(fontSize: 18.0),
-              onTap: _showCompleteDialog,
+              labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
+              onTap: _showCompleteDialog
           ),
           SpeedDialChild(
             child: Icon(Icons.delete),
             backgroundColor: Colors.red,
+            labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
             label: "Delete",
-            labelStyle: TextStyle(fontSize: 18.0),
+            labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
             onTap: null,
           ),
           SpeedDialChild(
             child: Icon(Icons.camera),
             backgroundColor: Colors.blue,
             label: "Image Check",
-            labelStyle: TextStyle(fontSize: 18.0),
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => PictureShow())),
+            labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
+            labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
+            onTap: () {
+              InfoOverlay.mainBottomSheet(context, [
+                ListTile(
+                  leading: Icon(Icons.camera_alt),
+                  title: Text("Kamera"),
+                  onTap: () => _pickImage(context, ImageSource.camera),
+                ),
+                ListTile(
+                  leading: Icon(Icons.photo),
+                  title: Text("Galerie"),
+                  onTap: () => _pickImage(context, ImageSource.gallery),
+                )
+              ]);
+            },
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _pickImage(BuildContext context, ImageSource imageSource) async {
+    try {
+      Map<String, dynamic> imageFormats = await cameraService.pickImage(imageSource);
+      var _imageFile = imageFormats["imageFile"];
+      var _image = imageFormats["lowLevelImage"];
+      Navigator.push(context, MaterialPageRoute(builder: (context) => CameraScanner(image: _image, imageFile: _imageFile,)));
+    } catch(e)  {
+      print(e.toString());
+    }
   }
 
   Future<void> _showCompleteDialog() async {

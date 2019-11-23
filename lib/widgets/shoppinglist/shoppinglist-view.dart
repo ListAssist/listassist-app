@@ -12,8 +12,8 @@ import 'package:provider/provider.dart';
 class ShoppingListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-
     User user = Provider.of<User>(context);
+    
     return DefaultTabController(
       length: 2,
       child: Scaffold(
