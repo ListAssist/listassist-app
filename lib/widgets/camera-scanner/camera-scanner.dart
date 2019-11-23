@@ -14,6 +14,8 @@ import 'package:listassist/models/User.dart';
 import 'package:listassist/services/camera.dart';
 import 'package:listassist/services/http.dart';
 import 'package:listassist/services/calc.dart';
+import 'package:listassist/services/info-overlay.dart';
+import 'package:listassist/services/storage.dart';
 import 'package:listassist/widgets/camera-scanner/polygon-painter.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:provider/provider.dart';
@@ -86,24 +88,9 @@ class CameraScannerState extends State<CameraScanner> with AfterInitMixin<Camera
   Widget build(BuildContext context) {
     final User user = Provider.of<User>(context);
 
-    ProgressDialog progressDialog = ProgressDialog(context,type: ProgressDialogType.Download, isDismissible: true);
-    progressDialog.style(
-        message: "Rechnung wird hochgeladen..",
-        borderRadius: 10.0,
-        backgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
-        progressWidget: SpinKitDoubleBounce(color: Colors.blue,),
-        elevation: 10.0,
-        insetAnimCurve: Curves.easeInOut,
-        progress: 0.0,
-        maxProgress: 100.0,
-        progressTextStyle: TextStyle(
-            color: Colors.black, fontSize: 12.0, fontWeight: FontWeight.w400),
-        messageTextStyle: TextStyle(
-            color: Colors.black, fontSize: 16.0, fontWeight: FontWeight.w600)
-    );
-
     return Scaffold(
       floatingActionButton: SpeedDial(
+        marginBottom: 60,
         animatedIcon: AnimatedIcons.menu_close,
         animatedIconTheme: IconThemeData(size: 22.0),
         closeManually: false,
@@ -119,7 +106,37 @@ class CameraScannerState extends State<CameraScanner> with AfterInitMixin<Camera
               labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
               labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
               onTap: () async {
-                await httpService.getDetections(_imageFile, calcService.exportPoints([_points[0], _points[2], _points[4], _points[6]], _image, boundingBox));
+                ProgressDialog dialog = InfoOverlay.showDynamicProgressDialog(context, "Rechnung wird hochgeladen..");
+                dialog.show();
+                try {
+                  /// Upload for detection
+                  await httpService.getDetections(
+                      _imageFile,
+                      calcService.exportPoints(
+                        [_points[0], _points[2], _points[4], _points[6]],
+                        _image,
+                        boundingBox,
+                      ),
+                      onProgress: (int sent, int total) {
+                        double percentage = (sent * 100 / total).roundToDouble();
+                        dialog.update(progress: percentage / 2);
+                      }
+                  );
+
+                  /// Upload to firestore
+                  var task = storageService.upload(_imageFile, "${user.uid}/lists/qjiwej1i23j/", concatString: "");
+                  task.events.listen((event) async {
+                    if (task.isInProgress) {
+                      double percentage = (event.snapshot.bytesTransferred * 100 / event.snapshot.totalByteCount).roundToDouble();
+                      dialog.update(progress: 50 + percentage / 2, message: percentage / 2 > 50 ? "Fast fertig.." : null);
+                    }
+                  });
+                  await task.onComplete;
+                } catch (e) {
+                  InfoOverlay.showErrorSnackBar("Hochladevorgang fehlgeschlagen.");
+                } finally {
+                  dialog.dismiss();
+                }
                   /*
                 progressDialog.show();
                 final task = storageService.upload(_imageFile, user);

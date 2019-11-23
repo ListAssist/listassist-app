@@ -9,13 +9,13 @@ class HttpService {
     ..options.baseUrl = "http://127.0.0.1:5000/";
 
   /// Send coordinates of box to api to evaluate image
-  Future<List<Detection>> getDetections(File imageFile, List<Map<String, double>> exportedPoints) async {
+  Future<List<Detection>> getDetections(File imageFile, List<Map<String, double>> exportedPoints, {Function onProgress}) async {
     FormData formData = new FormData.fromMap({
       "bill": await MultipartFile.fromFile(imageFile.path),
       "coordinates": jsonEncode(exportedPoints)
     });
 
-    Response<Map> response = await _dio.post("/", data: formData, options: Options(responseType: ResponseType.json));
+    Response<Map> response = await _dio.post("/", data: formData, onSendProgress: (int sent, int total) { onProgress(sent, total); }, options: Options(responseType: ResponseType.json));
     List<Detection> detections = Detection.multipleFromJson(response.data["detections"]);
     return detections;
   }

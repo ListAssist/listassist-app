@@ -6,11 +6,10 @@ class StorageService {
   final FirebaseStorage _storage =
   FirebaseStorage(storageBucket: "gs://listassist-433b3.appspot.com");
 
-  /// Starts an upload task
-  StorageUploadTask upload(File imageFile, User user) {
+  /// Starts an upload task and saves it to specified path
+  StorageUploadTask upload(File imageFile, String path, {bool includeTimestamp = true, String concatString = "_", String ext = "png"}) {
     /// Set image name on cloudfirestore
-    String filePath = '${user.uid}/${"w"}__${DateTime
-        .now()}.png';
+    String filePath = '$path${includeTimestamp ? "$concatString${DateTime.now()}" : ""}.$ext';
     return _storage.ref().child(filePath).putFile(imageFile);
   }
 

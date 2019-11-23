@@ -52,7 +52,6 @@ class PolygonPainter extends CustomPainter {
         ..style = PaintingStyle.fill
         ..strokeWidth = 2;
 
-
       canvas.drawImageRect(image, inputRect, boundingBox, imagePaint);
 
       if (currentType == EditorType.Trainer) {
