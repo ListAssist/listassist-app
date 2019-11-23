@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:listassist/models/CompletedShoppingList.dart';
 import 'package:listassist/models/Group.dart';
 import 'package:listassist/models/Invite.dart';
 import 'package:listassist/models/ShoppingList.dart';
@@ -59,13 +60,24 @@ class DatabaseService {
         .map((snap) => snap.documents.map((d) => ShoppingList.fromFirestore(d)).toList());
   }
 
+  Stream<List<CompletedShoppingList>> streamListsHistory(String uid) {
+    return _db
+        .collection("users")
+        .document(uid)
+        .collection("lists")
+        .where("type", isEqualTo: "completed")
+        .orderBy("completed", descending: true)
+        .snapshots()
+        .map((snap) => snap.documents.map((d) => CompletedShoppingList.fromFirestore(d)).toList());
+  }
+
   Future completeList(String uid, String listid) {
     return _db
         .collection("users")
         .document(uid)
         .collection("lists")
         .document(listid)
-        .setData({"type": "completed"}, merge: true).then((finished) => finished);
+        .setData({"type": "completed", "completed": Timestamp.now()}, merge: true).then((finished) => finished);
   }
 
 }
