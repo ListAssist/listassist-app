@@ -20,10 +20,13 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
 
   ShoppingList list;
   String uid = "";
+  bool useCache = false;
 
   @override
   Widget build(BuildContext context) {
-    list = Provider.of<List<ShoppingList>>(context)[widget.index];
+    if(!useCache) {
+      list = Provider.of<List<ShoppingList>>(context)[widget.index];
+    }
     uid = Provider.of<User>(context).uid;
 
     void itemChange(bool val, int index){
@@ -78,7 +81,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
               backgroundColor: Colors.green,
               label: "Complete",
               labelStyle: TextStyle(fontSize: 18.0),
-              onTap: _showDialog,
+              onTap: _showCompleteDialog,
           ),
           SpeedDialChild(
             child: Icon(Icons.delete),
@@ -99,7 +102,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
     );
   }
 
-  Future<void> _showDialog() async {
+  Future<void> _showCompleteDialog() async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
@@ -135,13 +138,20 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
             FlatButton(
               child: Text("Abschließen"),
               onPressed: () {
-                String name = list.name;
+                useCache = true;
+                list = ShoppingList(
+                  id: list.id,
+                  created: list.created,
+                  name: list.name,
+                  items: list.items,
+                );
                 databaseService.completeList(uid, list.id)
-                .catchError((_) => {
-                  InfoSnackbar.showErrorSnackBar("Fehler beim abschließen der Einkaufsliste")
+                .catchError((_) {
+                  InfoSnackbar.showErrorSnackBar("Fehler beim abschließen der Einkaufsliste");
+                  useCache = false;
                 })
                 .then((_) {
-                  InfoSnackbar.showInfoSnackBar("Einkaufsliste $name abgeschlossen");
+                  InfoSnackbar.showInfoSnackBar("Einkaufsliste ${list.name} abgeschlossen");
                   Navigator.of(context).pop();
                   Navigator.of(this.context).pop();
                 });
