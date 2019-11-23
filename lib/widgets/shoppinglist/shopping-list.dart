@@ -13,6 +13,7 @@ class ShoppingList extends StatelessWidget {
   Widget build(BuildContext context) {
     model.ShoppingList list = Provider.of<List<model.ShoppingList>>(context)[this.index];
     return GestureDetector(
+      behavior: HitTestBehavior.translucent,
       onTap: () => Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => ShoppingListDetail(index: this.index)),
