@@ -1,74 +1,63 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:listassist/models/ShoppingList.dart';
+import 'package:listassist/models/User.dart';
+import 'package:listassist/services/db.dart';
+import 'package:listassist/services/snackbar.dart';
+import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:listassist/services/camera.dart';
 import 'package:listassist/services/info-overlay.dart';
 import 'package:listassist/widgets/camera-scanner/camera-scanner.dart';
 
-class Item {
-  String name;
-  bool checked;
-
-  Item(String name, bool checked) {
-    this.name = name;
-    this.checked = checked;
-  }
-}
 
 class ShoppingListDetail extends StatefulWidget {
-  final String title;
-  ShoppingListDetail({this.title = "Einkaufsliste"});
+  final int index;
+  ShoppingListDetail({this.index});
 
   @override
-  _ShoppingListDetail createState() => _ShoppingListDetail(title: title);
+  _ShoppingListDetail createState() => _ShoppingListDetail();
 }
 
 class _ShoppingListDetail extends State<ShoppingListDetail> {
 
-  String title;
-  _ShoppingListDetail({this.title: "Einkaufsliste"});
-
-  var inputs = [
-    new Item("Apfel", false),
-    new Item("Kekse", false),
-    new Item("Seife", true),
-    new Item("Öl", true),
-    new Item("Batterien", true),
-    new Item("Brot", false),
-    new Item("Brot", false),
-    new Item("Brot", false),
-    new Item("Brot", false),
-    new Item("Kakao", false),
-    new Item("Milch", false)];
-
-  void itemChange(bool val, int index){
-    setState(() {
-      inputs[index].checked = val;
-    });
-  }
+  ShoppingList list;
+  String uid = "";
+  bool useCache = false;
 
   @override
   Widget build(BuildContext context) {
+    if(!useCache) {
+      list = Provider.of<List<ShoppingList>>(context)[widget.index];
+    }
+    uid = Provider.of<User>(context).uid;
+
+    void itemChange(bool val, int index){
+      setState(() {
+        list.items[index].bought = val;
+      });
+    }
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.primary,
-        title: Text(this.title),
+        title: Text(list.name),
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Container(
             padding: EdgeInsets.all(10.0),
-            child: Text("${inputs.map((e) => e.checked ? 1 : 0).reduce((a, b) => a + b)} von ${inputs.length} Sachen gekauft", style: Theme.of(context).textTheme.headline)
+            child: Text("${list.items.map((e) => e.bought ? 1 : 0).reduce((a, b) => a + b)} von ${list.items.length} Produkten gekauft", style: Theme.of(context).textTheme.headline)
           ),
           Expanded(
             child: ListView.builder(
-              itemCount: inputs.length,
+              itemCount: list.items.length,
               itemBuilder: (BuildContext context, int index){
                 return Container(
                   child: CheckboxListTile(
-                    value: inputs[index].checked,
-                    title: Text("${inputs[index].name}", style: inputs[index].checked ? TextStyle(decoration: TextDecoration.lineThrough, decorationThickness: 3) : null),
+                    value: list.items[index].bought,
+                    title: new Text("${list.items[index].name}", style: list.items[index].bought ? TextStyle(decoration: TextDecoration.lineThrough, decorationThickness: 3) : null),
                     controlAffinity: ListTileControlAffinity.leading,
                     onChanged: (bool val) { itemChange(val, index); }
                   )
@@ -94,7 +83,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
               labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
               label: "Complete",
               labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
-              onTap: _showDialog
+              onTap: _showCompleteDialog
           ),
           SpeedDialChild(
             child: Icon(Icons.delete),
@@ -141,7 +130,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
     }
   }
 
-  Future<void> _showDialog() async {
+  Future<void> _showCompleteDialog() async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // user must tap button!
@@ -158,7 +147,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
                     ),
                     children: <TextSpan> [
                       TextSpan(text: "Sind Sie sicher, dass Sie die Einkaufsliste "),
-                      TextSpan(text: "${this.title}", style: TextStyle(fontWeight: FontWeight.bold)),
+                      TextSpan(text: "${list.name}", style: TextStyle(fontWeight: FontWeight.bold)),
                       TextSpan(text: " abschließen möchten?")
                     ]
                 )
@@ -177,7 +166,23 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
             FlatButton(
               child: Text("Abschließen"),
               onPressed: () {
-                Navigator.of(context).pop();
+                useCache = true;
+                list = ShoppingList(
+                  id: list.id,
+                  created: list.created,
+                  name: list.name,
+                  items: list.items,
+                );
+                databaseService.completeList(uid, list.id)
+                .catchError((_) {
+                  InfoSnackbar.showErrorSnackBar("Fehler beim abschließen der Einkaufsliste");
+                  useCache = false;
+                })
+                .then((_) {
+                  InfoSnackbar.showInfoSnackBar("Einkaufsliste ${list.name} abgeschlossen");
+                  Navigator.of(context).pop();
+                  Navigator.of(this.context).pop();
+                });
               },
             ),
           ],
