@@ -1,8 +1,10 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:after_init/after_init.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/services.dart';
 import 'package:fancy_bottom_navigation/fancy_bottom_navigation.dart';
 import 'package:flutter/cupertino.dart';
@@ -10,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:image_cropper/image_cropper.dart';
+import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
 import 'package:listassist/services/camera.dart';
 import 'package:listassist/services/http.dart';
@@ -25,8 +28,9 @@ enum EditorType {Editor, Trainer, Recognizer}
 class CameraScanner extends StatefulWidget {
   final ui.Image image;
   final File imageFile;
+  final int listIndex;
 
-  const CameraScanner({Key key, @required this.image, @required this.imageFile}) : super(key: key);
+  const CameraScanner({Key key, @required this.image, @required this.imageFile, @required this.listIndex}) : super(key: key);
 
   @override
   CameraScannerState createState() => CameraScannerState();
@@ -86,6 +90,7 @@ class CameraScannerState extends State<CameraScanner> with AfterInitMixin<Camera
 
   @override
   Widget build(BuildContext context) {
+    ShoppingList selectedList = Provider.of<List<ShoppingList>>(context)[widget.listIndex];
     final User user = Provider.of<User>(context);
 
     return Scaffold(
@@ -108,6 +113,18 @@ class CameraScannerState extends State<CameraScanner> with AfterInitMixin<Camera
               onTap: () async {
                 ProgressDialog dialog = InfoOverlay.showDynamicProgressDialog(context, "Rechnung wird hochgeladen..");
                 dialog.show();
+                switch (_currentEditorType) {
+                  case EditorType.Editor:
+                    // TODO: Handle this case.
+                    break;
+                  case EditorType.Trainer:
+                    // TODO: Handle this case.
+                    break;
+                  case EditorType.Recognizer:
+                    // TODO: Handle this case.
+                    break;
+                }
+
                 try {
                   /// Upload for detection
                   await httpService.getDetections(
@@ -124,7 +141,12 @@ class CameraScannerState extends State<CameraScanner> with AfterInitMixin<Camera
                   );
 
                   /// Upload to firestore
-                  var task = storageService.upload(_imageFile, "${user.uid}/lists/qjiwej1i23j/", concatString: "");
+
+                  var task = storageService.upload(
+                      _imageFile,
+                      "${user.uid}/lists/${selectedList.id}/",
+                      concatString: "",
+                      metadata: StorageMetadata(customMetadata: {"coordinates": jsonEncode(calcService.exportPoints([_points[0], _points[2], _points[4], _points[6]], _image, boundingBox))}));
                   task.events.listen((event) async {
                     if (task.isInProgress) {
                       double percentage = (event.snapshot.bytesTransferred * 100 / event.snapshot.totalByteCount).roundToDouble();

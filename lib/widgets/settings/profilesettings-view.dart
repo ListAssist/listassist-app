@@ -136,7 +136,7 @@ class _ProfileSettingsView extends State<ProfileSettingsView> {
         );
 
         progressDialog.show();
-        final task = storageService.upload(_imageFile, "${user.uid}/profile_pic", ext: ".png", includeTimestamp: false);
+        final task = storageService.upload(_imageFile, "${user.uid}/profile_pic", ext: "png", includeTimestamp: false);
         task.events.listen((event) async {
           if (!progressDialog.isShowing()) {
             task.cancel();
