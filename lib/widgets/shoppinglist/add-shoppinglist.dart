@@ -1,7 +1,9 @@
+import 'package:algolia/algolia.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:extended_math/extended_math.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:listassist/models/Item.dart';
 import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
@@ -19,6 +21,8 @@ class _AddShoppinglist extends State<AddShoppinglist> {
 
   final _productTextController = TextEditingController();
   final _nameTextController = TextEditingController();
+
+  Algolia algolia = Application.algolia;
 
   bool _nameIsValid = false;
   bool _productsIsNotEmpty = true;
@@ -74,6 +78,26 @@ class _AddShoppinglist extends State<AddShoppinglist> {
 
       Navigator.pop(context);
   }
+
+  void _search(String search) async{
+    await _searchProducts(search);
+  }
+
+  _searchProducts(String search) async{
+    AlgoliaQuery query = algolia.instance.index('products').search(search);
+
+    AlgoliaQuerySnapshot snap = await query.getObjects();
+
+    print("keko");
+    print(snap.hits[0].data);
+
+    List<dynamic> hits = List<dynamic>();
+    snap.hits.forEach((h) => {
+      hits.add(h.data)
+    });
+    return hits;
+  }
+
 
   FocusNode myFocusNode;
 
@@ -234,6 +258,7 @@ class _AddShoppinglist extends State<AddShoppinglist> {
   });
 
 
+
   @override
   Widget build(BuildContext context) {
 
@@ -289,22 +314,53 @@ class _AddShoppinglist extends State<AddShoppinglist> {
                       Row(
                         children: <Widget>[
                           Expanded(
-                            child: TextField(
-                              controller: _productTextController,
-                              focusNode: myFocusNode,
-                              onSubmitted: (term) => {
-                                if(_productTextController.text.length > 1){
-                                  _addProduct(_productTextController.text)
-                                },
-                                FocusScope.of(context).requestFocus(myFocusNode),
+                            child: TypeAheadField(
+
+                              suggestionsCallback: (pattern) async{
+                                if(pattern.isNotEmpty) {
+                                  return await _searchProducts(pattern);
+                                }
+                                return null;
                               },
-                              //keyboardType: TextInputType.emailAddress,
-                              decoration: InputDecoration(
-                                border: UnderlineInputBorder(),
-                                contentPadding: EdgeInsets.all(3),
-                                labelText: 'Produkt eingeben',
-                                errorText: _productsIsNotEmpty ? _productIsValid ? null : 'Dieses Produkt ist bereits in der Einkaufsliste' : 'Die Einkaufsliste benötigt Produkte',
+                              itemBuilder:  (context, suggestion) {
+                                print(suggestion);
+                                return ListTile(
+                                  leading: Icon(Icons.directions_run),
+                                  title: Text(suggestion['name']),
+                                  subtitle: Text(suggestion['category']),
+                                );
+                              },
+                              onSuggestionSelected:  (suggestion) {
+                                _addProduct(suggestion['name']);
+                                _productTextController.clear();
+                              },
+
+                              textFieldConfiguration: TextFieldConfiguration(
+                                controller: _productTextController,
+                                focusNode: myFocusNode,
+                                onSubmitted: (term) => {
+                                  if(_productTextController.text.length > 1){
+                                    _addProduct(_productTextController.text)
+                                  },
+                                  FocusScope.of(context).requestFocus(myFocusNode),
+                                },
+                                decoration: InputDecoration(
+                                  border: UnderlineInputBorder(),
+                                  contentPadding: EdgeInsets.all(3),
+                                  labelText: 'Produkt eingeben',
+                                  errorText: _productsIsNotEmpty ? _productIsValid ? null : 'Dieses Produkt ist bereits in der Einkaufsliste' : 'Die Einkaufsliste benötigt Produkte',
+                                ),
                               ),
+
+
+                              errorBuilder: (BuildContext context, Object error) =>
+                                  Text(
+                                      '$error' + "HEEE MAN KANN DIE ERRORS AUSBLENDEN",
+                                      style: TextStyle(
+                                          color: Theme.of(context).errorColor
+                                      )
+                                  ),
+
                             ),
                           ),
                           IconButton(
@@ -344,9 +400,9 @@ class _AddShoppinglist extends State<AddShoppinglist> {
                             ]
                           ),
 
-
                         ],
                       ),
+
                       Container(
                         margin: EdgeInsets.only(top: 25.0),
                         constraints: BoxConstraints(
@@ -421,4 +477,11 @@ class _AddShoppinglist extends State<AddShoppinglist> {
     );
   }
 
+}
+
+class Application {
+  static final Algolia algolia = Algolia.init(
+    applicationId: 'K2QDRTR8CM',
+    apiKey: 'd09e06f1376cf1137d8e72c9bd41bece',
+  );
 }

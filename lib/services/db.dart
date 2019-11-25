@@ -74,6 +74,13 @@ class DatabaseService {
         .updateData({'email': newEmail});
   }
 
+  void addProductToProductList(String name) {
+    _db
+        .collection('products')
+        .document()
+        .setData({'name': name});
+  }
+
 }
 
 
