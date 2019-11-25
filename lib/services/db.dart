@@ -71,25 +71,24 @@ class DatabaseService {
         .map((snap) => snap.documents.map((d) => CompletedShoppingList.fromFirestore(d)).toList());
   }
 
-  Future completeList(String uid, String listid) {
+  Future<void> completeList(String uid, String listid) {
     return _db
         .collection("users")
         .document(uid)
         .collection("lists")
         .document(listid)
         .setData(
-        {"type": "completed", "completed": Timestamp.now()}, merge: true).then((
-        finished) => finished);
+        {"type": "completed", "completed": Timestamp.now()}, merge: true);
   }
 
-  void createList(String uid, ShoppingList list) {
+  Future<void> createList(String uid, ShoppingList list) {
     var items = list.items.map((e) => e.toJson()).toList();
 
-    _db
+    return _db
         .collection("users")
         .document(uid)
         .collection("lists")
-        .add({"name": list.name , "type": list.type, "items" : items});
+        .add({"name": list.name , "type": list.type, "items" : items, "created": list.created});
   }
 
   void updateProfileName(String uid, String newName) {
