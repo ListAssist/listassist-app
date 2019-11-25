@@ -9,15 +9,23 @@ class HttpService {
     ..options.baseUrl = "http://127.0.0.1:5000/";
 
   /// Send coordinates of box to api to evaluate image
-  Future<List<Detection>> getDetections(File imageFile, List<Map<String, double>> exportedPoints, {Function onProgress}) async {
+  Future<List<Detection>> getDetectionWithCoords(File imageFile, List<Map<String, double>> exportedPoints, {Function onProgress}) async {
     FormData formData = FormData.fromMap({
       "bill": await MultipartFile.fromFile(imageFile.path),
       "coordinates": jsonEncode(exportedPoints)
     });
 
-    Response<Map> response = await _dio.post("/", data: formData, onSendProgress: (int sent, int total) { onProgress(sent, total); }, options: Options(responseType: ResponseType.json));
-    List<Detection> detections = Detection.multipleFromJson(response.data["detections"]);
-    return detections;
+    Response<Map> response = await _dio.post("/trainable", data: formData, onSendProgress: (int sent, int total) { onProgress(sent, total); }, options: Options(responseType: ResponseType.json));
+    return Detection.multipleFromJson(response.data["detections"]);
+  }
+
+  Future<List<Detection>> getDetection(File imageFile, {Function onProgress}) async {
+    FormData formData = FormData.fromMap({
+      "bill": await MultipartFile.fromFile(imageFile.path),
+    });
+
+    Response<Map> response = await _dio.post("/prediction", data: formData, onSendProgress: (int sent, int total) { onProgress(sent, total); }, options: Options(responseType: ResponseType.json));
+    return Detection.multipleFromJson(response.data["detections"]);
   }
 
 }
