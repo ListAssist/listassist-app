@@ -162,6 +162,7 @@ class CameraScannerState extends State<CameraScanner> with AfterInitMixin<Camera
                       break;
                   }
                 } catch (e) {
+                  print(e);
                   InfoOverlay.showErrorSnackBar("Hochladevorgang fehlgeschlagen.");
                 } finally {
                   dialog.dismiss();

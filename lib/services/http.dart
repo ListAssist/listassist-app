@@ -15,18 +15,16 @@ class HttpService {
       "coordinates": jsonEncode(exportedPoints)
     });
 
-    Response<Map> response = await _dio.post("/trainable", data: formData, onSendProgress: (int sent, int total) { onProgress(sent, total); }, options: Options(responseType: ResponseType.json));
+    Response<Map> response = await _dio.post("/trainable", data: formData, onSendProgress: onProgress, options: Options(responseType: ResponseType.json));
     return Detection.multipleFromJson(response.data["detections"]);
   }
 
-  Future<List<Detection>> getDetection(File imageFile, {Function onProgress}) async {
+  Future<List<Detection>> getDetection(File imageFile, { Function onProgress }) async {
     FormData formData = FormData.fromMap({
       "bill": await MultipartFile.fromFile(imageFile.path),
     });
-
-    Response<Map> response = await _dio.post("/prediction", data: formData, onSendProgress: (int sent, int total) { onProgress(sent, total); }, options: Options(responseType: ResponseType.json));
+    Response<Map> response = await _dio.post("/prediction", data: formData, onSendProgress: onProgress, options: Options(responseType: ResponseType.json));
     return Detection.multipleFromJson(response.data["detections"]);
   }
-
 }
 final HttpService httpService = HttpService();
