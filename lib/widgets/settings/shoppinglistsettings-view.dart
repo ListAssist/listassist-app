@@ -12,7 +12,7 @@ class ShoppinglistsettingsViewState extends State<ShoppinglistsettingsView> {
   Widget build(BuildContext context) {
     return Scaffold(
       //backgroundColor: Colors.transparent,
-        appBar: new AppBar(
+        appBar: AppBar(
           backgroundColor: Colors.transparent,
           iconTheme: IconThemeData(color: Colors.black),
           elevation: 0.0,

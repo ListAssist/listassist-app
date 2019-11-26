@@ -28,7 +28,7 @@ class RegisterPage extends StatelessWidget {
 }
 
 class _RegisterForm extends StatelessWidget {
-  final _formKey = new GlobalKey<FormState>();
+  final _formKey = GlobalKey<FormState>();
   String _email = "";
   String _password = "";
   String _username = "";

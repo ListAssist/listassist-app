@@ -1,12 +1,11 @@
 import 'dart:io';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
+import 'package:listassist/models/Detection.dart';
 
 class RecognizeService {
   final TextRecognizer _textRecognizer = FirebaseVision.instance.cloudTextRecognizer();
 
-  Future<List<dynamic>> recognizeText(File imageAsFile) async {
-    print("Remove 'return' keyword to use FirebaseMLVIsion");
-    return null;
+  Future<VisionText> recognizeTextFirebase(File imageAsFile) async {
     VisionText text = await _textRecognizer.processImage(FirebaseVisionImage.fromFile(imageAsFile));
     for (TextBlock block in text.blocks) {
       for (TextLine line in block.lines) {
@@ -22,6 +21,14 @@ class RecognizeService {
       print("NEXT BLOCK");
       print("----------------------------------");
     }
+  }
+
+  void processHTTPResponse(List<Detection> detections) {
+
+  }
+
+  void process() {
+
   }
 
 }

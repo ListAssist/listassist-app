@@ -16,7 +16,7 @@ class NotificationsettingsView extends State<Keko> {
   Widget build(BuildContext context) {
     return Scaffold(
       //backgroundColor: Colors.transparent,
-        appBar: new AppBar(
+        appBar: AppBar(
           backgroundColor: Colors.transparent,
           iconTheme: IconThemeData(color: Colors.black),
           elevation: 0.0,

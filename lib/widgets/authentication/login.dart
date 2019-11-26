@@ -28,7 +28,7 @@ class LoginPage extends StatelessWidget {
 }
 
 class _LoginForm extends StatelessWidget {
-  final _formKey = new GlobalKey<FormState>();
+  final _formKey = GlobalKey<FormState>();
   String _email = "";
 
   final _passwordFocus = FocusNode();
@@ -36,7 +36,6 @@ class _LoginForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool loading = Provider.of<bool>(context);
     return Form(
         key: _formKey,
         child: Column(

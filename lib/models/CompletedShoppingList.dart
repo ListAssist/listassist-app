@@ -1,32 +1,35 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:listassist/models/Item.dart';
 
-class ShoppingList {
+class CompletedShoppingList {
   final String id;
   final Timestamp created;
+  final Timestamp completed;
   final String name;
   final String type;
   final List<Item> items;
 
-  ShoppingList({this.id, this.created, this.name, this.type, this.items});
+  CompletedShoppingList({this.id, this.created, this.completed, this.name, this.type, this.items});
 
-  factory ShoppingList.fromFirestore(DocumentSnapshot doc) {
+  factory CompletedShoppingList.fromFirestore(DocumentSnapshot doc) {
     Map data = doc.data;
 
-    return ShoppingList(
+    return CompletedShoppingList(
       id: doc.documentID,
       created: data["created"],
+      completed: data["completed"],
       name: data["name"],
       type: data["type"],
       items: List.from(data["items"] ?? []).map((x) => Item.fromMap(x)).toList(),
     );
   }
 
-  factory ShoppingList.fromMap(Map data) {
+  factory CompletedShoppingList.fromMap(Map data) {
     data = data ?? { };
 
-    return ShoppingList(
+    return CompletedShoppingList(
         created: data["created"],
+        completed: data["completed"],
         name: data["name"],
         type: data["type"],
         items: List.from(data["items"] ?? []).map((x) => Item.fromMap(x)).toList()

@@ -1,17 +1,18 @@
 import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:listassist/models/User.dart';
 
 class StorageService {
   final FirebaseStorage _storage =
   FirebaseStorage(storageBucket: "gs://listassist-433b3.appspot.com");
 
-  /// Starts an upload task
-  StorageUploadTask upload(File imageFile, User user) {
+  /// Starts an upload task and saves it to specified path
+  StorageUploadTask upload(
+      File imageFile,
+      String path,
+      {bool includeTimestamp = true, String concatString = "_", String ext = "png", StorageMetadata metadata}) {
     /// Set image name on cloudfirestore
-    String filePath = '${user.uid}/${"w"}__${DateTime
-        .now()}.png';
-    return _storage.ref().child(filePath).putFile(imageFile);
+    String filePath = '$path${includeTimestamp ? "$concatString${DateTime.now()}" : ""}.$ext';
+    return _storage.ref().child(filePath).putFile(imageFile, metadata);
   }
 
 }
