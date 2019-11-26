@@ -53,6 +53,8 @@ dependencies:
   image_crop:
   dio:
   progress_indicator_button:
+  algolia:
+  flutter_typeahead:
 
   # design
   fluttertoast:
