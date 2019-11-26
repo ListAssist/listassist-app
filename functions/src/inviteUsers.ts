@@ -42,7 +42,7 @@ export const inviteUsers = functions.https.onCall(async (data, context) => {
                         .then((sn) => {
                             console.log(sn);
                             console.log(sn.docs[0]);
-                            if(sn.docs && sn.docs[0]) return null;
+                            if(!sn.docs && !sn.docs[0]) return null;
                             return db.collection("invites")
                                 .add({
                                     created: Timestamp.now(),

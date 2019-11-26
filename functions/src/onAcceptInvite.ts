@@ -26,7 +26,23 @@ export const acceptInvite = functions.https.onCall((data, context) => {
                         .set({ groups: FieldValue.arrayUnion(snap.data()["groupid"]) }, { merge: true }),
                     db.collection("invites")
                         .doc(inviteid)
-                        .set({ type: "accepted" }, { merge: true })
+                        .set({ type: "accepted" }, { merge: true }),
+                    db.collection("users")
+                        .doc(uid)
+                        .get()
+                        .then((snapUser) => {
+                            const memberObj = snapUser.data()["photoURL"] ? {
+                                displayName: snapUser.data()["displayName"],
+                                uid: uid,
+                                photoURL: snapUser.data()["photoURL"]
+                            } : {
+                                displayName: snapUser.data()["displayName"],
+                                uid: uid,
+                            };
+                            return db.collection("groups")
+                                .doc(snap.data()["groupid"])
+                                .set({ members: FieldValue.arrayUnion(memberObj) }, { merge: true })
+                        })
                 ]).then(() => {
                     return { status: "Successful" }
                 });

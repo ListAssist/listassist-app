@@ -32,7 +32,7 @@ class GroupItem extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Text(group.title, style: Theme.of(context).textTheme.title),
-                    Text("${group.members.length + 1} Mitglieder")
+                    Text("${group.members.length} Mitglieder")
                   ],
                 ),
               ),

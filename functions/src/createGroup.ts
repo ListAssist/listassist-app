@@ -31,7 +31,12 @@ export const createGroup = functions.https.onCall(async (data, context) => {
                         uid: uid,
                         displayName: snap.data()["displayName"],
                         photoURL: snap.data()["photoURL"] || "",
-                    }
+                    },
+                    members: [{
+                        uid: uid,
+                        displayName: snap.data()["displayName"],
+                        photoURL: snap.data()["photoURL"] || "",
+                    }],
                 })
                 .then((doc) => {
                     return db.collection("groups_user")
