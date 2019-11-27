@@ -1,36 +1,49 @@
 import 'dart:io';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:listassist/models/Detection.dart';
+import 'package:listassist/models/DetectionResponse.dart';
 
 class RecognizeService {
-  final TextRecognizer _textRecognizer = FirebaseVision.instance.cloudTextRecognizer();
+  final String blackList = "%";
+  final int minLength = 3;
 
-  Future<VisionText> recognizeTextFirebase(File imageAsFile) async {
-    VisionText text = await _textRecognizer.processImage(FirebaseVisionImage.fromFile(imageAsFile));
-    for (TextBlock block in text.blocks) {
-      for (TextLine line in block.lines) {
-        var text = line.text;
-        var confidence = line.confidence;
-        String languages = line.recognizedLanguages.map((value) => value.languageCode).join("|");
 
-        print("text: $text");
-        print("confidence: $confidence");
-        print("languages: $languages");
+  void processResponse(DetectionResponse response) {
+    /// Split texts into array seperated by new lines
+    List<String> lines = response.detectedString.split("\n");
+    List<String> correctedLines = [];
+
+    for (int i = 0; i < lines.length; i++) {
+      /// Check if line is not empty and proceed
+      if (lines[i].isNotEmpty) {
+        List<String> lineSeperated = lines[i].split(" ");
+        List<String> correctedLine = [];
+        /// Iterate through line which has been splitted by a space
+        for (int j = 0; j < lineSeperated.length; j++) {
+          if (!_containsBlacklistedItem(lineSeperated[j]) && lineSeperated[j].length > minLength) {
+            String finalPartString;
+            if (double.tryParse(lineSeperated[j]) == null) {
+
+            }
+            correctedLine.add(finalPartString);
+          }
+        }
+        correctedLines.add(correctedLine.join(" "));
       }
-      print("----------------------------------");
-      print("NEXT BLOCK");
-      print("----------------------------------");
     }
+
+    print(correctedLines.join("\n"));
   }
 
-  void processHTTPResponse(List<Detection> detections) {
-
+  bool _containsBlacklistedItem(String toCheck) {
+    /// Check if char in string which is not allowed and delete part from line
+    for (int i = 0; i < blackList.length; i++) {
+      if (toCheck.contains(blackList[i])) {
+        return true;
+      }
+    }
+    return false;
   }
-
-  void process() {
-
-  }
-
 }
 
 final RecognizeService recognizeService = RecognizeService();
