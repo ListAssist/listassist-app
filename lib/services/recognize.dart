@@ -4,7 +4,7 @@ import 'package:listassist/models/Detection.dart';
 import 'package:listassist/models/DetectionResponse.dart';
 
 class RecognizeService {
-  final String blackList = "%";
+  final String blackList = "%()[]{}²³/\\!§?^°_#";
   final int minLength = 3;
 
 

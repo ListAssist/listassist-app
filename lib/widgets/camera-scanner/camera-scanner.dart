@@ -150,6 +150,7 @@ class CameraScannerState extends State<CameraScanner> with AfterInitMixin<Camera
                   }
 
                   /// Upload to firestore
+                  /*
                   var task = storageService.upload(
                       _imageFile,
                       "users/${user.uid}/lists/${selectedList.id}/",
@@ -162,8 +163,7 @@ class CameraScannerState extends State<CameraScanner> with AfterInitMixin<Camera
                     }
                   });
                   await task.onComplete;
-
-
+                  */
                   recognizeService.processResponse(detection);
                 } catch (e) {
                   print(e);
