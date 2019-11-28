@@ -20,10 +20,11 @@ class RecognizeService {
         List<String> correctedLine = [];
         /// Iterate through line which has been splitted by a space
         for (int j = 0; j < lineSeperated.length; j++) {
-          if (!_containsBlacklistedItem(lineSeperated[j]) && lineSeperated[j].length > minLength) {
-            String finalPartString;
+          if (!_containsBlacklistedItem(lineSeperated[j]) && lineSeperated[j].length >= minLength) {
+            String finalPartString = lineSeperated[j];
             if (double.tryParse(lineSeperated[j]) == null) {
-
+              finalPartString = finalPartString.replaceAll(".", ". ");
+              finalPartString = finalPartString.replaceAll(",", ". ");
             }
             correctedLine.add(finalPartString);
           }
