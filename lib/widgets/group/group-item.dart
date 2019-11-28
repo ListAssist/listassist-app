@@ -13,33 +13,30 @@ class GroupItem extends StatelessWidget {
   Widget build(BuildContext context) {
     Group group = Provider.of<Group>(context);
     return group != null ?
-      Container(
-        child: GestureDetector(
+        GestureDetector(
+          behavior: HitTestBehavior.translucent,
           onTap: () => Navigator.push(
             context,
             MaterialPageRoute(builder: (context) =>
-                Provider<Group>.value(
-                    value: group,
-                    child: GroupDetail(index: index)),
-                )
+              Provider<Group>.value(
+                value: group,
+                child: GroupDetail(index: index)),
+              )
           ),
-          child: Card(
-            child: Container(
-              padding: EdgeInsets.all(20),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(group.title, style: Theme.of(context).textTheme.title),
-                    Text("${group.members.length} Mitglieder")
-                  ],
-                ),
+          child: Container(
+            padding: EdgeInsets.all(20),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(group.title, style: Theme.of(context).textTheme.title),
+                  Text("${group.members.length} Mitglieder")
+                ],
               ),
             ),
           ),
-        ),
-      )
+        )
     :
     //Nicht anzeigen falls z.B. eine ungültige ID angegeben wurde
     Container();

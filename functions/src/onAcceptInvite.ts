@@ -31,17 +31,15 @@ export const acceptInvite = functions.https.onCall((data, context) => {
                         .doc(uid)
                         .get()
                         .then((snapUser) => {
-                            const memberObj = snapUser.data()["photoURL"] ? {
-                                displayName: snapUser.data()["displayName"],
-                                uid: uid,
-                                photoURL: snapUser.data()["photoURL"]
-                            } : {
-                                displayName: snapUser.data()["displayName"],
-                                uid: uid,
-                            };
                             return db.collection("groups")
                                 .doc(snap.data()["groupid"])
-                                .set({ members: FieldValue.arrayUnion(memberObj) }, { merge: true })
+                                .set({
+                                    members: FieldValue.arrayUnion({
+                                        displayName: snapUser.data()["displayName"],
+                                        uid: uid,
+                                        photoURL: snapUser.data()["photoURL"]
+                                    })
+                                }, { merge: true })
                         })
                 ]).then(() => {
                     return { status: "Successful" }

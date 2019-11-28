@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:listassist/models/Group.dart';
 import 'package:listassist/models/Invite.dart';
 import 'package:listassist/models/User.dart';
@@ -69,3 +71,4 @@ class DatabaseService {
 
 
 final databaseService = DatabaseService();
+final cloudFunctionInstance = CloudFunctions(app: FirebaseApp(name: "[DEFAULT]"), region: "europe-west1");

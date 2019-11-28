@@ -1,7 +1,9 @@
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:listassist/models/Group.dart';
 import 'package:listassist/models/User.dart';
+import 'package:listassist/services/db.dart';
 import 'package:listassist/services/snackbar.dart';
 import 'package:listassist/widgets/group/group-userlist.dart';
 import 'package:provider/provider.dart';
@@ -63,7 +65,7 @@ class GroupMenu extends StatelessWidget {
       onSelected: (GroupAction result) async {
         if(result == GroupAction.leave){
           try {
-            final HttpsCallable leave = CloudFunctions.instance.getHttpsCallable(
+            final HttpsCallable leave = cloudFunctionInstance.getHttpsCallable(
                 functionName: "leaveGroup"
             );
             dynamic resp = await leave.call(<String, dynamic>{

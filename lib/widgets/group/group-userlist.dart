@@ -11,13 +11,12 @@ class GroupUserList extends StatelessWidget {
   Widget build(BuildContext context) {
     Group group = Provider.of<Group>(context);
 
-    List<PublicUser> membersInGroup = group.members;
+    List<PublicUser> membersInGroup = List.from(group.members);
     membersInGroup.removeWhere((member) => member.uid == group.creator.uid);
-    print(membersInGroup);
     List<Widget> members = membersInGroup.map((member) {
-      return Container(
-        padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
-        child: Align(
+      return ListTile(
+        onLongPress: () {print(member.displayName);},
+        title: Align(
           alignment: Alignment.centerLeft,
           child: Row(
             children: <Widget>[
@@ -38,26 +37,25 @@ class GroupUserList extends StatelessWidget {
       );
     }).toList();
 
-    members.insert(0, Container(
-      padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
-      child: Align(
-          alignment: Alignment.centerLeft,
-          child: Row(
-            children: <Widget>[
-              CircleAvatar(backgroundImage: NetworkImage(group.creator.photoUrl)),
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-                  child: Text(
-                    group.creator.displayName,
-                    style: Theme.of(context).textTheme.subhead,
-                    overflow: TextOverflow.ellipsis
-                  ),
-                )
-              ),
-              Text("Gruppenersteller", style: TextStyle(color: Colors.green))
-            ],
-          )
+    members.insert(0, ListTile(
+      title: Align(
+        alignment: Alignment.centerLeft,
+        child: Row(
+          children: <Widget>[
+            CircleAvatar(backgroundImage: NetworkImage(group.creator.photoUrl)),
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                child: Text(
+                  group.creator.displayName,
+                  style: Theme.of(context).textTheme.subhead,
+                  overflow: TextOverflow.ellipsis
+                ),
+              )
+            ),
+            Text("Gruppenersteller", style: TextStyle(color: Colors.green))
+          ],
+        )
       ),
     ));
 
