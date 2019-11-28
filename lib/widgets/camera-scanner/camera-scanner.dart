@@ -14,6 +14,7 @@ import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:listassist/models/Detection.dart';
 import 'package:listassist/models/DetectionResponse.dart';
+import 'package:listassist/models/PossibleProduct.dart';
 import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
 import 'package:listassist/services/camera.dart';
@@ -33,7 +34,7 @@ class CameraScanner extends StatefulWidget {
   final File imageFile;
   final int listIndex;
 
-  const CameraScanner({Key key, @required this.image, @required this.imageFile, @required this.listIndex}) : super(key: key);
+  const CameraScanner({Key key, @required this.image, @required this.imageFile, this.listIndex}) : super(key: key);
 
   @override
   CameraScannerState createState() => CameraScannerState();
@@ -93,7 +94,6 @@ class CameraScannerState extends State<CameraScanner> with AfterInitMixin<Camera
 
   @override
   Widget build(BuildContext context) {
-    ShoppingList selectedList = Provider.of<List<ShoppingList>>(context)[widget.listIndex];
     final User user = Provider.of<User>(context);
 
     return Scaffold(
@@ -149,22 +149,29 @@ class CameraScannerState extends State<CameraScanner> with AfterInitMixin<Camera
                       break;
                   }
 
-                  /// Upload to firestore
-                  /*
-                  var task = storageService.upload(
-                      _imageFile,
-                      "users/${user.uid}/lists/${selectedList.id}/",
-                      concatString: "",
-                      metadata: StorageMetadata(customMetadata: {"coordinates": jsonEncode(calcService.exportPoints([_points[0], _points[2], _points[4], _points[6]], _image, boundingBox))}));
-                  task.events.listen((event) async {
-                    if (task.isInProgress) {
-                      double percentage = (event.snapshot.bytesTransferred * 100 / event.snapshot.totalByteCount).roundToDouble();
-                      dialog.update(progress: 50 + percentage / 2, message: percentage / 2 > 50 ? "Fast fertig.." : null);
-                    }
-                  });
-                  await task.onComplete;
-                  */
-                  recognizeService.processResponse(detection);
+                  /// Check if the camera scanner should check shopping lists or create a new one
+                  if (widget.listIndex != null) {
+                    ShoppingList selectedList = Provider.of<List<ShoppingList>>(context)[widget.listIndex];
+                    List<PossibleProduct> products = recognizeService.processResponse(detection);
+                      print(products);
+                    /// Upload to firestore
+                    /*
+                    var task = storageService.upload(
+                        _imageFile,
+                        "users/${user.uid}/lists/${selectedList.id}/",
+                        concatString: "",
+                        metadata: StorageMetadata(customMetadata: {"coordinates": jsonEncode(calcService.exportPoints([_points[0], _points[2], _points[4], _points[6]], _image, boundingBox))}));
+                    task.events.listen((event) async {
+                      if (task.isInProgress) {
+                        double percentage = (event.snapshot.bytesTransferred * 100 / event.snapshot.totalByteCount).roundToDouble();
+                        dialog.update(progress: 50 + percentage / 2, message: percentage / 2 > 50 ? "Fast fertig.." : null);
+                      }
+                    });
+                    await task.onComplete;
+                    */
+                  } else {
+
+                  }
                 } catch (e) {
                   print(e);
                   InfoOverlay.showErrorSnackBar("Hochladevorgang fehlgeschlagen.");
