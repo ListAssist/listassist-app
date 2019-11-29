@@ -39,11 +39,11 @@ class _CompletedShoppingListDetailState extends State<CompletedShoppingListDetai
           ),
           Expanded(
               child: ListView.builder(
-                itemCount: list.items.length,
+                itemCount: list.allItems.length,
                 itemBuilder: (BuildContext context, int index){
                   return ListTile(
-                    leading: Icon(Icons.check),
-                    title: Text("${list.items[index].name}", style: TextStyle(fontSize: 16))
+                    leading: Icon(list.allItems[index].bought ? Icons.check : Icons.close),
+                    title: Text("${list.allItems[index].name}", style: TextStyle(fontSize: 16))
                   );
                 }
               )

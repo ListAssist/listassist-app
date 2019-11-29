@@ -8,15 +8,19 @@ class CompletedShoppingList {
   final Timestamp completed;
   final String name;
   final String type;
-  final List<Item> items;
+  final List<Item> allItems;
+  final List<Item> completedItems;
 
-  CompletedShoppingList({this.id, this.created, this.completed, this.name, this.type, this.items});
+  CompletedShoppingList({this.id, this.created, this.completed, this.name, this.type, this.completedItems, this.allItems});
 
   factory CompletedShoppingList.fromFirestore(DocumentSnapshot doc) {
     Map data = doc.data;
 
-    List<Item> tempItems = List.from(data["items"] ?? []).map((x) => Item.fromMap(x)).toList();
-    tempItems.removeWhere((item) => !item.bought);
+    List<Item> tempCompletedItems = List.from(data["items"] ?? []).map((x) => Item.fromMap(x)).toList();
+    tempCompletedItems.removeWhere((item) => !item.bought);
+
+    List<Item> tempAllItems = List.from(data["items"] ?? []).map((x) => Item.fromMap(x)).toList();
+    tempAllItems.sort((a, b) => (b.bought ? 1 : 0) - (a.bought ? 1 : 0));
 
     return CompletedShoppingList(
       id: doc.documentID,
@@ -24,7 +28,8 @@ class CompletedShoppingList {
       completed: data["completed"],
       name: data["name"],
       type: data["type"],
-      items: tempItems,
+      allItems: tempAllItems,
+      completedItems: tempCompletedItems,
     );
 }
 
@@ -36,7 +41,7 @@ class CompletedShoppingList {
         completed: data["completed"],
         name: data["name"],
         type: data["type"],
-        items: List.from(data["items"] ?? []).map((x) => Item.fromMap(x)).toList()
+        completedItems: List.from(data["items"] ?? []).map((x) => Item.fromMap(x)).toList()
     );
   }
 
@@ -45,7 +50,7 @@ class CompletedShoppingList {
         created: Timestamp.now(),
         name: newName ?? this.name,
         type: "pending",
-        items: this.items.map((item) => Item(name: item.name, bought: item.bought = false)).toList());
+        items: this.completedItems.map((item) => Item(name: item.name, bought: item.bought = false)).toList());
   }
 
 }
