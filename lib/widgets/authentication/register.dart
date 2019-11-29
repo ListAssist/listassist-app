@@ -13,7 +13,7 @@ class RegisterPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-        margin: EdgeInsets.all(40),
+        margin: EdgeInsets.all(25),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
@@ -27,15 +27,28 @@ class RegisterPage extends StatelessWidget {
 
 }
 
-class _RegisterForm extends StatelessWidget {
+class _RegisterForm extends StatefulWidget {
+  @override
+  _RegisterFormState createState() => _RegisterFormState();
+}
+
+class _RegisterFormState extends State<_RegisterForm> {
   final _formKey = GlobalKey<FormState>();
+
   String _email = "";
   String _password = "";
   String _username = "";
 
+  TextEditingController _passwordController = TextEditingController();
+
   final FocusNode _usernameFocus = FocusNode();
   final FocusNode _passwordFocus = FocusNode();
+  final FocusNode _passwordVerifyFocus = FocusNode();
 
+  @override
+  void dispose() {
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -82,8 +95,29 @@ class _RegisterForm extends StatelessWidget {
                       color: Colors.black,
                     ),
                     obscureText: true,
-                    onFieldSubmitted: (_) => submit(),
+                    controller: _passwordController,
+                    onFieldSubmitted: (_) {
+                      FocusScope.of(context).requestFocus(_passwordVerifyFocus);
+                    },
                     focusNode: _passwordFocus,
+                  ),
+                  ReactiveTextInputFormField(
+                    validator: (value) {
+                      if (_passwordController.text != value || value.isEmpty) {
+                        return "Die Passwörter müssen übereinstimmen.";
+                      } else {
+                        return null;
+                      }
+                    },
+                    onSaved: (value) => _password = value,
+                    hintText: "Passwort bestätigen",
+                    icon: Icon(
+                      Icons.lock_outline,
+                      color: Colors.black,
+                    ),
+                    obscureText: true,
+                    onFieldSubmitted: (_) => submit(),
+                    focusNode: _passwordVerifyFocus,
                   ),
                 ],
               ),
@@ -121,6 +155,5 @@ class _RegisterForm extends StatelessWidget {
       await authService.signUpWithMail(_email, _password, _username);
     }
   }
-
 }
 

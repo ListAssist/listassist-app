@@ -20,7 +20,6 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-//    debugPaintSizeEnabled = true;
     return MultiProvider(
       providers: [
         StreamProvider<User>.value(value: authService.userDoc,),
@@ -53,6 +52,7 @@ class _MainAppState extends State<MainApp> {
   @override
   Widget build(BuildContext context) {
     FirebaseUser user = Provider.of<FirebaseUser>(context);
+    User docUser = Provider.of<User>(context);
     bool loading = Provider.of<bool>(context);
 
     return AnimatedSwitcher(
@@ -60,15 +60,15 @@ class _MainAppState extends State<MainApp> {
       child: user != null ?
         Scaffold(
           key: mainScaffoldKey,
-          body: Body(),
-          drawer: Sidebar(),
+          body: docUser != null ? Body() : null,
+          drawer: docUser != null ? Sidebar() : null,
         ) : Scaffold(
        key: authScaffoldKey,
        body: AnimatedSwitcher(
          duration: Duration(milliseconds: 600),
          child: loading ? SpinKitDoubleBounce(color: Colors.blueAccent) : AuthenticationPage(),
        ),
-       resizeToAvoidBottomInset: false,
+        resizeToAvoidBottomInset: false,
      )
     );
   }
