@@ -154,12 +154,14 @@ class CameraScannerState extends State<CameraScanner> with AfterInitMixin<Camera
                     ShoppingList selectedList = Provider.of<List<ShoppingList>>(context)[widget.listIndex];
                     List<PossibleProduct> products = recognizeService.processResponse(detection);
                       print(products);
+
+                      /*
                     /// Upload to firestore
-                    /*
                     var task = storageService.upload(
                         _imageFile,
                         "users/${user.uid}/lists/${selectedList.id}/",
                         concatString: "",
+                        includeTimestamp: true,
                         metadata: StorageMetadata(customMetadata: {"coordinates": jsonEncode(calcService.exportPoints([_points[0], _points[2], _points[4], _points[6]], _image, boundingBox))}));
                     task.events.listen((event) async {
                       if (task.isInProgress) {

@@ -9,7 +9,7 @@ class StorageService {
   StorageUploadTask upload(
       File imageFile,
       String path,
-      {bool includeTimestamp = true, String concatString = "_", String ext = "png", StorageMetadata metadata}) {
+      {bool includeTimestamp = false, String concatString = "_", String ext = "png", StorageMetadata metadata}) {
     /// Set image name on cloudfirestore
     String filePath = '$path${includeTimestamp ? "$concatString${DateTime.now()}" : ""}.$ext';
     return _storage.ref().child(filePath).putFile(imageFile, metadata);
