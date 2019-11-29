@@ -2,8 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:listassist/models/CompletedShoppingList.dart';
 import 'package:listassist/models/Group.dart';
 import 'package:listassist/models/Invite.dart';
+import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
 import 'package:async/async.dart' show StreamGroup;
 
@@ -65,6 +67,61 @@ class DatabaseService {
         .where("type", isEqualTo: "pending")
         .snapshots()
         .map((snap) => snap.documents.map((d) => Invite.fromFirestore(d)).toList());
+  }
+
+  Stream<List<ShoppingList>> streamLists(String uid) {
+    return _db
+        .collection("users")
+        .document(uid)
+        .collection("lists")
+        .where("type", isEqualTo: "pending")
+        .snapshots()
+        .map((snap) => snap.documents.map((d) => ShoppingList.fromFirestore(d)).toList());
+  }
+
+  Stream<List<CompletedShoppingList>> streamListsHistory(String uid) {
+    return _db
+        .collection("users")
+        .document(uid)
+        .collection("lists")
+        .where("type", isEqualTo: "completed")
+        .orderBy("completed", descending: true)
+        .snapshots()
+        .map((snap) => snap.documents.map((d) => CompletedShoppingList.fromFirestore(d)).toList());
+  }
+
+  Future<void> completeList(String uid, String listid) {
+    return _db
+        .collection("users")
+        .document(uid)
+        .collection("lists")
+        .document(listid)
+        .setData(
+        {"type": "completed", "completed": Timestamp.now()}, merge: true);
+  }
+
+  Future<void> createList(String uid, ShoppingList list) {
+    var items = list.items.map((e) => e.toJson()).toList();
+
+    return _db
+        .collection("users")
+        .document(uid)
+        .collection("lists")
+        .add({"name": list.name , "type": list.type, "items" : items, "created": list.created});
+  }
+
+  void updateProfileName(String uid, String newName) {
+    _db
+        .collection('users')
+        .document(uid)
+        .updateData({'displayName': newName});
+  }
+
+  void updateEmail(String uid, String newEmail) {
+    _db
+        .collection('users')
+        .document(uid)
+        .updateData({'email': newEmail});
   }
 
 }

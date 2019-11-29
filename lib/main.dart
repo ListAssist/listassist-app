@@ -1,4 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:listassist/models/current-screen.dart';
@@ -18,21 +20,24 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ScopedModel<ScreenModel>(
-      model: ScreenModel(),
-      child: MultiProvider(
-        providers: [
-          StreamProvider<User>.value(value: authService.userDoc,),
-          StreamProvider<bool>.value(value: authService.loading.asBroadcastStream())
-        ],
+//    debugPaintSizeEnabled = true;
+    return MultiProvider(
+      providers: [
+        StreamProvider<User>.value(value: authService.userDoc,),
+        StreamProvider<bool>.value(value: authService.loading.asBroadcastStream()),
+        StreamProvider<FirebaseUser>.value(value: authService.user)
+      ],
+      child: ScopedModel<ScreenModel>(
+        model: ScreenModel(),
         child: MaterialApp(
           title: "ListAssist",
           theme: ThemeData(
             primarySwatch: Colors.indigo,
+            brightness: Brightness.light
           ),
           home: MainApp()
         ),
-      )
+      ),
     );
   }
 }
@@ -47,7 +52,7 @@ class _MainAppState extends State<MainApp> {
 
   @override
   Widget build(BuildContext context) {
-    User user = Provider.of<User>(context);
+    FirebaseUser user = Provider.of<FirebaseUser>(context);
     bool loading = Provider.of<bool>(context);
 
     return AnimatedSwitcher(
