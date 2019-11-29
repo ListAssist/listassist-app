@@ -22,7 +22,7 @@ class InfoOverlay {
     );
   }
 
-  static mainBottomSheet(BuildContext context, List<ListTile> tiles) {
+  static mainModalBottomSheet(BuildContext context, List<ListTile> tiles) {
     showModalBottomSheet(
         context: context,
         builder: (BuildContext context) {
