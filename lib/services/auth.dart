@@ -170,7 +170,6 @@ class AuthService {
 
   /// Logout client and kill current session
   void signOut() async {
-    ScreenModel()
     await _auth.signOut();
   }
 
