@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:listassist/models/current-screen.dart';
@@ -19,14 +20,15 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ScopedModel<ScreenModel>(
-      model: ScreenModel(),
-      child: MultiProvider(
-        providers: [
-          StreamProvider<User>.value(value: authService.userDoc,),
-          StreamProvider<bool>.value(value: authService.loading.asBroadcastStream()),
-          StreamProvider<FirebaseUser>.value(value: authService.user)
-        ],
+//    debugPaintSizeEnabled = true;
+    return MultiProvider(
+      providers: [
+        StreamProvider<User>.value(value: authService.userDoc,),
+        StreamProvider<bool>.value(value: authService.loading.asBroadcastStream()),
+        StreamProvider<FirebaseUser>.value(value: authService.user)
+      ],
+      child: ScopedModel<ScreenModel>(
+        model: ScreenModel(),
         child: MaterialApp(
           title: "ListAssist",
           theme: ThemeData(
@@ -35,7 +37,7 @@ class MyApp extends StatelessWidget {
           ),
           home: MainApp()
         ),
-      )
+      ),
     );
   }
 }

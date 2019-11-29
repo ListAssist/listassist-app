@@ -2,7 +2,7 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:listassist/models/Invite.dart' as model;
-import 'package:listassist/services/snackbar.dart';
+import 'package:listassist/services/info-overlay.dart';
 
 
 class Invite extends StatefulWidget {
@@ -41,12 +41,12 @@ class _InviteState extends State<Invite> {
                   "inviteid": widget.invite.id
                 });
                 if(resp.data["status"] == "Failed"){
-                  InfoSnackbar.showErrorSnackBar("Fehler beim Akzeptieren der Einladung");
+                  InfoOverlay.showErrorSnackBar("Fehler beim Akzeptieren der Einladung");
                 }else {
-                  InfoSnackbar.showInfoSnackBar("Einladung akzepiert");
+                  InfoOverlay.showInfoSnackBar("Einladung akzepiert");
                 }
               }catch (e) {
-                InfoSnackbar.showErrorSnackBar("Fehler: ${e.message}");
+                InfoOverlay.showErrorSnackBar("Fehler: ${e.message}");
               }
             },
             color: Colors.green,
@@ -74,7 +74,7 @@ class _InviteState extends State<Invite> {
               children: <Widget>[
                 RichText(text:
                 TextSpan(
-                    style: new TextStyle(
+                    style: TextStyle(
                       color: Theme.of(context).textTheme.title.color,
                     ),
                     children: <TextSpan> [
@@ -109,12 +109,12 @@ class _InviteState extends State<Invite> {
                     "inviteid": widget.invite.id,
                   });
                   if(resp.data["status"] == "Failed"){
-                    InfoSnackbar.showErrorSnackBar("Fehler beim Ablehnen der Einladung");
+                    InfoOverlay.showErrorSnackBar("Fehler beim Ablehnen der Einladung");
                   }else {
-                    InfoSnackbar.showInfoSnackBar("Einladung abgelehnt");
+                    InfoOverlay.showInfoSnackBar("Einladung abgelehnt");
                   }
                 }catch (e) {
-                  InfoSnackbar.showErrorSnackBar("Fehler: ${e.message}");
+                  InfoOverlay.showErrorSnackBar("Fehler: ${e.message}");
                 }
                 Navigator.of(context).pop();
               },

@@ -8,12 +8,11 @@ import 'package:listassist/models/User.dart';
 import 'package:listassist/services/auth.dart';
 import 'package:listassist/services/camera.dart';
 import 'package:listassist/services/db.dart';
-import 'package:listassist/services/snackbar.dart';
+import 'package:listassist/services/info-overlay.dart';
 import 'package:listassist/services/storage.dart';
 import 'package:listassist/validators/email.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:provider/provider.dart';
-import 'settings-modal.dart';
 
 class ProfileSettingsView extends StatefulWidget {
   @override
@@ -21,7 +20,6 @@ class ProfileSettingsView extends StatefulWidget {
 }
 
 class _ProfileSettingsView extends State<ProfileSettingsView> {
-  SettingsModal modal = new SettingsModal();
 
   String _uid;
   String _displayName;
@@ -138,12 +136,12 @@ class _ProfileSettingsView extends State<ProfileSettingsView> {
         );
 
         progressDialog.show();
-        final task = storageService.upload(_imageFile, user);
+        final task = storageService.upload(_imageFile, "${user.uid}/profile_pic", ext: "png", includeTimestamp: false);
         task.events.listen((event) async {
           if (!progressDialog.isShowing()) {
             task.cancel();
             progressDialog.dismiss();
-            InfoSnackbar.showErrorSnackBar("Hochladevorgang wurde abgebrochen");
+            InfoOverlay.showErrorSnackBar("Hochladevorgang wurde abgebrochen");
             return;
           }
 

@@ -1,22 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:listassist/widgets/shoppinglist/shoppinglist-detail.dart';
-import 'package:listassist/models/ShoppingList.dart' as model;
+import 'package:listassist/models/CompletedShoppingList.dart' as model;
+import 'package:listassist/services/date_formatter.dart';
 import 'package:provider/provider.dart';
+import 'completedshoppinglist-detail.dart';
 
 
-class ShoppingList extends StatelessWidget {
+class CompletedShoppingList extends StatelessWidget {
   final int index;
-  ShoppingList({this.index});
+  CompletedShoppingList({this.index});
 
   @override
   Widget build(BuildContext context) {
-    model.ShoppingList list = Provider.of<List<model.ShoppingList>>(context)[this.index];
+    model.CompletedShoppingList list = Provider.of<List<model.CompletedShoppingList>>(context)[this.index];
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () => Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => ShoppingListDetail(index: this.index)),
+        MaterialPageRoute(builder: (context) => CompletedShoppingListDetail(index: this.index)),
       ),
       child: Container(
         padding: EdgeInsets.all(20),
@@ -24,9 +25,10 @@ class ShoppingList extends StatelessWidget {
           alignment: Alignment.centerLeft,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Text(list.name, style: Theme.of(context).textTheme.title),
-              Text("${list.items.map((e) => e.bought ? 1 : 0).reduce((a, b) => a + b)}/${list.items.length} eingekauft")
+              Text("Erledigt am ${DateFormatter.getDate(list.completed.toDate())}")
             ],
           ),
         ),

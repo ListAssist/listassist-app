@@ -41,7 +41,16 @@ class _Sidebar extends State<Sidebar> {
             leading: Icon(Icons.list),
             title: Text("Einkaufslisten"),
             onTap: () {
-              ScreenModel.of(context).setScreen(ShoppingListView());
+              ScreenModel.of(context).setScreen(MultiProvider(
+                  providers: [
+                    StreamProvider.value(value: databaseService.streamLists(user.uid)),
+                    StreamProvider.value(value: databaseService.streamListsHistory(user.uid))
+                  ],
+                  child: CustomNavigator(
+                    home: ShoppingListView(),
+                    pageRoute: PageRoutes.materialPageRoute,
+                  )
+              ));
               Navigator.pop(context);
             },
           ),

@@ -32,7 +32,7 @@ class ReactiveTextInputFormField extends StatefulWidget {
 }
 
 class _ReactiveTextInputFormFieldState extends State<ReactiveTextInputFormField> {
-  final _fieldKey = new GlobalKey<FormFieldState>();
+  final _fieldKey = GlobalKey<FormFieldState>();
   bool _interacted = false;
 
   @override
