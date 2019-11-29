@@ -1,10 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:listassist/models/CompletedShoppingList.dart';
 import 'package:listassist/models/Group.dart';
 import 'package:listassist/models/Invite.dart';
 import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
+import 'package:async/async.dart' show StreamGroup;
 
 class DatabaseService {
   final Firestore _db = Firestore.instance;
@@ -30,9 +33,25 @@ class DatabaseService {
             .collection("groups")
             .document(groupId)
             .snapshots()
-            .map<Group>((snap) => Group.fromMap(snap.data))
+            .map<Group>((snap) => Group.fromFirestore(snap))
           ).toList() : List<Stream<Group>>();
       });
+
+//    return _db
+//        .collection("groups_user")
+//        .document(uid)
+//        .snapshots()
+//        .map<List<Group>>((list) {
+//          print(list);
+//          print(list.data);
+//          return list.data != null ? list.data["groups"]
+//          .map<Stream<Group>>((groupId) => _db
+//            .collection("groups")
+//            .document(groupId)
+//            .snapshots()
+//            .map<Group>((snap) => Group.fromMap(snap.data))
+//          ).toList() : List<Group>();
+//    });
 
 //    return db
 //            .collection("groups")
@@ -109,3 +128,4 @@ class DatabaseService {
 
 
 final databaseService = DatabaseService();
+final cloudFunctionInstance = CloudFunctions(app: FirebaseApp(name: "[DEFAULT]"), region: "europe-west1");
