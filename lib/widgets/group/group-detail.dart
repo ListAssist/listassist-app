@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:listassist/models/Group.dart';
 import 'package:listassist/models/User.dart';
 import 'package:listassist/services/db.dart';
-import 'package:listassist/services/snackbar.dart';
+import 'package:listassist/services/info-overlay.dart';
 import 'package:listassist/widgets/group/group-userlist.dart';
 import 'package:provider/provider.dart';
 
@@ -72,13 +72,13 @@ class GroupMenu extends StatelessWidget {
               "groupid": group.id
             });
             if (resp.data["status"] == "Failed") {
-              InfoSnackbar.showErrorSnackBar("Fehler beim Verlassen der Gruppe");
+              InfoOverlay.showErrorSnackBar("Fehler beim Verlassen der Gruppe");
             } else {
-              InfoSnackbar.showInfoSnackBar("Gruppe verlassen");
+              InfoOverlay.showInfoSnackBar("Gruppe verlassen");
               Navigator.pop(context);
             }
           }catch(e) {
-            InfoSnackbar.showErrorSnackBar("Fehler: ${e.message}");
+            InfoOverlay.showErrorSnackBar("Fehler: ${e.message}");
           }
         }
       },

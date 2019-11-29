@@ -1,7 +1,7 @@
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:listassist/services/snackbar.dart';
+import 'package:listassist/services/info-overlay.dart';
 
 class AddGroup extends StatefulWidget {
   @override
@@ -32,9 +32,9 @@ class _AddGroup extends State<AddGroup> {
         "title": _nameTextController.text,
       });
       if(resp.data["status"] == "Failed"){
-        InfoSnackbar.showErrorSnackBar("Fehler beim Erstellen der Gruppe");
+        InfoOverlay.showErrorSnackBar("Fehler beim Erstellen der Gruppe");
       }else {
-        InfoSnackbar.showInfoSnackBar("Gruppe ${_nameTextController.text} erstellt");
+        InfoOverlay.showInfoSnackBar("Gruppe ${_nameTextController.text} erstellt");
         final HttpsCallable invite = CloudFunctions.instance.getHttpsCallable(
             functionName: "inviteUsers"
         );
@@ -46,17 +46,17 @@ class _AddGroup extends State<AddGroup> {
               "from": resp.data["creator"],
           });
           if (resp2.data["status"] == "Failed") {
-            InfoSnackbar.showErrorSnackBar("Fehler beim Verschicken");
+            InfoOverlay.showErrorSnackBar("Fehler beim Verschicken");
           } else {
-            InfoSnackbar.showInfoSnackBar("Einladungen verschickt");
+            InfoOverlay.showInfoSnackBar("Einladungen verschickt");
             Navigator.pop(context);
           }
         }catch(e) {
-          InfoSnackbar.showErrorSnackBar("Fehler: ${e.message}");
+          InfoOverlay.showErrorSnackBar("Fehler: ${e.message}");
         }
       }
     }catch (e) {
-      InfoSnackbar.showErrorSnackBar("Fehler: ${e.message}");
+      InfoOverlay.showErrorSnackBar("Fehler: ${e.message}");
     }
   }
 
