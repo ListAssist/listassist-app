@@ -106,7 +106,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
             labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
             label: "Delete",
             labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
-            onTap: null,
+            onTap: _showDeleteDialog
           ),
           SpeedDialChild(
             child: Icon(Icons.camera),
@@ -190,7 +190,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
                 );
                 databaseService.completeList(uid, list.id)
                 .catchError((_) {
-                  InfoOverlay.showErrorSnackBar("Fehler beim abschließen der Einkaufsliste");
+                  InfoOverlay.showErrorSnackBar("Fehler beim Abschließen der Einkaufsliste");
                   useCache = false;
                 })
                 .then((_) {
@@ -205,4 +205,66 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
       },
     );
   }
+
+  Future<void> _showDeleteDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Einkaufsliste löschen"),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                RichText(text:
+                TextSpan(
+                    style: new TextStyle(
+                      color: Theme.of(context).textTheme.title.color,
+                    ),
+                    children: <TextSpan> [
+                      TextSpan(text: "Sind Sie sicher, dass Sie die Einkaufsliste "),
+                      TextSpan(text: "${list.name}", style: TextStyle(fontWeight: FontWeight.bold)),
+                      TextSpan(text: " löschen möchten?")
+                    ]
+                )
+                )
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              textColor: Colors.red,
+              child: Text("Abbrechen"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            FlatButton(
+              child: Text("Löschen"),
+              onPressed: () {
+                useCache = true;
+                list = ShoppingList(
+                  id: list.id,
+                  created: list.created,
+                  name: list.name,
+                  items: list.items,
+                );
+                databaseService.deleteList(uid, list.id)
+                  .catchError((_) {
+                    InfoOverlay.showErrorSnackBar("Fehler beim Löschen der Einkaufsliste");
+                    useCache = false;
+                  })
+                  .then((_) {
+                    InfoOverlay.showInfoSnackBar("Einkaufsliste ${list.name} gelöscht");
+                    Navigator.of(context).pop();
+                    Navigator.of(this.context).pop();
+                  });
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
 }

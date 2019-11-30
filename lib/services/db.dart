@@ -95,8 +95,7 @@ class DatabaseService {
         .document(uid)
         .collection("lists")
         .document(listid)
-        .setData(
-        {"type": "completed", "completed": Timestamp.now()}, merge: true);
+        .setData({"type": "completed", "completed": Timestamp.now()}, merge: true);
   }
 
   Future<void> createList(String uid, ShoppingList list) {
@@ -118,6 +117,15 @@ class DatabaseService {
         .collection("lists")
         .document(list.id)
         .setData({"name": list.name, "items" : items}, merge: true);
+  }
+
+  Future<void> deleteList(String uid, String listid) {
+    return _db
+        .collection("users")
+        .document(uid)
+        .collection("lists")
+        .document(listid)
+        .setData({"type": "deleted", "deleted": Timestamp.now()}, merge: true);
   }
 
 
