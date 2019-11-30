@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:listassist/models/ShoppingList.dart';
@@ -24,18 +25,33 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
   String uid = "";
   bool useCache = false;
 
+  Timer _debounce;
+  int _debounceTime = 1500;
+
+  void itemChange(bool val, int index){
+    setState(() {
+      list.items[index].bought = val;
+    });
+    if (_debounce?.isActive ?? false) _debounce.cancel();
+    _debounce = Timer(Duration(milliseconds: _debounceTime), () {
+      if(list != null && uid != null || uid.length > 0){
+        databaseService.updateList(uid, list)
+          .then((onUpdate) {
+            print("Saved items");
+          })
+          .catchError((onError) {
+            InfoOverlay.showErrorSnackBar("Fehler beim aktualisieren der Einkaufsliste");
+          });
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     if(!useCache) {
       list = Provider.of<List<ShoppingList>>(context)[widget.index];
     }
     uid = Provider.of<User>(context).uid;
-
-    void itemChange(bool val, int index){
-      setState(() {
-        list.items[index].bought = val;
-      });
-    }
 
     return Scaffold(
       appBar: AppBar(
