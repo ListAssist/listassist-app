@@ -4,12 +4,12 @@ import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
 import 'package:listassist/services/db.dart';
+import 'package:listassist/widgets/shoppinglist/edit_shopping_list.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:listassist/services/camera.dart';
 import 'package:listassist/services/info-overlay.dart';
 import 'package:listassist/widgets/camera-scanner/camera-scanner.dart';
-
 
 class ShoppingListDetail extends StatefulWidget {
   final int index;
@@ -57,6 +57,15 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.primary,
         title: Text(list.name),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.edit),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => EditShoppingList(index: widget.index)),
+            ),
+          )
+        ],
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
