@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-import 'package:listassist/assets/custom_icons_icons.dart';
+import 'package:listassist/assets/custom_icons.dart';
+import 'package:listassist/models/Item.dart';
 import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
 import 'package:listassist/services/date_formatter.dart';

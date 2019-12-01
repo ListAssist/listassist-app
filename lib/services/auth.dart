@@ -7,6 +7,7 @@ import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:flutter_twitter_login/flutter_twitter_login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:listassist/models/User.dart';
+import 'package:listassist/models/current-screen.dart';
 import 'package:listassist/services/db.dart';
 import 'package:listassist/services/info-overlay.dart';
 import 'package:rxdart/rxdart.dart';
@@ -226,7 +227,7 @@ class ResultHandler {
     return true;
   }
 
-  static Future showError(Text title, Text message) async {
+  static Future<void> showError(Text title, Text message) async {
     await showDialog(
       context: authContext,
       builder: (BuildContext context) {
@@ -234,8 +235,8 @@ class ResultHandler {
           title: title,
           content: message,
           actions: <Widget>[
-            new FlatButton(
-              child: new Text("Schließen"),
+            FlatButton(
+              child: Text("Schließen"),
               onPressed: () {
                 Navigator.of(context).pop();
               },

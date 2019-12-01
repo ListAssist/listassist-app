@@ -20,7 +20,6 @@ class ShoppingListDetail extends StatefulWidget {
 }
 
 class _ShoppingListDetail extends State<ShoppingListDetail> {
-
   ShoppingList list;
   String uid = "";
   bool useCache = false;
@@ -81,7 +80,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
                 return Container(
                   child: CheckboxListTile(
                     value: list.items[index].bought,
-                    title: new Text("${list.items[index].name}", style: list.items[index].bought ? TextStyle(decoration: TextDecoration.lineThrough, decorationThickness: 3) : null),
+                    title: Text("${list.items[index].name}", style: list.items[index].bought ? TextStyle(decoration: TextDecoration.lineThrough, decorationThickness: 3) : null),
                     controlAffinity: ListTileControlAffinity.leading,
                     onChanged: (bool val) { itemChange(val, index); }
                   )
@@ -128,12 +127,12 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
                 ListTile(
                   leading: Icon(Icons.camera_alt),
                   title: Text("Kamera"),
-                  onTap: () => _pickImage(context, ImageSource.camera),
+                  onTap: () => _pickImage(context, ImageSource.camera, widget.index),
                 ),
                 ListTile(
                   leading: Icon(Icons.photo),
                   title: Text("Galerie"),
-                  onTap: () => _pickImage(context, ImageSource.gallery),
+                  onTap: () => _pickImage(context, ImageSource.gallery, widget.index),
                 )
               ]);
             },
@@ -143,12 +142,12 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
     );
   }
 
-  Future<void> _pickImage(BuildContext context, ImageSource imageSource) async {
+  Future<void> _pickImage(BuildContext context, ImageSource imageSource, int index) async {
     try {
       Map<String, dynamic> imageFormats = await cameraService.pickImage(imageSource);
       var _imageFile = imageFormats["imageFile"];
       var _image = imageFormats["lowLevelImage"];
-      Navigator.push(context, MaterialPageRoute(builder: (context) => CameraScanner(image: _image, imageFile: _imageFile,)));
+      Navigator.push(context, MaterialPageRoute(builder: (context) => CameraScanner(image: _image, imageFile: _imageFile, listIndex: index,)));
     } catch(e)  {
       print(e.toString());
     }
@@ -166,7 +165,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
               children: <Widget>[
                 RichText(text:
                 TextSpan(
-                    style: new TextStyle(
+                    style: TextStyle(
                       color: Theme.of(context).textTheme.title.color,
                     ),
                     children: <TextSpan> [

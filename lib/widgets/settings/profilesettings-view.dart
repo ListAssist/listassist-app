@@ -136,7 +136,7 @@ class _ProfileSettingsView extends State<ProfileSettingsView> {
         );
 
         progressDialog.show();
-        final task = storageService.upload(_imageFile, "${user.uid}/profile_pic", ext: ".png", includeTimestamp: false);
+        final task = storageService.upload(_imageFile, "users/${user.uid}/profile-picture", ext: "png", includeTimestamp: false);
         task.events.listen((event) async {
           if (!progressDialog.isShowing()) {
             task.cancel();
@@ -152,7 +152,7 @@ class _ProfileSettingsView extends State<ProfileSettingsView> {
           if (progressDialog.isShowing()) {
             progressDialog.update(
                 progress: (progressPercent * 100).round().toDouble(),
-                message: progressPercent > .70 ? "Fast fertig.." : "Rechnung wird hochgeladen.."
+                message: progressPercent > .70 ? "Fast fertig.." : "Profilbild wird hochgeladen.."
             );
             if (task.isSuccessful) {
               progressDialog.hide();

@@ -36,8 +36,8 @@ dependencies:
   google_sign_in:
   flutter_twitter_login:
   flutter_facebook_login:
-  flutter_signin_button:
-
+  flutter_signin_button: ^1.0.0
+  flutter_form_builder: ^3.6.1
   # state management
   rxdart:
   scoped_model:
@@ -53,6 +53,8 @@ dependencies:
   image_crop:
   dio:
   progress_indicator_button:
+  algolia:
+  flutter_typeahead:
 
   # design
   fluttertoast:

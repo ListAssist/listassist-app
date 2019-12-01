@@ -98,7 +98,7 @@ class DatabaseService {
         .setData({"type": "completed", "completed": Timestamp.now()}, merge: true);
   }
 
-  Future<void> createList(String uid, ShoppingList list) {
+  Future<DocumentReference> createList(String uid, ShoppingList list) {
     var items = list.items.map((e) => e.toJson()).toList();
 
     return _db
@@ -108,6 +108,13 @@ class DatabaseService {
         .add({"name": list.name , "type": list.type, "items" : items, "created": list.created});
   }
 
+  Future<void> updateProfileName(String uid, String newName) {
+    return _db
+        .collection('users')
+        .document(uid)
+        .updateData({'displayName': newName});
+  }
+  
   Future<void> updateList(String uid, ShoppingList list) {
     var items = list.items.map((e) => e.toJson()).toList();
 
@@ -128,19 +135,18 @@ class DatabaseService {
         .setData({"type": "deleted", "deleted": Timestamp.now()}, merge: true);
   }
 
-
-  void updateProfileName(String uid, String newName) {
-    _db
-        .collection('users')
-        .document(uid)
-        .updateData({'displayName': newName});
-  }
-
-  void updateEmail(String uid, String newEmail) {
-    _db
+  Future<void> updateEmail(String uid, String newEmail) {
+    return _db
         .collection('users')
         .document(uid)
         .updateData({'email': newEmail});
+  }
+
+  void addProductToProductList(String name) {
+    _db
+        .collection('products')
+        .document()
+        .setData({'name': name});
   }
 
 }

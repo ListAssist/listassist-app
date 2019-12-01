@@ -19,7 +19,7 @@ class Detection {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+    final Map<String, dynamic> data = Map<String, dynamic>();
     data["x"] = this.x;
     data["y"] = this.y;
     data["width"] = this.width;

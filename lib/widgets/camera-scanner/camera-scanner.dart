@@ -1,20 +1,27 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:after_init/after_init.dart';
+import 'package:firebase_ml_vision/firebase_ml_vision.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/services.dart';
 import 'package:fancy_bottom_navigation/fancy_bottom_navigation.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:image_cropper/image_cropper.dart';
+import 'package:listassist/models/Detection.dart';
+import 'package:listassist/models/DetectionResponse.dart';
+import 'package:listassist/models/PossibleProduct.dart';
+import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
 import 'package:listassist/services/camera.dart';
 import 'package:listassist/services/http.dart';
 import 'package:listassist/services/calc.dart';
 import 'package:listassist/services/info-overlay.dart';
+import 'package:listassist/services/recognize.dart';
 import 'package:listassist/services/storage.dart';
 import 'package:listassist/widgets/camera-scanner/polygon-painter.dart';
 import 'package:progress_dialog/progress_dialog.dart';
@@ -25,8 +32,9 @@ enum EditorType {Editor, Trainer, Recognizer}
 class CameraScanner extends StatefulWidget {
   final ui.Image image;
   final File imageFile;
+  final int listIndex;
 
-  const CameraScanner({Key key, @required this.image, @required this.imageFile}) : super(key: key);
+  const CameraScanner({Key key, @required this.image, @required this.imageFile, this.listIndex}) : super(key: key);
 
   @override
   CameraScannerState createState() => CameraScannerState();
@@ -109,60 +117,69 @@ class CameraScannerState extends State<CameraScanner> with AfterInitMixin<Camera
                 ProgressDialog dialog = InfoOverlay.showDynamicProgressDialog(context, "Rechnung wird hochgeladen..");
                 dialog.show();
                 try {
-                  /// Upload for detection
-                  await httpService.getDetections(
-                      _imageFile,
-                      calcService.exportPoints(
-                        [_points[0], _points[2], _points[4], _points[6]],
-                        _image,
-                        boundingBox,
-                      ),
-                      onProgress: (int sent, int total) {
-                        double percentage = (sent * 100 / total).roundToDouble();
-                        dialog.update(progress: percentage / 2);
-                      }
-                  );
+                  DetectionResponse detection;
 
-                  /// Upload to firestore
-                  var task = storageService.upload(_imageFile, "${user.uid}/lists/qjiwej1i23j/", concatString: "");
-                  task.events.listen((event) async {
-                    if (task.isInProgress) {
-                      double percentage = (event.snapshot.bytesTransferred * 100 / event.snapshot.totalByteCount).roundToDouble();
-                      dialog.update(progress: 50 + percentage / 2, message: percentage / 2 > 50 ? "Fast fertig.." : null);
-                    }
-                  });
-                  await task.onComplete;
+                  switch (_currentEditorType) {
+                    case EditorType.Editor:
+                      detection = await httpService.getDetection(_imageFile);
+                      break;
+                    case EditorType.Trainer:
+                      /*
+                      API Logic for trainer which trains our network
+                       */
+                      /// Upload for detection
+                      detection = await httpService.getDetectionWithCoords(
+                          _imageFile,
+                          calcService.exportPoints(
+                            [_points[0], _points[2], _points[4], _points[6]],
+                            _image,
+                            boundingBox,
+                          ),
+                          onProgress: (int sent, int total) {
+                            double percentage = (sent * 100 / total).roundToDouble();
+                            dialog.update(progress: percentage / 2);
+                          }
+                      );
+                      break;
+                    case EditorType.Recognizer:
+                      /*
+                      API Logic for auto reocgnizer
+                      */
+                      detection = await httpService.getAutoDetection(_imageFile);
+                      break;
+                  }
+
+                  /// Check if the camera scanner should check shopping lists or create a new one
+                  if (widget.listIndex != null) {
+                    ShoppingList selectedList = Provider.of<List<ShoppingList>>(context)[widget.listIndex];
+                    List<PossibleProduct> products = recognizeService.processResponse(detection);
+                      print(products);
+
+                      /*
+                    /// Upload to firestore
+                    var task = storageService.upload(
+                        _imageFile,
+                        "users/${user.uid}/lists/${selectedList.id}/",
+                        concatString: "",
+                        includeTimestamp: true,
+                        metadata: StorageMetadata(customMetadata: {"coordinates": jsonEncode(calcService.exportPoints([_points[0], _points[2], _points[4], _points[6]], _image, boundingBox))}));
+                    task.events.listen((event) async {
+                      if (task.isInProgress) {
+                        double percentage = (event.snapshot.bytesTransferred * 100 / event.snapshot.totalByteCount).roundToDouble();
+                        dialog.update(progress: 50 + percentage / 2, message: percentage / 2 > 50 ? "Fast fertig.." : null);
+                      }
+                    });
+                    await task.onComplete;
+                    */
+                  } else {
+
+                  }
                 } catch (e) {
+                  print(e);
                   InfoOverlay.showErrorSnackBar("Hochladevorgang fehlgeschlagen.");
                 } finally {
                   dialog.dismiss();
                 }
-                  /*
-                progressDialog.show();
-                final task = storageService.upload(_imageFile, user);
-                task.events.listen((event) async {
-                  if (!progressDialog.isShowing()) {
-                    task.cancel();
-                    progressDialog.dismiss();
-                    InfoSnackbar.showErrorSnackBar("Hochladevorgang wurde abgebrochen");
-                    return;
-                  }
-
-                  var snap = event.snapshot;
-                  double progressPercent = snap != null
-                      ? snap.bytesTransferred / snap.totalByteCount
-                      : 0;
-                  if (progressDialog.isShowing()) {
-                    progressDialog.update(
-                        progress: (progressPercent * 100).round().toDouble(),
-                        message: progressPercent > .70 ? "Fast fertig.." : "Rechnung wird hochgeladen.."
-                    );
-                    if (task.isSuccessful) {
-                      progressDialog.hide();
-                    }
-                  }
-                });
-                 */
               }
           ),
           SpeedDialChild(

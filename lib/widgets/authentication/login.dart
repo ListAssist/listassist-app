@@ -13,7 +13,7 @@ class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-        margin: EdgeInsets.all(40),
+        margin: EdgeInsets.all(25),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
@@ -27,16 +27,22 @@ class LoginPage extends StatelessWidget {
 
 }
 
-class _LoginForm extends StatelessWidget {
-  final _formKey = new GlobalKey<FormState>();
+class _LoginForm extends StatefulWidget {
+  @override
+  _LoginFormState createState() => _LoginFormState();
+}
+
+class _LoginFormState extends State<_LoginForm> {
+  final _formKey = GlobalKey<FormState>();
+
   String _email = "";
 
   final _passwordFocus = FocusNode();
+
   String _password = "";
 
   @override
   Widget build(BuildContext context) {
-    bool loading = Provider.of<bool>(context);
     return Form(
         key: _formKey,
         child: Column(
@@ -106,7 +112,6 @@ class _LoginForm extends StatelessWidget {
       await authService.signInWithMail(_email, _password);
     }
   }
-
 }
 
 class SocialSignInButtons extends StatelessWidget {

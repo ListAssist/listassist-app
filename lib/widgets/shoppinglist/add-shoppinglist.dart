@@ -1,7 +1,8 @@
+import 'package:algolia/algolia.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:extended_math/extended_math.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:listassist/models/Item.dart';
 import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
@@ -20,24 +21,38 @@ class _AddShoppinglist extends State<AddShoppinglist> {
   final _productTextController = TextEditingController();
   final _nameTextController = TextEditingController();
 
+  Algolia algolia = Application.algolia;
+
   bool _nameIsValid = false;
   bool _productsIsNotEmpty = true;
   bool _productIsValid = true;
   bool _listIsValid = false;
 
-  var rng = new Random();
-
-  var _products = [
-    new Item(name: "Apfel", bought: false),
-    new Item(name: "Kekse", bought: false),
-    new Item(name: "Seife", bought: false),
-    new Item(name: "Öl", bought: false)
+  List<Item> _products = [
   ];
 
-  void itemChange(bool val, int index){
+  List<Item> _productsTicked = [
+
+  ];
+
+  _tickItem(int index){
     setState(() {
-      _products[index].bought = val;
+      _products[index].bought = true;
+      _productsTicked.add(_products[index]);
+      _products.removeAt(index);
     });
+  }
+
+  _untickItem(int index){
+    setState(() {
+      _productsTicked[index].bought = false;
+      _products.add(_productsTicked[index]);
+      _productsTicked.removeAt(index);
+    });
+  }
+
+  bool _productsIsEmpty(){
+    return _products.isEmpty && _productsTicked.isEmpty;
   }
 
   _addProduct(product) {
@@ -45,6 +60,12 @@ class _AddShoppinglist extends State<AddShoppinglist> {
     _productIsValid = true;
     for(var i = 0; i < _products.length; i++){
       if(_products[i].name == product){
+        _productIsValid = false;
+        return;
+      }
+    }
+    for(var i = 0; i < _productsTicked.length; i++){
+      if(_productsTicked[i].name == product){
         _productIsValid = false;
         return;
       }
@@ -75,6 +96,22 @@ class _AddShoppinglist extends State<AddShoppinglist> {
       Navigator.pop(context);
   }
 
+  _searchProducts(String search) async{
+    AlgoliaQuery query = algolia.instance.index('products').search(search);
+
+    AlgoliaQuerySnapshot snap = await query.getObjects();
+
+    print("keko");
+    print(snap.hits[0].data);
+
+    List<dynamic> hits = List<dynamic>();
+    snap.hits.forEach((h) => {
+      hits.add(h.data)
+    });
+    return hits;
+  }
+
+
   FocusNode myFocusNode;
 
   @override
@@ -90,149 +127,6 @@ class _AddShoppinglist extends State<AddShoppinglist> {
     _productTextController.dispose();
     super.dispose();
   }
-
-
-
-  List<String> daten = List.from({
-    "Milk Protein Drink Choco Mountain",
-    "Milk Protein Drink Coffee County",
-    "Milk Protein Drink Vanilla Drive",
-    "Milk Protein Drink Raspberry Falls",
-    "Protein Pudding Choco Mountain",
-    "Protein Pudding Vanilla Drive",
-    "Milk Protein Drink Coco Island",
-    "Milk Protein Drink Blueberry River",
-    "Milk Protein Drink Mango Avenue",
-    "Powergel Shot Cola",
-    "Instant Hafer",
-    "Performance Smoothie Banane-Heidelbeer",
-    "Protein Plus High Protein Drink Schoko",
-    "Protein Plus High Protein Drink Vanille",
-    "FitRabbit Sportdrink",
-    "Bod.e Burn",
-    "Verve Energy Drink",
-    "Vegan Blend natur",
-    "Sport Isotonic Citrus Power",
-    "Protein Plus Sports Fruicy Orange-Mango",
-    "Body Fit Active L-Carnitine Apfelschorle",
-    "L-Carnitin Liquid",
-    "Mineral Vitamin Drink Orange",
-    "Plus Kohlenhydratdrink",
-    "Power Gel Fruit",
-    "Powerade Mountain Blast",
-    "Powerade Citrus Lime",
-    "Gatorade div Sorten",
-    "Professional Pyruvate Food Supplement",
-    "Guarana Shot",
-    "Protein Shake Schoko",
-    "L-Carnitine Liquid",
-    "L-Carnitine Water",
-    "Body Cool + Form",
-    "Magnesium Liquid",
-    "Active Cool + Fit",
-    "Energy Charge Drink",
-    "Iso Drink Grapefruit-Lime",
-    "Super Amino Liquid",
-    "Red Kick",
-    "Green Kick",
-    "Muscle Amino Drink",
-    "Isostar Hydrate & Perform Pulver Lemon",
-    "55g High Protein Shake Schoko",
-    "Creatin Monohydrat",
-    "Fat Free Protein 85",
-    "Hyperlyt Kirsche",
-    "Anti- Oxidant Formula",
-    "BCAA Kapseln",
-    "Super Chitosan",
-    "Kreatin-Monohydrat Pulver",
-    "Vitalstoffkapseln für Knochen und Knorpel",
-    "Perfect Body day",
-    "Perfect Body night",
-    "PEP 2",
-    "Body L-Carnitine Drops",
-    "Shake & Shape Weiße Schokolade",
-    "Professional Zell Max plus 2",
-    "BCAA Kapseln",
-    "Aminosäure 2300 Kapseln",
-    "Professional Triple Protein Complex",
-    "Professional Thermo Burner",
-    "L-Glutamine Powder neutral",
-    "Professional Pure CLA Capsules",
-    "Professional Double Protein Complex",
-    "Muscle Creatine",
-    "Creatine Caps",
-    "BCAA Plus",
-    "Whey Amino Tablets",
-    "Whey Isolate 100% Erdbeer",
-    "Muscle D-Fine",
-    "Formula 80 Protein Complex Heidelbeer-Joghurt",
-    "Soya Protein Shake Schokolade",
-    "Proteinplus 80% Shake Banane",
-    "Whey Protein Isolate Schoko",
-    "Fitmaxx Soya Protein Schoko/Vanille",
-    "Protein Plus Power Shake div Sorten",
-    "Whey Molke- und Milchprotein Shake Vanille",
-    "Whey Protein 100% Vanille",
-    "Whey Protein",
-    "Recovery Shake Schoko",
-    "Active Energy Charge",
-    "Fit Active",
-    "Fit Active Plus Blutorange",
-    "Active Fit Active Plus Q10",
-    "Fit Active L-Carnitine Drink",
-    "Body Molke Pro",
-    "Muscle Supergainer Schoko-Honig",
-    "Whey Gainer",
-    "Glutargo forte Zitrone",
-    "Energy Gel liquid",
-    "Isoactive Isotonic Sports Drink Zitrone",
-    "Gainer Shake Vanille",
-    "Gainer Shake Schokolade",
-    "Energizer Ultra Gel Cola-Geschmack",
-    "Body Molke Pro L-Carnitine",
-    "Muscle X-Plode",
-    "Professional Weight Gainer",
-    "Chimpanzee Energy Bar Aprikose",
-    "Chimpanzee Slim Bar Preiselbeere & Nüsse",
-    "Ride Sportriegel Erdnuss-Karamell",
-    "Crunch Fit Bar Joghurt",
-    "Active Energy Balance XXL",
-    "Active Oats Bar",
-    "Body Diet Fit",
-    "Energate Balance Bar Erdbeer-Vanille",
-    "L-Carnitine Bar Schoko-Crisp",
-    "Ovo Sport",
-    "Protein Bar Sweet Peanut",
-    "Bio Vegan Protein Riegel Vanille",
-    "Bio Vegan Protein Riegel Cocos",
-    "Bio Vegan Protein Riegel Choco Maca",
-    "53% Protein Bar Cookies",
-    "Power Pack classic white",
-    "Muscle Nutri Meal",
-    "Power Pack classic dark",
-    "Energy Bar div. Sorten",
-    "Natural Energy Cereal Riegel Sweet'n Salty",
-    "Proteinplus 30% Bar Vanille-Kokos",
-    "Proteinplus 30% Bar Cappuccino Caramel-Crisp",
-    "Proteinplus Bar LowCarb Vanille",
-    "Proteinplus 30% Bar Schokolade",
-    "Proteinplus Bar Erdbeer",
-    "Energize Bar Berry",
-    "Fitmaxx Bar 27% Protein",
-    "Fit'n Lite L-Carnitine Low Carb",
-    "Proteinplus + L-Carnitine Himbeer-Joghurt Riegel",
-    "Power Pack Haferflockenriegel Bananenbrot",
-    "Protein Wafer",
-    "Professional Weight Gainer Riegel",
-    "30% Protein Bar Kokos",
-    "pro-Sports Müsliriegel Choco-Orange",
-    "pro-Sports Müsliriegel Rote Beeren-Joghurt",
-    "Corny Sport Riegel 30% Protein Schoko",
-    "Corny Sport Riegel 30% Protein Karamell",
-    "Corny Sport 30% Eiweiß Buttermilch-Zitrone",
-    "Dörrfleisch vom Rind"
-  });
-
 
   @override
   Widget build(BuildContext context) {
@@ -257,25 +151,18 @@ class _AddShoppinglist extends State<AddShoppinglist> {
                     autofocus: true,
                     onChanged: (text){
                       setState(() {
-                        if(text.length > 1){
-                          _nameIsValid = true;
-                          if(_productsIsNotEmpty) {
-                            _listIsValid = true;
-                          }
-                        } else {
-                          _nameIsValid = false;
-                          _listIsValid = false;
-                        }
                         text.length > 1 ? _nameIsValid = true : _nameIsValid = false;
+                        _listIsValid = !_productsIsEmpty() && _nameIsValid;
                       });
                     },
                     onSubmitted: (term) => {
                       FocusScope.of(context).requestFocus(myFocusNode),
                     },
                     decoration: InputDecoration(
-                      border: UnderlineInputBorder(),
-                      contentPadding: EdgeInsets.all(3),
+                      border: OutlineInputBorder(),
+                      contentPadding: EdgeInsets.all(14),
                       labelText: 'Name',
+                      prefixIcon: Icon(Icons.list),
                       errorText: _nameIsValid ? null : 'Bitte einen gültigen Namen eingeben',
                     ),
                   )
@@ -285,26 +172,59 @@ class _AddShoppinglist extends State<AddShoppinglist> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Text("Produkte:"),
+
+
                       Row(
                         children: <Widget>[
                           Expanded(
-                            child: TextField(
-                              controller: _productTextController,
-                              focusNode: myFocusNode,
-                              onSubmitted: (term) => {
-                                if(_productTextController.text.length > 1){
-                                  _addProduct(_productTextController.text)
-                                },
-                                FocusScope.of(context).requestFocus(myFocusNode),
+                            child: TypeAheadField(
+
+                              suggestionsCallback: (pattern) async{
+                                if(pattern.isNotEmpty) {
+                                  return await _searchProducts(pattern);
+                                }
+                                return null;
                               },
-                              //keyboardType: TextInputType.emailAddress,
-                              decoration: InputDecoration(
-                                border: UnderlineInputBorder(),
-                                contentPadding: EdgeInsets.all(3),
-                                labelText: 'Produkt eingeben',
-                                errorText: _productsIsNotEmpty ? _productIsValid ? null : 'Dieses Produkt ist bereits in der Einkaufsliste' : 'Die Einkaufsliste benötigt Produkte',
+                              itemBuilder:  (context, suggestion) {
+                                print(suggestion);
+                                return ListTile(
+                                  leading: suggestion['category'] == "Allgemein" ? Icon(Icons.local_dining) : Icon(Icons.directions_run),
+                                  title: Text(suggestion['name']),
+                                  subtitle: Text(suggestion['category']),
+                                );
+                              },
+                              onSuggestionSelected:  (suggestion) {
+                                _addProduct(suggestion['name']);
+                                _productTextController.clear();
+                              },
+
+                              textFieldConfiguration: TextFieldConfiguration(
+                                controller: _productTextController,
+                                focusNode: myFocusNode,
+                                onSubmitted: (term) => {
+                                  if(_productTextController.text.length > 1){
+                                    _addProduct(_productTextController.text)
+                                  },
+                                  FocusScope.of(context).requestFocus(myFocusNode),
+                                },
+                                decoration: InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  contentPadding: EdgeInsets.all(14),
+                                  labelText: 'Produkt eingeben',
+                                  prefixIcon: Icon(Icons.add_circle_outline),
+                                  errorText: _productsIsNotEmpty ? _productIsValid ? null : 'Dieses Produkt ist bereits in der Einkaufsliste' : 'Die Einkaufsliste benötigt Produkte',
+                                ),
                               ),
+
+
+                              errorBuilder: (BuildContext context, Object error) =>
+                                  Text(
+                                      '$error' + "HEEE MAN KANN DIE ERRORS AUSBLENDEN",
+                                      style: TextStyle(
+                                          color: Theme.of(context).errorColor
+                                      )
+                                  ),
+
                             ),
                           ),
                           IconButton(
@@ -320,16 +240,6 @@ class _AddShoppinglist extends State<AddShoppinglist> {
 
                           PopupMenuButton<int>(
                             itemBuilder: (context) => [
-                              PopupMenuItem(
-                                value: 1,
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                  children: <Widget>[
-                                    Icon(Icons.category),
-                                    Text("Kategorien")
-                                  ],
-                                )
-                              ),
 
                               PopupMenuItem(
                                   value: 2,
@@ -341,73 +251,57 @@ class _AddShoppinglist extends State<AddShoppinglist> {
                                     ],
                                   )
                               ),
+
+                              PopupMenuItem(
+                                  value: 1,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                    children: <Widget>[
+                                      Icon(Icons.mic),
+                                      Text("Spracheingabe")
+                                    ],
+                                  )
+                              ),
+
+                              PopupMenuItem(
+                                value: 1,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                  children: <Widget>[
+                                    Icon(Icons.category),
+                                    Text("Kategorien")
+                                  ],
+                                )
+                              ),
+
                             ]
                           ),
-
-
                         ],
                       ),
+
                       Container(
-                        margin: EdgeInsets.only(top: 25.0),
-                        constraints: BoxConstraints(
-                          maxHeight: 530,
-                        ),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(5)),
-                          color: Color(0xffeeeeee),
-                        ),
-                        child: ListView.builder(
-                            itemCount: _products.length,
-                            scrollDirection: Axis.vertical,
-                            shrinkWrap: true,
-                            reverse: true,
-                            itemBuilder: (BuildContext context, int index){
-                              return Dismissible(
-                                key: Key(_products[index].name),
-                                direction: DismissDirection.startToEnd,
-                                background: Container(
-                                  child: Icon(Icons.delete, color: Colors.white,),
-                                  alignment: AlignmentDirectional.centerStart,
-                                  padding: EdgeInsets.only(left: 15),
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      stops: [0, 0.3],
-                                      colors: [Colors.red, Color(0xffeeeeee)],
-                                    ),
-                                    borderRadius: BorderRadius.all(Radius.circular(5)),
-                                  ),
-                                ),
-                                onDismissed: (direction){
-                                  setState(() {
-                                    _products.removeAt(index);
-                                    if(_products.length > 0){
-                                      _productsIsNotEmpty = true;
-                                      if(_nameIsValid){
-                                        _listIsValid = true;
-                                      }
-                                    } else {
-                                      _productsIsNotEmpty = false;
-                                      _listIsValid = false;
-                                    }
-                                  });
-                                },
-                                child: Container(
-                                    child: CheckboxListTile(
-                                        value: _products[index].bought,
-                                        title: new Text("${_products[index].name}"),
-                                        controlAffinity: ListTileControlAffinity.leading,
-                                        onChanged: (bool val) { itemChange(val, index); },
-                                        secondary: IconButton(
-                                            icon: Icon(Icons.delete, color: Colors.red,),
-                                            onPressed: ()=>(){},
-                                        ),
-                                    )
-                                ),
-                              );
-                            }
-                        ),
+                        child: Text(_products.isNotEmpty || _productsTicked.isNotEmpty ? "Produkte:" : ""),
+                        margin: EdgeInsets.only(top: 25.0, bottom: 15.0),
                       ),
-                    ],
+
+                      _products.isNotEmpty ? Container(
+                        margin: EdgeInsets.only(bottom: 15.0),
+                        child: _showProductList(false),
+                      ) : Container(height: 0, width: 0,),
+
+                      Container(
+                        //margin: EdgeInsets.only(top: 15.0),
+                        child: _productsTicked.isNotEmpty ?
+                          ExpansionTile(
+                            title: Text("Abgehakt"),
+                            leading: Icon(Icons.beenhere),
+                            trailing: Icon(Icons.keyboard_arrow_down),
+                            children: <Widget>[
+                              _showProductList(true)
+                            ],
+                          ) : Container(height: 0, width: 0,),
+                      ),
+                      ],
                   )
               ),
             ],
@@ -421,4 +315,79 @@ class _AddShoppinglist extends State<AddShoppinglist> {
     );
   }
 
+
+
+  _showProductList (bool ticked){
+    return Container(
+      constraints: BoxConstraints(
+        maxHeight: 530,
+      ),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(5)),
+        color: Color(0xffeeeeee),
+      ),
+      child: ListView.builder(
+          itemCount: ticked ? _productsTicked.length : _products.length,
+          scrollDirection: Axis.vertical,
+          shrinkWrap: true,
+          reverse: true,
+          itemBuilder: (BuildContext context, int index){
+            return Dismissible(
+              key: Key(ticked ? _productsTicked[index].name : _products[index].name),
+              direction: DismissDirection.startToEnd,
+              background: Container(
+                child: Icon(Icons.delete, color: Colors.white,),
+                alignment: AlignmentDirectional.centerStart,
+                padding: EdgeInsets.only(left: 15),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    stops: [0, 0.3],
+                    colors: [Colors.red, Color(0xffeeeeee)],
+                  ),
+                  borderRadius: BorderRadius.all(Radius.circular(5)),
+                ),
+              ),
+
+              onDismissed: (direction){
+                setState(() {
+                  ticked ? _productsTicked.removeAt(index) : _products.removeAt(index);
+                  _listIsValid = !_productsIsEmpty() && _nameIsValid;
+                });
+              },
+
+              child: Container(
+                  child: CheckboxListTile(
+                    value: ticked ? _productsTicked[index].bought : _products[index].bought,
+                    title: ticked ?
+                      Text("${_productsTicked[index].name}",  style: TextStyle(decoration: TextDecoration.lineThrough))
+                        :
+                      Text( "${_products[index].name}"),
+
+                    controlAffinity: ListTileControlAffinity.leading,
+                    onChanged: (bool val) { ticked ? _untickItem(index) : _tickItem(index); },
+                    secondary: IconButton(
+                      icon: Icon(Icons.delete, color: Colors.red,),
+                      onPressed: (){
+                        setState(() {
+                          ticked ? _productsTicked.removeAt(index) : _products.removeAt(index);
+                          _listIsValid = !_productsIsEmpty() && _nameIsValid;
+                        });
+                      },
+                    ),
+                  )
+              ),
+            );
+          }
+      ),
+    );
+  }
+
+
+}
+
+class Application {
+  static final Algolia algolia = Algolia.init(
+    applicationId: 'K2QDRTR8CM',
+    apiKey: 'd09e06f1376cf1137d8e72c9bd41bece',
+  );
 }

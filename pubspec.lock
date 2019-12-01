@@ -8,6 +8,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.1.2"
+  algolia:
+    dependency: "direct main"
+    description:
+      name: algolia
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.7"
   async:
     dependency: transitive
     description:
@@ -64,6 +71,20 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.14.11"
+  convert:
+    dependency: transitive
+    description:
+      name: convert
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.1.1"
+  crypto:
+    dependency: transitive
+    description:
+      name: crypto
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.1.3"
   cupertino_icons:
     dependency: "direct main"
     description:
@@ -78,6 +99,20 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.3.0"
+  date_range_picker:
+    dependency: transitive
+    description:
+      name: date_range_picker
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.6"
+  datetime_picker_formfield:
+    dependency: transitive
+    description:
+      name: datetime_picker_formfield
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.0-pre.5"
   dio:
     dependency: "direct main"
     description:
@@ -132,6 +167,13 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_chips_input:
+    dependency: transitive
+    description:
+      name: flutter_chips_input
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.6.0"
   flutter_facebook_login:
     dependency: "direct main"
     description:
@@ -139,6 +181,20 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.0.0"
+  flutter_form_builder:
+    dependency: "direct main"
+    description:
+      name: flutter_form_builder
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.6.1"
+  flutter_keyboard_visibility:
+    dependency: transitive
+    description:
+      name: flutter_keyboard_visibility
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.7.0"
   flutter_signin_button:
     dependency: "direct main"
     description:
@@ -172,6 +228,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.1.0"
+  flutter_typeahead:
+    dependency: "direct main"
+    description:
+      name: flutter_typeahead
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.7.0"
   flutter_vector_icons:
     dependency: "direct main"
     description:
@@ -200,6 +263,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "4.0.11"
+  http:
+    dependency: transitive
+    description:
+      name: http
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.12.0+2"
   http_parser:
     dependency: transitive
     description:
@@ -228,6 +298,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.6.1+10"
+  intl:
+    dependency: transitive
+    description:
+      name: intl
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.16.0"
   matcher:
     dependency: transitive
     description:
@@ -345,6 +422,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.5"
+  sy_flutter_widgets:
+    dependency: transitive
+    description:
+      name: sy_flutter_widgets
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.4"
   term_glyph:
     dependency: transitive
     description:
@@ -373,6 +457,20 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "5.2.1"
+  uuid:
+    dependency: transitive
+    description:
+      name: uuid
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.4"
+  validators:
+    dependency: transitive
+    description:
+      name: validators
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.0+1"  
   vector_math:
     dependency: transitive
     description:
