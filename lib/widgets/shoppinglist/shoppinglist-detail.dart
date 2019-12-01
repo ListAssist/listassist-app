@@ -123,7 +123,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
             labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
             labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
             onTap: () {
-              InfoOverlay.mainBottomSheet(context, [
+              InfoOverlay.mainModalBottomSheet(context, [
                 ListTile(
                   leading: Icon(Icons.camera_alt),
                   title: Text("Kamera"),
@@ -142,12 +142,26 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
     );
   }
 
+  void itemChange(bool val, int index){
+    setState(() {
+      list.items[index].bought = val;
+    });
+  }
+
   Future<void> _pickImage(BuildContext context, ImageSource imageSource, int index) async {
     try {
       Map<String, dynamic> imageFormats = await cameraService.pickImage(imageSource);
       var _imageFile = imageFormats["imageFile"];
       var _image = imageFormats["lowLevelImage"];
-      Navigator.push(context, MaterialPageRoute(builder: (context) => CameraScanner(image: _image, imageFile: _imageFile, listIndex: index,)));
+
+      /// get result from camera scanner
+      List<int> indecesToCheck = await Navigator.push(context, MaterialPageRoute(builder: (context) => CameraScanner(image: _image, imageFile: _imageFile, listIndex: index,)));
+      if (indecesToCheck != null) {
+        for (int i = 0; i < indecesToCheck.length; i++) {
+          itemChange(true, indecesToCheck[i]);
+        }
+      }
+      Navigator.pop(context);
     } catch(e)  {
       print(e.toString());
     }

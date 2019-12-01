@@ -37,7 +37,6 @@ dependencies:
   flutter_twitter_login:
   flutter_facebook_login:
   flutter_signin_button: ^1.0.0
-  flutter_form_builder: ^3.6.1
   # state management
   rxdart:
   scoped_model:
