@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         StreamProvider<User>.value(value: authService.userDoc,),
-        StreamProvider<bool>.value(value: authService.loading.asBroadcastStream()),
+        StreamProvider<bool>.value(value: authService.loading.asBroadcastStream().defaultIfEmpty(true)),
         StreamProvider<FirebaseUser>.value(value: authService.user)
       ],
       child: ScopedModel<ScreenModel>(
@@ -66,7 +66,7 @@ class _MainAppState extends State<MainApp> {
        key: authScaffoldKey,
        body: AnimatedSwitcher(
          duration: Duration(milliseconds: 600),
-         child: loading ? SpinKitDoubleBounce(color: Colors.blueAccent) : AuthenticationPage(),
+         child: loading != null && loading ? SpinKitDoubleBounce(color: Colors.blueAccent) : AuthenticationPage(),
        ),
         resizeToAvoidBottomInset: false,
      )

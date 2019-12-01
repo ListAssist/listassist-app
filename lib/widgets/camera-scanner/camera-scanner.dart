@@ -4,6 +4,7 @@ import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:after_init/after_init.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:fancy_bottom_navigation/fancy_bottom_navigation.dart';
 import 'package:flutter/cupertino.dart';
@@ -11,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:listassist/models/DetectionResponse.dart';
+import 'package:listassist/models/Item.dart';
 import 'package:listassist/models/PossibleProduct.dart';
 import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
@@ -20,6 +22,7 @@ import 'package:listassist/services/calc.dart';
 import 'package:listassist/services/info-overlay.dart';
 import 'package:listassist/services/recognize.dart';
 import 'package:listassist/widgets/camera-scanner/polygon-painter.dart';
+import 'package:listassist/widgets/camera-scanner/select-dialog.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:provider/provider.dart';
 
@@ -111,11 +114,12 @@ class CameraScannerState extends State<CameraScanner> with AfterInitMixin<Camera
               labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
               onTap: () async {
                 /// Show dialog while execution is made
-                ProgressDialog dialog = InfoOverlay.showDynamicProgressDialog(context, "Rechnung wird hochgeladen..");
+                ProgressDialog dialog = InfoOverlay.showDynamicProgressDialog(context, "Rechnung wird analysiert..");
                 dialog.show();
+                print("Hey");
                 try {
                   DetectionResponse detection;
-
+                  /// Do actions depending on what type of trainer was used
                   switch (_currentEditorType) {
                     case EditorType.Editor:
                       detection = await httpService.getDetection(_imageFile);
@@ -144,34 +148,43 @@ class CameraScannerState extends State<CameraScanner> with AfterInitMixin<Camera
                       break;
                   }
 
-                  /// Check if the camera scanner should check shopping lists or create a new one
-                  if (widget.listIndex != null) {
-                    ShoppingList selectedList = Provider.of<List<ShoppingList>>(context)[widget.listIndex];
-                    List<PossibleProduct> products = recognizeService.processResponse(detection);
+                  List<PossibleProduct> products = recognizeService.processResponse(detection, removeIfNoMapping: true);
+                  if (products.isNotEmpty) {
+                    /// Check if the camera scanner should check shopping lists or create a new one
+                    if (widget.listIndex != null) {
+                      ShoppingList selectedList = Provider.of<List<ShoppingList>>(context)[widget.listIndex];
 
-                    List<String> detectedItems = [];
-                    List<int> indecesToCheck = [];
-                    /// Check for matches in shopping list with Edit Distance
-                    /// TODO: Combine with other distance forms to optimize result
-                    if ("Settings" == "are okay with this")
-                    for (int i = 0; i < products.length; i++) {
-                      String name = products[i].name.join("");
-                      for (int j = 0; j < selectedList.items.length; j++) {
-                        /// Get edit distance and check for a threshold if it's somewhere similar
-                        int distance = recognizeService.editDistance(name.replaceAll(" ", ""), selectedList.items[j].name.replaceAll(" ", ""));
-                        if (distance <= 7) {
+                      /// let user choose what is corrrect of our detections
+                      if ("Settings" == "are okay with this" || true) {
+                        var selectedProducts = await showSelectDialog(context, products);
+                        if (selectedProducts != null) {
+                          products = selectedProducts;
+                        }
+                      }
+
+                      /// Check for matches in shopping list with Edit Distance
+                      /// TODO: Combine with other distance forms to optimize result
+                      List<String> detectedItems = [];
+                      List<int> indecesToCheck = [];
+                      for (int i = 0; i < products.length; i++) {
+                        String name = products[i].name.join("");
+                        int closestDistanceItemIndex = -1;
+                        int score = -1;
+
+                        for (int j = 0; j < selectedList.items.length; j++) {
+                          /// Get edit distance and check for a threshold if it's somewhere similar
+                          int distance = recognizeService.editDistance(name.replaceAll(" ", ""), selectedList.items[j].name.replaceAll(" ", ""));
+
+                          if (distance == score) {
+
+                          }
                           /// add to detected items and add to array of indeces to be checked
                           detectedItems.add(selectedList.items[j].name);
                           indecesToCheck.add(j);
                         }
                       }
-                    } else {
-                      /// TODO: Show modal and let user choose what is corrrect of our calculations
 
-                    }
-
-
-                    /*
+                      /*
                     /// Upload to firestore
                     var task = storageService.upload(
                         _imageFile,
@@ -193,10 +206,13 @@ class CameraScannerState extends State<CameraScanner> with AfterInitMixin<Camera
                     await task.onComplete;
                     */
 
-                    /// Send calculated data back to the screen
-                    //Navigator.pop(context, foundIndeces);
+                      /// Send calculated data back to the screen
+                      //Navigator.pop(context, foundIndeces);
+                    } else {
+                      /// TODO: Implement Logic for creating new shopping lists from scanning an existing one
+                    }
                   } else {
-                    /// TODO: Implement Logic for creating new shopping lists from scanning an existing one
+                    InfoOverlay.showErrorSnackBar("Leider konnten wir keine Produkte erkennen. Versuchen Sie es erneut!");
                   }
                 } on HttpException catch (e) {
                   print(e);

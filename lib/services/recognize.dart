@@ -3,14 +3,14 @@ import 'package:listassist/models/PossibleProduct.dart';
 
 class RecognizeService {
   // final String blackList = "%()[]{}²³/\\!§?^°_#";
-  final RegExp blackList = RegExp(r"%|§|?|^|°|_|²|³|#|€|EUR");
+  final RegExp blackList = RegExp(r"%|§|\?|\^|°|_|²|³|#|€|EUR|kassa|bon-nr|bonnr|filiale", caseSensitive: false);
   final RegExp regexPreprocessing = RegExp(r"\.|[0-9]|kg|g|-");
   // final List<String> marken = ["clever", "oetk", "nöm", "knorr"];
 
   final int minLength = 3;
 
 
-  List<PossibleProduct> processResponse(DetectionResponse response) {
+  List<PossibleProduct> processResponse(DetectionResponse response, {bool removeIfNoMapping = false, double priceThreshold = 1000}) {
     List<PossibleProduct> output = [];
 
     /// Split texts into array seperated by new lines
@@ -29,13 +29,17 @@ class RecognizeService {
           PossibleProduct product;
           if (double.tryParse(correctedLine.last) != null) {
             double price = double.parse(correctedLine.last);
-            correctedLine.removeLast();
-
-            product = PossibleProduct(name: _preprocessName(correctedLine), price: price);
-          } else {
+            if (price < priceThreshold) {
+              correctedLine.removeLast();
+              if (!removeIfNoMapping || correctedLine.join("").isNotEmpty) {
+                product = PossibleProduct(name: _preprocessName(correctedLine), price: price);
+                output.add(product);
+              }
+            }
+          } else if (!removeIfNoMapping) {
             product = PossibleProduct(name: _preprocessName(correctedLine));
+            output.add(product);
           }
-          output.add(product);
         }
       }
     }
@@ -129,6 +133,7 @@ class RecognizeService {
 
   /// Check if String contains unwanted char
   bool _containsBlacklistedItem(String toCheck) {
+    print("$toCheck is ${blackList.hasMatch(toCheck)}");
     /// Check if char in string which is not allowed and delete part from line
     if (blackList.hasMatch(toCheck)) {
       return true;
