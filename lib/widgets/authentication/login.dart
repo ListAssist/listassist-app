@@ -6,6 +6,8 @@ import 'package:listassist/services/auth.dart';
 import 'package:listassist/validators/email.dart';
 import 'package:listassist/validators/password.dart';
 import 'package:listassist/widgets/forms/formfield.dart';
+import 'package:progress_indicator_button/progress_button.dart';
+import 'package:provider/provider.dart';
 
 class LoginPage extends StatelessWidget {
   @override
@@ -34,6 +36,7 @@ class _LoginForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool loading = Provider.of<bool>(context);
     return Form(
         key: _formKey,
         child: Column(
@@ -70,26 +73,37 @@ class _LoginForm extends StatelessWidget {
                 ],
               ),
             ),
-            MaterialButton(
-              child: Text(
-                "Log in",
-                style: TextStyle(
-                    color: Colors.white
+            Container(
+              width: 100,
+              height: 40,
+              child: ProgressButton(
+                child: Text(
+                  "Log in",
+                  style: TextStyle(
+                      color: Colors.white
+                  ),
                 ),
+                onPressed: (AnimationController controller) async {
+                  controller.forward();
+                  await submit();
+                  controller.reverse();
+                },
+                borderRadius: BorderRadius.all(Radius.circular(4)),
+                color: Theme.of(context).primaryColor,
+                progressIndicatorColor: Colors.white,
+                progressIndicatorSize: 20,
               ),
-              onPressed: () => submit(),
-              color: Colors.blueAccent,
             )
           ],
         )
     );
   }
 
-  void submit() async {
+  Future<void> submit() async {
     if (_formKey.currentState.validate()) {
       _formKey.currentState.save();
 
-      authService.signInWithMail(_email, _password);
+      await authService.signInWithMail(_email, _password);
     }
   }
 

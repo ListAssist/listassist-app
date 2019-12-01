@@ -6,6 +6,7 @@ import 'package:listassist/validators/password.dart';
 import 'package:listassist/validators/username.dart';
 
 import 'package:listassist/widgets/forms/formfield.dart';
+import 'package:progress_indicator_button/progress_button.dart';
 import 'login.dart';
 
 class RegisterPage extends StatelessWidget {
@@ -87,22 +88,33 @@ class _RegisterForm extends StatelessWidget {
                 ],
               ),
             ),
-            MaterialButton(
-              child: Text(
-                "Registrieren",
-                style: TextStyle(
-                    color: Colors.white
+            Container(
+              width: 170,
+              height: 40,
+              child: ProgressButton(
+                child: Text(
+                  "Registrieren",
+                  style: TextStyle(
+                      color: Colors.white
+                  ),
                 ),
+                onPressed: (AnimationController controller) async {
+                  controller.forward();
+                  await submit();
+                  controller.reverse();
+                },
+                borderRadius: BorderRadius.all(Radius.circular(4)),
+                color: Theme.of(context).primaryColor,
+                progressIndicatorColor: Colors.white,
+                progressIndicatorSize: 20,
               ),
-              onPressed: () => submit(),
-              color: Colors.blueAccent,
             )
           ],
         )
     );
   }
 
-  void submit() async {
+  Future<void> submit() async {
     if (_formKey.currentState.validate()) {
       _formKey.currentState.save();
 

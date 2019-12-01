@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:listassist/models/User.dart';
-import 'package:listassist/widgets/settings/profilesettings-view.dart';
 import 'package:listassist/widgets/settings/notificationsettings-view.dart';
 import 'package:listassist/services/auth.dart';
+import 'package:listassist/widgets/settings/profilesettings-view.dart';
 import 'package:listassist/widgets/settings/shoppinglistsettings-view.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -18,15 +18,15 @@ class SettingsView extends StatelessWidget {
       builder: (BuildContext context) {
         // return object of type Dialog
         return AlertDialog(
-          title: new Text(
+          title: Text(
               "Abmelden",
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22)
           ),
-          content: new Text("Möchten Sie sich von Ihrem ListAssist-Konto abmelden?"),
+          content: Text("Möchten Sie sich von Ihrem ListAssist-Konto abmelden?"),
           actions: <Widget>[
             // usually buttons at the bottom of the dialog
-            new FlatButton(
-              child: new Text(
+            FlatButton(
+              child: Text(
                   "ABBRECHEN",
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)
               ),
@@ -34,7 +34,7 @@ class SettingsView extends StatelessWidget {
                 Navigator.pop(context);
               },
             ),
-            new FlatButton(
+            FlatButton(
               child: new Text(
                   "OK",
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)
@@ -136,7 +136,7 @@ class Test extends StatelessWidget {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => ProfilesettingsView()
+                              builder: (context) => ProfileSettingsView(),
                           )
                       )
                     },
