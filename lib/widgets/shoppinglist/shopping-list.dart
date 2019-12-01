@@ -18,6 +18,37 @@ class ShoppingList extends StatelessWidget {
         context,
         MaterialPageRoute(builder: (context) => ShoppingListDetail(index: this.index)),
       ),
+      onLongPressStart: (details) async {
+        RenderBox overlay = Overlay.of(context).context.findRenderObject();
+        dynamic picked = await showMenu(
+          context: context,
+          position: RelativeRect.fromRect(
+              details.globalPosition & Size(10, 10), // smaller rect, the touch area
+              Offset.zero & overlay.semanticBounds.size   // Bigger rect, the entire screen
+          ),
+          items: <PopupMenuEntry>[
+            PopupMenuItem(
+              value: 0,
+              child: Row(
+                children: <Widget>[
+                  Icon(Icons.edit),
+                  Text("Bearbeiten"),
+                ],
+              ),
+            ),
+            PopupMenuItem(
+              value: 1,
+              child: Row(
+                children: <Widget>[
+                  Icon(Icons.delete,),
+                  Text("Löschen"),
+                ],
+              ),
+            )
+          ]
+        );
+        print(picked);
+      },
       child: Container(
         padding: EdgeInsets.all(20),
         child: Align(
