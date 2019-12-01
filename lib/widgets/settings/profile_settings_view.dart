@@ -8,7 +8,7 @@ import 'package:listassist/models/User.dart';
 import 'package:listassist/services/auth.dart';
 import 'package:listassist/services/camera.dart';
 import 'package:listassist/services/db.dart';
-import 'package:listassist/services/info-overlay.dart';
+import 'package:listassist/services/info_overlay.dart';
 import 'package:listassist/services/storage.dart';
 import 'package:listassist/validators/email.dart';
 import 'package:progress_dialog/progress_dialog.dart';

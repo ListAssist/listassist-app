@@ -2,7 +2,7 @@ import 'package:custom_navigator/custom_navigator.dart';
 import 'package:flutter/material.dart';
 import 'package:listassist/models/User.dart';
 import 'package:listassist/services/db.dart';
-import 'package:listassist/widgets/shoppinglist/shoppinglist-view.dart';
+import 'package:listassist/widgets/shoppinglist/shopping_list_view.dart';
 import 'package:provider/provider.dart';
 import 'package:scoped_model/scoped_model.dart';
 

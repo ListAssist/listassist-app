@@ -2,7 +2,7 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:listassist/services/db.dart';
-import 'package:listassist/services/info-overlay.dart';
+import 'package:listassist/services/info_overlay.dart';
 
 class AddGroup extends StatefulWidget {
   @override

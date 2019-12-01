@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:listassist/models/Invite.dart' as model;
 import 'package:listassist/services/db.dart';
-import 'package:listassist/services/info-overlay.dart';
+import 'package:listassist/services/info_overlay.dart';
 
 
 class Invite extends StatefulWidget {

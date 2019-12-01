@@ -8,8 +8,8 @@ import 'package:listassist/widgets/shoppinglist/edit_shopping_list.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:listassist/services/camera.dart';
-import 'package:listassist/services/info-overlay.dart';
-import 'package:listassist/widgets/camera-scanner/camera-scanner.dart';
+import 'package:listassist/services/info_overlay.dart';
+import 'package:listassist/widgets/camera-scanner/camera_scanner.dart';
 
 class ShoppingListDetail extends StatefulWidget {
   final int index;

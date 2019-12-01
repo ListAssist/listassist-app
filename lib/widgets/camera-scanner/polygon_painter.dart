@@ -3,7 +3,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'dart:ui' as ui;
 
-import 'package:listassist/widgets/camera-scanner/camera-scanner.dart';
+import 'package:listassist/widgets/camera-scanner/camera_scanner.dart';
 
 
 class PolygonPainter extends CustomPainter {

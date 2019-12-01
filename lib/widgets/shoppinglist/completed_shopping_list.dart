@@ -3,7 +3,7 @@ import 'package:flutter/rendering.dart';
 import 'package:listassist/models/CompletedShoppingList.dart' as model;
 import 'package:listassist/services/date_formatter.dart';
 import 'package:provider/provider.dart';
-import 'completedshoppinglist-detail.dart';
+import 'completed_shopping_list_detail.dart';
 
 
 class CompletedShoppingList extends StatelessWidget {

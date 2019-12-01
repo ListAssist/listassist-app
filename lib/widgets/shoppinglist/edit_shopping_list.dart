@@ -4,7 +4,7 @@ import 'package:listassist/models/Item.dart';
 import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
 import 'package:listassist/services/db.dart';
-import 'package:listassist/services/info-overlay.dart';
+import 'package:listassist/services/info_overlay.dart';
 import 'package:provider/provider.dart';
 
 class EditShoppingList extends StatefulWidget {

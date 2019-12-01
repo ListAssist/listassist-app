@@ -19,10 +19,10 @@ import 'package:listassist/models/User.dart';
 import 'package:listassist/services/camera.dart';
 import 'package:listassist/services/http.dart';
 import 'package:listassist/services/calc.dart';
-import 'package:listassist/services/info-overlay.dart';
+import 'package:listassist/services/info_overlay.dart';
 import 'package:listassist/services/recognize.dart';
-import 'package:listassist/widgets/camera-scanner/polygon-painter.dart';
-import 'package:listassist/widgets/camera-scanner/select-dialog.dart';
+import 'package:listassist/widgets/camera-scanner/polygon_painter.dart';
+import 'package:listassist/widgets/camera-scanner/select_dialog.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:provider/provider.dart';
 

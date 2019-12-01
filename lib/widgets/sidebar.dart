@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:listassist/models/Group.dart';
 import 'package:listassist/models/User.dart';
 import 'package:listassist/services/db.dart';
-import 'package:listassist/widgets/group/group-view.dart';
+import 'package:listassist/widgets/group/group_view.dart';
 import 'package:listassist/models/current-screen.dart';
 import 'package:listassist/services/auth.dart';
-import 'package:listassist/widgets/settings/settings-view.dart';
-import 'package:listassist/widgets/invites/invite-view.dart';
-import 'package:listassist/widgets/shoppinglist/shoppinglist-view.dart';
+import 'package:listassist/widgets/settings/settings_view.dart';
+import 'package:listassist/widgets/invites/invite_view.dart';
+import 'package:listassist/widgets/shoppinglist/shopping_list_view.dart';
 import 'package:provider/provider.dart';
 
 

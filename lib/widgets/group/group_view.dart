@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:listassist/main.dart';
 import 'package:listassist/models/Group.dart';
-import 'package:listassist/widgets/group/add-group.dart';
-import 'package:listassist/widgets/group/group-item.dart';
+import 'package:listassist/widgets/group/add_group.dart';
+import 'package:listassist/widgets/group/group_item.dart';
 import 'package:provider/provider.dart';
 
 class GroupView extends StatelessWidget {

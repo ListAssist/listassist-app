@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:listassist/models/Group.dart';
-import 'package:listassist/widgets/group/group-detail.dart';
+import 'package:listassist/widgets/group/group_detail.dart';
 import 'package:provider/provider.dart';
 
 

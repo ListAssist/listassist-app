@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:listassist/widgets/shoppinglist/shoppinglist-detail.dart';
+import 'package:listassist/widgets/shoppinglist/shopping_list_detail.dart';
 import 'package:listassist/models/ShoppingList.dart' as model;
 import 'package:provider/provider.dart';
 

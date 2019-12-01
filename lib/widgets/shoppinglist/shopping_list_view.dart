@@ -4,9 +4,9 @@ import 'package:listassist/main.dart';
 import 'package:listassist/models/CompletedShoppingList.dart' as model2;
 import 'package:listassist/models/ShoppingList.dart' as model;
 import 'package:listassist/models/User.dart';
-import 'package:listassist/widgets/shoppinglist/completedshopping-list.dart';
-import 'package:listassist/widgets/shoppinglist/shopping-list.dart';
-import 'package:listassist/widgets/shoppinglist/add-shoppinglist.dart';
+import 'package:listassist/widgets/shoppinglist/completed_shopping_list.dart';
+import 'package:listassist/widgets/shoppinglist/shopping_list.dart';
+import 'package:listassist/widgets/shoppinglist/add_shopping_list.dart';
 import 'package:provider/provider.dart';
 
 class ShoppingListView extends StatelessWidget {
