@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:listassist/models/Item.dart';
 import 'package:listassist/models/ShoppingList.dart';
+import 'package:listassist/models/User.dart';
+import 'package:listassist/services/db.dart';
+import 'package:listassist/services/info-overlay.dart';
 import 'package:provider/provider.dart';
 
 class EditShoppingList extends StatefulWidget {
@@ -22,6 +25,7 @@ class _EditShoppingListState extends State<EditShoppingList> {
   @override
   Widget build(BuildContext context) {
     ShoppingList list = Provider.of<List<ShoppingList>>(context)[widget.index];
+    String uid = Provider.of<User>(context).uid;
     if(firstLoad) {
       copyItems = List.from(list.items);
       firstLoad = false;
@@ -58,7 +62,6 @@ class _EditShoppingListState extends State<EditShoppingList> {
                           onPressed: () {
                             setState(() {
                               copyItems.remove(i);
-                              print(copyItems);
                             });
                           }),
                         title: new Text("${i.name}", style: i.bought ? TextStyle(decoration: TextDecoration.lineThrough, decorationThickness: 3) : null),
@@ -73,8 +76,14 @@ class _EditShoppingListState extends State<EditShoppingList> {
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.save),
         onPressed: () {
-          //TODO: Save changes
-          String newName = _nameTextController.text;
+          databaseService.updateList(uid, ShoppingList(
+            id: list.id,
+            name: _nameTextController.text,
+            items: copyItems))
+          .then((onSaved) {
+            InfoOverlay.showInfoSnackBar("Einkaufsliste bearbeitet");
+            Navigator.of(context).pop();
+          });
         },
       ),
     );
