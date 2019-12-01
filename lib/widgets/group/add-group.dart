@@ -80,54 +80,52 @@ class _AddGroup extends State<AddGroup> {
         backgroundColor: Theme.of(context).colorScheme.primary,
         title: Text("Neue Gruppe erstellen"),
       ),
-      body: Container(
-        child: ListView(
-          children: <Widget>[
-            Padding(
-              padding: EdgeInsets.all(20),
-              child: TextField(
-                controller: _nameTextController,
-                decoration: InputDecoration(
-                  border: UnderlineInputBorder(),
-                  contentPadding: EdgeInsets.all(3),
-                  labelText: 'Gruppenname',
-                ),
-              )
-            ),
-            Padding(
-              padding: EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text("Gruppenmitglieder:"),
-                  Row(
-                    children: <Widget>[
-                      Expanded(
-                        child: TextField(
-                          controller: _memberTextController,
-                          keyboardType: TextInputType.emailAddress,
-                          decoration: InputDecoration(
-                            border: UnderlineInputBorder(),
-                            contentPadding: EdgeInsets.all(3),
-                            labelText: 'Email Adresse eingeben',
-                          ),
+      body: ListView(
+        children: <Widget>[
+          Padding(
+            padding: EdgeInsets.all(20),
+            child: TextField(
+              controller: _nameTextController,
+              decoration: InputDecoration(
+                border: UnderlineInputBorder(),
+                contentPadding: EdgeInsets.all(3),
+                labelText: 'Gruppenname',
+              ),
+            )
+          ),
+          Padding(
+            padding: EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text("Gruppenmitglieder:"),
+                Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: TextField(
+                        controller: _memberTextController,
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: InputDecoration(
+                          border: UnderlineInputBorder(),
+                          contentPadding: EdgeInsets.all(3),
+                          labelText: 'Email Adresse eingeben',
                         ),
                       ),
-                      IconButton(
-                        icon: Icon(Icons.add),
-                        onPressed: () => _addMember(_memberTextController.text)
-                      ),
-                    ],
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: _members.map((x) => Text(x)).toList(),
-                  ),
-                ],
-              )
-            ),
-          ],
-        )
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.add),
+                      onPressed: () => _addMember(_memberTextController.text),
+                    ),
+                  ],
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: _members.map((x) => Text(x)).toList(),
+                ),
+              ],
+            )
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.check),

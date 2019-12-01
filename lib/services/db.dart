@@ -7,7 +7,6 @@ import 'package:listassist/models/Group.dart';
 import 'package:listassist/models/Invite.dart';
 import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
-import 'package:async/async.dart' show StreamGroup;
 
 class DatabaseService {
   final Firestore _db = Firestore.instance;
@@ -96,8 +95,7 @@ class DatabaseService {
         .document(uid)
         .collection("lists")
         .document(listid)
-        .setData(
-        {"type": "completed", "completed": Timestamp.now()}, merge: true);
+        .setData({"type": "completed", "completed": Timestamp.now()}, merge: true);
   }
 
   Future<void> createList(String uid, ShoppingList list) {
@@ -109,6 +107,27 @@ class DatabaseService {
         .collection("lists")
         .add({"name": list.name , "type": list.type, "items" : items, "created": list.created});
   }
+
+  Future<void> updateList(String uid, ShoppingList list) {
+    var items = list.items.map((e) => e.toJson()).toList();
+
+    return _db
+        .collection("users")
+        .document(uid)
+        .collection("lists")
+        .document(list.id)
+        .setData({"name": list.name, "items" : items}, merge: true);
+  }
+
+  Future<void> deleteList(String uid, String listid) {
+    return _db
+        .collection("users")
+        .document(uid)
+        .collection("lists")
+        .document(listid)
+        .setData({"type": "deleted", "deleted": Timestamp.now()}, merge: true);
+  }
+
 
   void updateProfileName(String uid, String newName) {
     _db
