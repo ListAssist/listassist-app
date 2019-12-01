@@ -13,6 +13,7 @@ class ReactiveTextInputFormField extends StatefulWidget {
   final ValueChanged<String> onFieldSubmitted;
   final TextInputType keyboardType;
   final FocusNode focusNode;
+  final TextEditingController controller;
 
 
   ReactiveTextInputFormField({
@@ -24,7 +25,8 @@ class ReactiveTextInputFormField extends StatefulWidget {
     this.obscureText = false,
     this.onFieldSubmitted,
     this.keyboardType,
-    this.focusNode
+    this.focusNode,
+    this.controller,
   }): super(key: key);
 
   @override
@@ -32,13 +34,14 @@ class ReactiveTextInputFormField extends StatefulWidget {
 }
 
 class _ReactiveTextInputFormFieldState extends State<ReactiveTextInputFormField> {
-  final _fieldKey = new GlobalKey<FormFieldState>();
+  final _fieldKey = GlobalKey<FormFieldState>();
   bool _interacted = false;
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
       key: _fieldKey,
+      controller: widget.controller,
       autovalidate: _interacted,
       onFieldSubmitted: widget.onFieldSubmitted,
       maxLines: 1,

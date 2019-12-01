@@ -1,5 +1,5 @@
-name: shoppy
-description: Shoppy - The intelligent shopping list
+name: listassist
+description: ListAssist - The intelligent shopping list
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -23,20 +23,48 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons:
-  
+
+  # firebase
   firebase_core:
   firebase_auth:
   firebase_ml_vision:
   firebase_storage:
   cloud_firestore:
+  cloud_functions:
 
+  # auth
   google_sign_in:
-  flutter_twitter:
+  flutter_twitter_login:
   flutter_facebook_login:
-  flutter_signin_button:
-
+  flutter_signin_button: ^1.0.0
+  # state management
   rxdart:
   scoped_model:
+  provider:
+
+  # addons
+  url_launcher:
+  extended_math:
+  camera_fix_exception:
+  path_provider:
+  image_picker:
+  custom_navigator:
+  image_crop:
+  dio:
+  progress_indicator_button:
+  algolia:
+  flutter_typeahead:
+
+  # design
+  fluttertoast:
+  badges:
+  progress_dialog:
+  flutter_vector_icons:
+  flutter_speed_dial:
+  flutter_spinkit:
+  fancy_bottom_navigation:
+  image_cropper:
+  after_init:
 
 dev_dependencies:
   flutter_test:
@@ -48,6 +76,10 @@ dev_dependencies:
 
 # The following section is specific to Flutter.
 flutter:
+  fonts:
+    - family: CustomIcons
+      fonts:
+        - asset: assets/fonts/CustomIcons.ttf
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

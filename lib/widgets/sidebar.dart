@@ -1,39 +1,56 @@
+import 'package:custom_navigator/custom_navigator.dart';
 import 'package:flutter/material.dart';
-import 'package:shoppy/models/current-screen.dart';
-import 'package:shoppy/services/auth.dart';
-import 'package:shoppy/widgets/shoppinglist-view.dart';
+import 'package:listassist/models/Group.dart';
+import 'package:listassist/models/User.dart';
+import 'package:listassist/services/db.dart';
+import 'package:listassist/widgets/group/group_view.dart';
+import 'package:listassist/models/current-screen.dart';
+import 'package:listassist/services/auth.dart';
+import 'package:listassist/widgets/settings/settings_view.dart';
+import 'package:listassist/widgets/invites/invite_view.dart';
+import 'package:listassist/widgets/shoppinglist/shopping_list_view.dart';
+import 'package:provider/provider.dart';
 
-import '../main.dart';
 
 class Sidebar extends StatefulWidget {
   @override
   _Sidebar createState() => _Sidebar();
 }
 class _Sidebar extends State<Sidebar> {
-  String img = "https://proxy.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.tractionwise.com%2Fwp-content%2Fuploads%2F2016%2F04%2FIcon-Person.png&f=1&nofb=1";
-  String name = "Tobias Seczer";
-  String email = "tobias.seczer@gmail.com";
 
   @override
   Widget build(BuildContext context) {
+    User user = Provider.of<User>(context);
     return Drawer(
       child: Column(
         children: <Widget>[
           UserAccountsDrawerHeader(
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.primary,
-           ),
-            accountName: Text(name),
-            accountEmail: Text(email),
-            currentAccountPicture: CircleAvatar(
-              backgroundImage: NetworkImage(img),
+            ),
+            accountName: Text(user.displayName),
+            accountEmail: Text(user.email),
+            currentAccountPicture: Hero(
+              tag: "profilePicture",
+              child: CircleAvatar(
+                backgroundImage: NetworkImage(user.photoUrl),
+              ),
             ),
           ),
           ListTile(
             leading: Icon(Icons.list),
             title: Text("Einkaufslisten"),
             onTap: () {
-              ScreenModel.of(context).setScreen(ShoppingListView(), "Einkaufslisten");
+              ScreenModel.of(context).setScreen(MultiProvider(
+                  providers: [
+                    StreamProvider.value(value: databaseService.streamLists(user.uid)),
+                    StreamProvider.value(value: databaseService.streamListsHistory(user.uid))
+                  ],
+                  child: CustomNavigator(
+                    home: ShoppingListView(),
+                    pageRoute: PageRoutes.materialPageRoute,
+                  )
+              ));
               Navigator.pop(context);
             },
           ),
@@ -56,6 +73,13 @@ class _Sidebar extends State<Sidebar> {
             leading: Icon(Icons.group),
             title: Text("Gruppen"),
             onTap: () {
+              ScreenModel.of(context).setScreen(StreamProvider<List<Stream<Group>>>.value(
+                value: databaseService.streamGroupsFromUser(user.uid),
+                child: CustomNavigator(
+                  home: GroupView(),
+                  pageRoute: PageRoutes.materialPageRoute,
+                )
+              ));
               Navigator.pop(context);
             },
           ),
@@ -63,6 +87,7 @@ class _Sidebar extends State<Sidebar> {
             leading: Icon(Icons.mail),
             title: Text("Einladungen"),
             onTap: () {
+              ScreenModel.of(context).setScreen(InviteView());
               Navigator.pop(context);
             },
           ),
@@ -71,7 +96,8 @@ class _Sidebar extends State<Sidebar> {
             leading: Icon(Icons.settings),
             title: Text("Einstellungen"),
             onTap: () {
-              Navigator.pop(context);
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => SettingsView()));
             },
           ),
           Spacer(),

@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_signin_button/button_view.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
-import 'package:shoppy/services/auth.dart';
-import 'package:shoppy/validators/email.dart';
-import 'package:shoppy/validators/password.dart';
-import '../formfield.dart';
+import 'package:listassist/services/auth.dart';
+import 'package:listassist/validators/email.dart';
+import 'package:listassist/validators/password.dart';
+import 'package:listassist/widgets/forms/formfield.dart';
+import 'package:progress_indicator_button/progress_button.dart';
+import 'package:provider/provider.dart';
 
 class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-        margin: EdgeInsets.all(40),
+        margin: EdgeInsets.all(25),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
@@ -24,11 +27,18 @@ class LoginPage extends StatelessWidget {
 
 }
 
-class _LoginForm extends StatelessWidget {
-  final _formKey = new GlobalKey<FormState>();
+class _LoginForm extends StatefulWidget {
+  @override
+  _LoginFormState createState() => _LoginFormState();
+}
+
+class _LoginFormState extends State<_LoginForm> {
+  final _formKey = GlobalKey<FormState>();
+
   String _email = "";
 
   final _passwordFocus = FocusNode();
+
   String _password = "";
 
   @override
@@ -69,29 +79,39 @@ class _LoginForm extends StatelessWidget {
                 ],
               ),
             ),
-            MaterialButton(
-              child: Text(
-                "Log in",
-                style: TextStyle(
-                    color: Colors.white
+            Container(
+              width: 100,
+              height: 40,
+              child: ProgressButton(
+                child: Text(
+                  "Log in",
+                  style: TextStyle(
+                      color: Colors.white
+                  ),
                 ),
+                onPressed: (AnimationController controller) async {
+                  controller.forward();
+                  await submit();
+                  controller.reverse();
+                },
+                borderRadius: BorderRadius.all(Radius.circular(4)),
+                color: Theme.of(context).primaryColor,
+                progressIndicatorColor: Colors.white,
+                progressIndicatorSize: 20,
               ),
-              onPressed: () => submit(),
-              color: Colors.blueAccent,
             )
           ],
         )
     );
   }
 
-  void submit() async {
+  Future<void> submit() async {
     if (_formKey.currentState.validate()) {
       _formKey.currentState.save();
 
-      authService.signInWithMail(_email, _password);
+      await authService.signInWithMail(_email, _password);
     }
   }
-
 }
 
 class SocialSignInButtons extends StatelessWidget {
