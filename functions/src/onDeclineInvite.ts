@@ -3,7 +3,7 @@ import * as admin from 'firebase-admin';
 
 const db = admin.firestore();
 
-export const declineInvite = functions.https.onCall((data, context) => {
+export const declineInvite = functions.region("europe-west1").https.onCall((data, context) => {
   const inviteid = data.inviteid;
   const uid = context.auth.uid;
 

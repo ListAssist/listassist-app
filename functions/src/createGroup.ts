@@ -5,7 +5,7 @@ import Timestamp = admin.firestore.Timestamp;
 
 const db = admin.firestore();
 
-export const createGroup = functions.https.onCall(async (data, context) => {
+export const createGroup = functions.region("europe-west1").https.onCall(async (data, context) => {
     const title = data.title;
     const uid = context.auth.uid;
 

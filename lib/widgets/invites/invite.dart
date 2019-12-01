@@ -2,6 +2,7 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:listassist/models/Invite.dart' as model;
+import 'package:listassist/services/db.dart';
 import 'package:listassist/services/info-overlay.dart';
 
 
@@ -33,7 +34,7 @@ class _InviteState extends State<Invite> {
           IconButton(
             icon: Icon(Icons.check),
             onPressed: () async {
-              final HttpsCallable accept = CloudFunctions.instance.getHttpsCallable(
+              final HttpsCallable accept = cloudFunctionInstance.getHttpsCallable(
                   functionName: "acceptInvite"
               );
               try {
@@ -101,7 +102,7 @@ class _InviteState extends State<Invite> {
               child: Text("Ablehnen"),
               onPressed: () async {
                 declined = true;
-                final HttpsCallable decline = CloudFunctions.instance.getHttpsCallable(
+                final HttpsCallable decline = cloudFunctionInstance.getHttpsCallable(
                     functionName: "declineInvite"
                 );
                 try {

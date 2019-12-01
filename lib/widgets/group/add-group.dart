@@ -1,6 +1,7 @@
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:listassist/services/db.dart';
 import 'package:listassist/services/info-overlay.dart';
 
 class AddGroup extends StatefulWidget {
@@ -29,7 +30,7 @@ class _AddGroup extends State<AddGroup> {
     });
     print(_members);
     print(_nameTextController.text);
-    final HttpsCallable create = CloudFunctions.instance.getHttpsCallable(
+    final HttpsCallable create = cloudFunctionInstance.getHttpsCallable(
         functionName: "createGroup"
     );
     try {
@@ -40,7 +41,7 @@ class _AddGroup extends State<AddGroup> {
         InfoOverlay.showErrorSnackBar("Fehler beim Erstellen der Gruppe");
       }else {
         InfoOverlay.showInfoSnackBar("Gruppe ${_nameTextController.text} erstellt");
-        final HttpsCallable invite = CloudFunctions.instance.getHttpsCallable(
+        final HttpsCallable invite = cloudFunctionInstance.getHttpsCallable(
             functionName: "inviteUsers"
         );
         try {

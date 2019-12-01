@@ -4,7 +4,7 @@ import FieldValue = admin.firestore.FieldValue;
 
 const db = admin.firestore();
 
-export const acceptInvite = functions.https.onCall((data, context) => {
+export const acceptInvite = functions.region("europe-west1").https.onCall((data, context) => {
   const inviteid = data.inviteid;
   const uid = context.auth.uid;
 

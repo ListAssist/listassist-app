@@ -4,7 +4,7 @@ import Timestamp = admin.firestore.Timestamp;
 
 const db = admin.firestore();
 
-export const inviteUser = functions.https.onCall(async (data, context) => {
+export const inviteUser = functions.region("europe-west1").https.onCall(async (data, context) => {
     const targetuid = data.targetuid;
     const groupid = data.groupid;
     const groupname = data.groupname;

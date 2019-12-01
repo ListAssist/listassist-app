@@ -142,12 +142,6 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
     );
   }
 
-  void itemChange(bool val, int index){
-    setState(() {
-      list.items[index].bought = val;
-    });
-  }
-
   Future<void> _pickImage(BuildContext context, ImageSource imageSource, int index) async {
     try {
       Map<String, dynamic> imageFormats = await cameraService.pickImage(imageSource);
