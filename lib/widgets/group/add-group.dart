@@ -14,6 +14,8 @@ class _AddGroup extends State<AddGroup> {
   final _nameTextController = TextEditingController();
   List<String> _members = [];
 
+  bool _isCreating = false;
+
   _addMember(email) {
     setState(() {
       _memberTextController.clear();
@@ -22,6 +24,9 @@ class _AddGroup extends State<AddGroup> {
   }
 
   _createGroup() async {
+    setState(() {
+      _isCreating = true;
+    });
     print(_members);
     print(_nameTextController.text);
     final HttpsCallable create = CloudFunctions.instance.getHttpsCallable(
@@ -40,10 +45,10 @@ class _AddGroup extends State<AddGroup> {
         );
         try {
           dynamic resp2 = await invite.call(<String, dynamic>{
-              "targetuids": _members,
-              "groupid": resp.data["groupid"],
-              "groupname": resp.data["groupname"],
-              "from": resp.data["creator"],
+            "targetuids": _members,
+            "groupid": resp.data["groupid"],
+            "groupname": resp.data["groupname"],
+            "from": resp.data["creator"],
           });
           if (resp2.data["status"] == "Failed") {
             InfoOverlay.showErrorSnackBar("Fehler beim Verschicken");
@@ -72,10 +77,7 @@ class _AddGroup extends State<AddGroup> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme
-            .of(context)
-            .colorScheme
-            .primary,
+        backgroundColor: Theme.of(context).colorScheme.primary,
         title: Text("Neue Gruppe erstellen"),
       ),
       body: ListView(
@@ -126,9 +128,9 @@ class _AddGroup extends State<AddGroup> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-          child: Icon(Icons.check),
-          backgroundColor: Colors.green,
-          onPressed: () => _createGroup()
+        child: Icon(Icons.check),
+        backgroundColor: !_isCreating ? Colors.green : Colors.grey,
+        onPressed: () => !_isCreating ? _createGroup() : null,
       ),
     );
   }
