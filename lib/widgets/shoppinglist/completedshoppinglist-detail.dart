@@ -2,20 +2,30 @@ import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:listassist/assets/custom_icons.dart';
 import 'package:listassist/models/Item.dart';
+import 'package:listassist/models/ShoppingList.dart';
+import 'package:listassist/models/User.dart';
 import 'package:listassist/services/date_formatter.dart';
+import 'package:listassist/services/db.dart';
+import 'package:listassist/services/info-overlay.dart';
 import 'package:provider/provider.dart';
 import 'package:listassist/models/CompletedShoppingList.dart';
 
-class CompletedShoppingListDetail extends StatelessWidget {
+class CompletedShoppingListDetail extends StatefulWidget {
   final int index;
   CompletedShoppingListDetail({this.index});
 
+  @override
+  _CompletedShoppingListDetailState createState() => _CompletedShoppingListDetailState();
+}
+
+class _CompletedShoppingListDetailState extends State<CompletedShoppingListDetail> {
+
+  String _newName = "";
 
   @override
   Widget build(BuildContext context) {
-    CompletedShoppingList list = Provider.of<List<CompletedShoppingList>>(context)[this.index];
-    List<Item> completedItems = List<Item>();
-    list.items.forEach((i) { if(i.bought) { completedItems.add(i); } });
+    CompletedShoppingList list = Provider.of<List<CompletedShoppingList>>(context)[this.widget.index];
+    User user = Provider.of<User>(context);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.primary,
@@ -30,11 +40,11 @@ class CompletedShoppingListDetail extends StatelessWidget {
           ),
           Expanded(
               child: ListView.builder(
-                itemCount: completedItems.length,
+                itemCount: list.allItems.length,
                 itemBuilder: (BuildContext context, int index){
                   return ListTile(
-                    leading: Icon(Icons.check),
-                    title: Text("${completedItems[index].name}", style: TextStyle(fontSize: 16))
+                    leading: Icon(list.allItems[index].bought ? Icons.check : Icons.close),
+                    title: Text("${list.allItems[index].name}", style: TextStyle(fontSize: 16))
                   );
                 }
               )
@@ -58,7 +68,19 @@ class CompletedShoppingListDetail extends StatelessWidget {
             backgroundColor: Colors.green,
             label: "Copy to new",
             labelStyle: TextStyle(fontSize: 18.0),
-            onTap: () {},
+            onTap: () async {
+              ShoppingList newList;
+              await _showCreateCopyDialog();
+              if(_newName != null && _newName != "" && _newName.trim() != "") {
+                newList = list.createNewCopy(_newName);
+              }else {
+                newList = list.createNewCopy();
+              }
+
+              databaseService.createList(user.uid, newList).then((onComplete) {
+                InfoOverlay.showInfoSnackBar("Einkaufsliste wurde erfolgreich Kopiert");
+              });
+            },
           ),
           SpeedDialChild(
             child: Icon(Icons.picture_as_pdf),
@@ -72,4 +94,45 @@ class CompletedShoppingListDetail extends StatelessWidget {
     );
   }
 
+  Future<void> _showCreateCopyDialog() async {
+    TextEditingController _controller = TextEditingController();
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Einkaufsliste kopieren"),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                TextField(
+                  controller: _controller,
+                  decoration: new InputDecoration(
+                    hintText: "Neuer Einkaufslistenname"
+                  ),
+                  keyboardType: TextInputType.text,
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              textColor: Colors.red,
+              child: Text("Abbrechen"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            FlatButton(
+              child: Text("Neue Einkaufsliste erstellen"),
+              onPressed: () {
+                _newName = _controller.text;
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 }

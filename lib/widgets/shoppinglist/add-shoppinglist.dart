@@ -1,6 +1,5 @@
 import 'package:algolia/algolia.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:extended_math/extended_math.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
@@ -11,15 +10,12 @@ import 'package:listassist/services/db.dart';
 import 'package:provider/provider.dart';
 
 class AddShoppinglist extends StatefulWidget {
-  final List<Item> products;
-
-  const AddShoppinglist({Key key, this.products}) : super(key: key);
-
   @override
   _AddShoppinglist createState() => _AddShoppinglist();
 }
 
 class _AddShoppinglist extends State<AddShoppinglist> {
+
   User user;
 
   final _productTextController = TextEditingController();
@@ -32,12 +28,31 @@ class _AddShoppinglist extends State<AddShoppinglist> {
   bool _productIsValid = true;
   bool _listIsValid = false;
 
-  var _products = [];
+  List<Item> _products = [
+  ];
 
-  void itemChange(bool val, int index){
+  List<Item> _productsTicked = [
+
+  ];
+
+  _tickItem(int index){
     setState(() {
-      _products[index].bought = val;
+      _products[index].bought = true;
+      _productsTicked.add(_products[index]);
+      _products.removeAt(index);
     });
+  }
+
+  _untickItem(int index){
+    setState(() {
+      _productsTicked[index].bought = false;
+      _products.add(_productsTicked[index]);
+      _productsTicked.removeAt(index);
+    });
+  }
+
+  bool _productsIsEmpty(){
+    return _products.isEmpty && _productsTicked.isEmpty;
   }
 
   _addProduct(product) {
@@ -49,13 +64,19 @@ class _AddShoppinglist extends State<AddShoppinglist> {
         return;
       }
     }
+    for(var i = 0; i < _productsTicked.length; i++){
+      if(_productsTicked[i].name == product){
+        _productIsValid = false;
+        return;
+      }
+    }
     if(_nameIsValid){
       _listIsValid = true;
     }
 
     setState(() {
       _productTextController.clear();
-      _products.add(Item(name: product, bought: false));
+      _products.add(new Item(name: product, bought: false));
     });
   }
 
@@ -73,10 +94,6 @@ class _AddShoppinglist extends State<AddShoppinglist> {
       ));
 
       Navigator.pop(context);
-  }
-
-  void _search(String search) async{
-    await _searchProducts(search);
   }
 
   _searchProducts(String search) async{
@@ -101,10 +118,6 @@ class _AddShoppinglist extends State<AddShoppinglist> {
   void initState() {
     super.initState();
     myFocusNode = FocusNode();
-
-    if (widget.products != null) {
-      _products = widget.products;
-    }
   }
 
   @override
@@ -117,6 +130,7 @@ class _AddShoppinglist extends State<AddShoppinglist> {
 
   @override
   Widget build(BuildContext context) {
+
     user = Provider.of<User>(context);
 
     return Scaffold(
@@ -137,25 +151,18 @@ class _AddShoppinglist extends State<AddShoppinglist> {
                     autofocus: true,
                     onChanged: (text){
                       setState(() {
-                        if(text.length > 1){
-                          _nameIsValid = true;
-                          if(_productsIsNotEmpty) {
-                            _listIsValid = true;
-                          }
-                        } else {
-                          _nameIsValid = false;
-                          _listIsValid = false;
-                        }
                         text.length > 1 ? _nameIsValid = true : _nameIsValid = false;
+                        _listIsValid = !_productsIsEmpty() && _nameIsValid;
                       });
                     },
                     onSubmitted: (term) => {
                       FocusScope.of(context).requestFocus(myFocusNode),
                     },
                     decoration: InputDecoration(
-                      border: UnderlineInputBorder(),
-                      contentPadding: EdgeInsets.all(3),
+                      border: OutlineInputBorder(),
+                      contentPadding: EdgeInsets.all(14),
                       labelText: 'Name',
+                      prefixIcon: Icon(Icons.list),
                       errorText: _nameIsValid ? null : 'Bitte einen gültigen Namen eingeben',
                     ),
                   )
@@ -165,7 +172,8 @@ class _AddShoppinglist extends State<AddShoppinglist> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Text("Produkte:"),
+
+
                       Row(
                         children: <Widget>[
                           Expanded(
@@ -180,7 +188,7 @@ class _AddShoppinglist extends State<AddShoppinglist> {
                               itemBuilder:  (context, suggestion) {
                                 print(suggestion);
                                 return ListTile(
-                                  leading: Icon(Icons.directions_run),
+                                  leading: suggestion['category'] == "Allgemein" ? Icon(Icons.local_dining) : Icon(Icons.directions_run),
                                   title: Text(suggestion['name']),
                                   subtitle: Text(suggestion['category']),
                                 );
@@ -200,9 +208,10 @@ class _AddShoppinglist extends State<AddShoppinglist> {
                                   FocusScope.of(context).requestFocus(myFocusNode),
                                 },
                                 decoration: InputDecoration(
-                                  border: UnderlineInputBorder(),
-                                  contentPadding: EdgeInsets.all(3),
+                                  border: OutlineInputBorder(),
+                                  contentPadding: EdgeInsets.all(14),
                                   labelText: 'Produkt eingeben',
+                                  prefixIcon: Icon(Icons.add_circle_outline),
                                   errorText: _productsIsNotEmpty ? _productIsValid ? null : 'Dieses Produkt ist bereits in der Einkaufsliste' : 'Die Einkaufsliste benötigt Produkte',
                                 ),
                               ),
@@ -231,16 +240,6 @@ class _AddShoppinglist extends State<AddShoppinglist> {
 
                           PopupMenuButton<int>(
                             itemBuilder: (context) => [
-                              PopupMenuItem(
-                                value: 1,
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                  children: <Widget>[
-                                    Icon(Icons.category),
-                                    Text("Kategorien")
-                                  ],
-                                )
-                              ),
 
                               PopupMenuItem(
                                   value: 2,
@@ -252,73 +251,57 @@ class _AddShoppinglist extends State<AddShoppinglist> {
                                     ],
                                   )
                               ),
+
+                              PopupMenuItem(
+                                  value: 1,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                    children: <Widget>[
+                                      Icon(Icons.mic),
+                                      Text("Spracheingabe")
+                                    ],
+                                  )
+                              ),
+
+                              PopupMenuItem(
+                                value: 1,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                  children: <Widget>[
+                                    Icon(Icons.category),
+                                    Text("Kategorien")
+                                  ],
+                                )
+                              ),
+
                             ]
                           ),
-
                         ],
                       ),
 
                       Container(
-                        margin: EdgeInsets.only(top: 25.0),
-                        constraints: BoxConstraints(
-                          maxHeight: 530,
-                        ),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(5)),
-                          color: Color(0xffeeeeee),
-                        ),
-                        child: ListView.builder(
-                            itemCount: _products.length,
-                            scrollDirection: Axis.vertical,
-                            shrinkWrap: true,
-                            reverse: true,
-                            itemBuilder: (BuildContext context, int index){
-                              return Dismissible(
-                                key: Key(_products[index].name),
-                                direction: DismissDirection.startToEnd,
-                                background: Container(
-                                  child: Icon(Icons.delete, color: Colors.white,),
-                                  alignment: AlignmentDirectional.centerStart,
-                                  padding: EdgeInsets.only(left: 15),
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      stops: [0, 0.3],
-                                      colors: [Colors.red, Color(0xffeeeeee)],
-                                    ),
-                                    borderRadius: BorderRadius.all(Radius.circular(5)),
-                                  ),
-                                ),
-                                onDismissed: (direction){
-                                  setState(() {
-                                    _products.removeAt(index);
-                                    if(_products.length > 0){
-                                      _productsIsNotEmpty = true;
-                                      if(_nameIsValid){
-                                        _listIsValid = true;
-                                      }
-                                    } else {
-                                      _productsIsNotEmpty = false;
-                                      _listIsValid = false;
-                                    }
-                                  });
-                                },
-                                child: Container(
-                                    child: CheckboxListTile(
-                                        value: _products[index].bought,
-                                        title: Text("${_products[index].name}"),
-                                        controlAffinity: ListTileControlAffinity.leading,
-                                        onChanged: (bool val) { itemChange(val, index); },
-                                        secondary: IconButton(
-                                            icon: Icon(Icons.delete, color: Colors.red,),
-                                            onPressed: ()=>(){},
-                                        ),
-                                    )
-                                ),
-                              );
-                            }
-                        ),
+                        child: Text(_products.isNotEmpty || _productsTicked.isNotEmpty ? "Produkte:" : ""),
+                        margin: EdgeInsets.only(top: 25.0, bottom: 15.0),
                       ),
-                    ],
+
+                      _products.isNotEmpty ? Container(
+                        margin: EdgeInsets.only(bottom: 15.0),
+                        child: _showProductList(false),
+                      ) : Container(height: 0, width: 0,),
+
+                      Container(
+                        //margin: EdgeInsets.only(top: 15.0),
+                        child: _productsTicked.isNotEmpty ?
+                          ExpansionTile(
+                            title: Text("Abgehakt"),
+                            leading: Icon(Icons.beenhere),
+                            trailing: Icon(Icons.keyboard_arrow_down),
+                            children: <Widget>[
+                              _showProductList(true)
+                            ],
+                          ) : Container(height: 0, width: 0,),
+                      ),
+                      ],
                   )
               ),
             ],
@@ -331,6 +314,74 @@ class _AddShoppinglist extends State<AddShoppinglist> {
       ),
     );
   }
+
+
+
+  _showProductList (bool ticked){
+    return Container(
+      constraints: BoxConstraints(
+        maxHeight: 530,
+      ),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(5)),
+        color: Color(0xffeeeeee),
+      ),
+      child: ListView.builder(
+          itemCount: ticked ? _productsTicked.length : _products.length,
+          scrollDirection: Axis.vertical,
+          shrinkWrap: true,
+          reverse: true,
+          itemBuilder: (BuildContext context, int index){
+            return Dismissible(
+              key: Key(ticked ? _productsTicked[index].name : _products[index].name),
+              direction: DismissDirection.startToEnd,
+              background: Container(
+                child: Icon(Icons.delete, color: Colors.white,),
+                alignment: AlignmentDirectional.centerStart,
+                padding: EdgeInsets.only(left: 15),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    stops: [0, 0.3],
+                    colors: [Colors.red, Color(0xffeeeeee)],
+                  ),
+                  borderRadius: BorderRadius.all(Radius.circular(5)),
+                ),
+              ),
+
+              onDismissed: (direction){
+                setState(() {
+                  ticked ? _productsTicked.removeAt(index) : _products.removeAt(index);
+                  _listIsValid = !_productsIsEmpty() && _nameIsValid;
+                });
+              },
+
+              child: Container(
+                  child: CheckboxListTile(
+                    value: ticked ? _productsTicked[index].bought : _products[index].bought,
+                    title: ticked ?
+                      Text("${_productsTicked[index].name}",  style: TextStyle(decoration: TextDecoration.lineThrough))
+                        :
+                      Text( "${_products[index].name}"),
+
+                    controlAffinity: ListTileControlAffinity.leading,
+                    onChanged: (bool val) { ticked ? _untickItem(index) : _tickItem(index); },
+                    secondary: IconButton(
+                      icon: Icon(Icons.delete, color: Colors.red,),
+                      onPressed: (){
+                        setState(() {
+                          ticked ? _productsTicked.removeAt(index) : _products.removeAt(index);
+                          _listIsValid = !_productsIsEmpty() && _nameIsValid;
+                        });
+                      },
+                    ),
+                  )
+              ),
+            );
+          }
+      ),
+    );
+  }
+
 
 }
 

@@ -32,4 +32,10 @@ class ShoppingList {
         items: List.from(data["items"] ?? []).map((x) => Item.fromMap(x)).toList()
     );
   }
+
+  @override
+  String toString() {
+    // TODO: implement toString
+    return "Name: $name, Items: ${items.map((i) => i.name).join(", ")}";
+  }
 }

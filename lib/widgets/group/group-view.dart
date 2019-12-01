@@ -22,12 +22,17 @@ class GroupView extends StatelessWidget {
         ),
       ),
       body: groups != null ?
-      ListView.builder(
+      ListView.separated(
+        separatorBuilder: (ctx, i) => Divider(
+          indent: 10,
+          endIndent: 10,
+          color: Colors.grey,
+        ),
         itemCount: groups.length,
         itemBuilder: (BuildContext ctx, int index) =>
           StreamProvider<Group>.value(
-              value: groups[index],
-              child:  GroupItem(),
+            value: groups[index],
+            child: GroupItem(index: index),
           )
       ) : SpinKitDoubleBounce(color: Colors.blueAccent),
       floatingActionButton: FloatingActionButton(

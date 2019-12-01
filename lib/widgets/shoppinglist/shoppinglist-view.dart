@@ -12,8 +12,6 @@ import 'package:provider/provider.dart';
 class ShoppingListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    User user = Provider.of<User>(context);
-    
     return DefaultTabController(
       length: 2,
       child: Scaffold(
@@ -55,7 +53,7 @@ class ShoppingLists extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     List<model.ShoppingList> lists = Provider.of<List<model.ShoppingList>>(context);
-    return lists != null ? ListView.separated(
+    return lists != null ? lists.length == 0 ? Center(child: Text("Noch keine Einkaufslisten erstellt", style: Theme.of(context).textTheme.title,)) : ListView.separated(
         separatorBuilder: (ctx, i) => Divider(
           indent: 10,
           endIndent: 10,
@@ -72,7 +70,7 @@ class ShoppingListsHistory extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     List<model2.CompletedShoppingList> lists = Provider.of<List<model2.CompletedShoppingList>>(context);
-    return lists != null ? ListView.separated(
+    return lists != null ? lists.length == 0 ? Center(child: Text("Noch keine Einkäufe abgeschlossen", style: Theme.of(context).textTheme.title,)) : ListView.separated(
         separatorBuilder: (ctx, i) => Divider(
           indent: 10,
           endIndent: 10,
