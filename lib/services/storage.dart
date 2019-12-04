@@ -15,6 +15,11 @@ class StorageService {
     return _storage.ref().child(filePath).putFile(imageFile, metadata);
   }
 
+  Future<dynamic> getFolderContents(String path){
+    /// Set image name on cloudfirestore
+    return _storage.ref().child(path).listAll();
+  }
+
 }
 
 final StorageService storageService = StorageService();

@@ -7,6 +7,7 @@ import 'package:listassist/models/User.dart';
 import 'package:listassist/services/date_formatter.dart';
 import 'package:listassist/services/db.dart';
 import 'package:listassist/services/info_overlay.dart';
+import 'package:listassist/services/storage.dart';
 import 'package:provider/provider.dart';
 import 'package:listassist/models/CompletedShoppingList.dart';
 
@@ -26,6 +27,10 @@ class _CompletedShoppingListDetailState extends State<CompletedShoppingListDetai
   Widget build(BuildContext context) {
     CompletedShoppingList list = Provider.of<List<CompletedShoppingList>>(context)[this.widget.index];
     User user = Provider.of<User>(context);
+    storageService.getFolderContents("/users/0yIMsy8d0sWBEoqGTLffaToU6722/lists/289HVQD4vd9KO0trzI73").then((onValue) {
+      //TODO Bilder auflisten, evtl Button in SpeedDial zum Bilder Anschauen
+      print(onValue);
+    });
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.primary,
