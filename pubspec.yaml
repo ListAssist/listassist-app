@@ -29,10 +29,6 @@ dependencies:
   firebase_auth:
   firebase_ml_vision:
   firebase_storage:
-    git:
-      url: git://github.com/danysz/flutterfire.git
-      ref: master
-      path: packages/firebase_storage
   cloud_firestore:
   cloud_functions:
 

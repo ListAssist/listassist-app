@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:listassist/models/Bill.dart';
 
 class StorageService {
   final FirebaseStorage _storage =
@@ -15,9 +16,8 @@ class StorageService {
     return _storage.ref().child(filePath).putFile(imageFile, metadata);
   }
 
-  Future<dynamic> getFolderContents(String path){
-    /// Set image name on cloudfirestore
-    return _storage.ref().child(path).listAll();
+  Future<List<dynamic>> getImages(List<Bill> bills){
+    return Future.wait(bills.map((b) => _storage.ref().child(b.url).getDownloadURL()));
   }
 
 }
