@@ -65,6 +65,7 @@ dependencies:
   fancy_bottom_navigation:
   image_cropper:
   after_init:
+  carousel_slider:
 
 dev_dependencies:
   flutter_test:
