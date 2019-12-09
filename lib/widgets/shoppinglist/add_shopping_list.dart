@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:algolia/algolia.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
@@ -22,6 +24,7 @@ class _AddShoppinglist extends State<AddShoppinglist> {
   final _nameTextController = TextEditingController();
 
   Algolia algolia = Application.algolia;
+  Timer _debounce;
 
   bool _nameIsValid = false;
   bool _productsIsNotEmpty = true;
@@ -97,6 +100,9 @@ class _AddShoppinglist extends State<AddShoppinglist> {
   }
 
   _searchProducts(String search) async{
+
+
+
     AlgoliaQuery query = algolia.instance.index('products').search(search);
 
     AlgoliaQuerySnapshot snap = await query.getObjects();

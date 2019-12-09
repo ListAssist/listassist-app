@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:image_cropper/image_cropper.dart';
@@ -11,6 +12,7 @@ import 'package:listassist/services/db.dart';
 import 'package:listassist/services/info_overlay.dart';
 import 'package:listassist/services/storage.dart';
 import 'package:listassist/validators/email.dart';
+import 'package:listassist/widgets/settings/updateProfileDataDialog.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:provider/provider.dart';
 
@@ -21,6 +23,8 @@ class ProfileSettingsView extends StatefulWidget {
 
 class _ProfileSettingsView extends State<ProfileSettingsView> {
 
+  FirebaseUser _firebaseUser;
+  User _user;
   String _uid;
   String _displayName;
   String _email;
@@ -32,6 +36,8 @@ class _ProfileSettingsView extends State<ProfileSettingsView> {
 
   bool _nameChanged = false;
   bool _emailChanged = false;
+
+  var updateProfileDataDialog = new UpdateProfileDataDialog();
 
 
   // schaut ob der Name anders ist als der in der DB,
@@ -69,7 +75,9 @@ class _ProfileSettingsView extends State<ProfileSettingsView> {
       _nameChanged = false;
     }
     if(_emailChanged) {
+      print("leo");
       databaseService.updateEmail(_uid, _newEmail);
+      authService.updateEmail(_firebaseUser, _newEmail);
       _email = _newEmail;
       _emailChanged = false;
     }
@@ -169,7 +177,10 @@ class _ProfileSettingsView extends State<ProfileSettingsView> {
   @override
   Widget build(BuildContext context) {
 
-    User user  = Provider.of<User>(context);
+    FirebaseUser firebaseUser  = Provider.of<FirebaseUser>(context);
+    User user = Provider.of<User>(context);
+    _firebaseUser = firebaseUser;
+    _user = user;
     _uid = user.uid;
     _displayName = user.displayName;
     _email = user.email;
@@ -231,18 +242,32 @@ class _ProfileSettingsView extends State<ProfileSettingsView> {
                         ),
                       ),
                   ),
-                  TextFormField(
-                    initialValue: user.email,
-                    autovalidate: true,
-                    onChanged: (text) {
-                      _checkEmail(text);
-                    },
-                    decoration: InputDecoration(
-                      labelText: 'E-Mail',
-                      icon: Icon(Icons.email),
-                    ),
-                    keyboardType: TextInputType.emailAddress,
-                    validator: EmailValidator(),
+
+                  Row(
+                    children: <Widget>[
+                      Expanded(
+                        child: TextFormField(
+                          initialValue: user.email,
+                          autovalidate: true,
+                          onChanged: (text) {
+                            _checkEmail(text);
+                          },
+                          decoration: InputDecoration(
+                            labelText: 'E-Mail',
+                            icon: Icon(Icons.email),
+                          ),
+                          keyboardType: TextInputType.emailAddress,
+                          validator: EmailValidator(),
+                        ),
+                      ),
+
+                      IconButton(
+                        icon: Icon(Icons.edit),
+                        onPressed: () {
+                          updateProfileDataDialog.showLoginDialog(context, firebaseUser, user);
+                        },
+                      )
+                    ]
                   ),
 
                 ])
