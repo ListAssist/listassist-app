@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 
 class Keko extends StatefulWidget{
@@ -7,6 +9,17 @@ class Keko extends StatefulWidget{
 class NotificationsettingsView extends State<Keko> {
 
   String img = "https://www.indiewire.com/wp-content/uploads/2019/05/shutterstock_8999492b.jpg?w=780";
+
+  Map<String, bool> _notificationsSettings = {
+    //Generell ob man Benachrichtigungen bekommen will
+    "master": true,
+    //Wenn ein Gruppenmitglied eine Einkaufsliste abschließt
+    "group_complete": true,
+    //Wenn ein Gruppenmitglied ein Item abhakt
+    "group_item_ticked": false
+  };
+
+
   bool _notifications = true;
   bool _group = true;
   bool _autolist = true;

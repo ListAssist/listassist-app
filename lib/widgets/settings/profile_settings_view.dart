@@ -12,6 +12,7 @@ import 'package:listassist/services/db.dart';
 import 'package:listassist/services/info_overlay.dart';
 import 'package:listassist/services/storage.dart';
 import 'package:listassist/validators/email.dart';
+import 'package:listassist/widgets/settings/reauthenticate_form.dart';
 import 'package:listassist/widgets/settings/updateProfileDataDialog.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:provider/provider.dart';
@@ -51,19 +52,6 @@ class _ProfileSettingsView extends State<ProfileSettingsView> {
     } else {
       setState(() {
         _nameChanged = false;
-      });
-    }
-  }
-
-  _checkEmail(text) {
-    if(_email != text) {
-      setState(() {
-        _emailChanged = true;
-        _newEmail = text;
-      });
-    } else {
-      setState(() {
-        _emailChanged = false;
       });
     }
   }
@@ -110,16 +98,13 @@ class _ProfileSettingsView extends State<ProfileSettingsView> {
       leading: Icon(icon),
       title: Text(name),
       onTap: () async{
-        print("keeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeek");
 
         File file = await cameraService.pickImageFile(imgSrc);
-        print("keeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeek");
 
         setState(() {
           _imageFile = file;
         });
 
-        print("keeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeek");
         File cropped = await ImageCropper.cropImage(sourcePath: _imageFile.path, cropStyle: CropStyle.circle, aspectRatio: CropAspectRatio(ratioX: 1, ratioY: 1));
         if (cropped != null) {
           setState(() {
@@ -174,6 +159,7 @@ class _ProfileSettingsView extends State<ProfileSettingsView> {
     );
   }
 
+
   @override
   Widget build(BuildContext context) {
 
@@ -184,9 +170,13 @@ class _ProfileSettingsView extends State<ProfileSettingsView> {
     _uid = user.uid;
     _displayName = user.displayName;
     _email = user.email;
+    GlobalKey _scaffold = GlobalKey();
+    GlobalKey _textField = GlobalKey();
+
 
     return Scaffold(
       //backgroundColor: Colors.transparent,
+      //key: _scaffold,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           iconTheme: IconThemeData(color: Colors.black),
@@ -229,7 +219,7 @@ class _ProfileSettingsView extends State<ProfileSettingsView> {
                   ),
 
                   Container(
-                    margin: const EdgeInsets.only(bottom: 10.0),
+                    margin: EdgeInsets.only(bottom: 20.0),
                     child:
                       TextFormField(
                         initialValue: user.displayName,
@@ -243,33 +233,53 @@ class _ProfileSettingsView extends State<ProfileSettingsView> {
                       ),
                   ),
 
-                  Row(
-                    children: <Widget>[
-                      Expanded(
-                        child: TextFormField(
-                          initialValue: user.email,
-                          autovalidate: true,
-                          onChanged: (text) {
-                            _checkEmail(text);
-                          },
-                          decoration: InputDecoration(
-                            labelText: 'E-Mail',
-                            icon: Icon(Icons.email),
+                  Container(
+                    margin: EdgeInsets.only(bottom: 20.0),
+                    child: Row(
+                      children: <Widget>[
+                        Expanded(
+                          child: TextFormField(
+                            initialValue: user.email,
+                            decoration: InputDecoration(
+                              labelText: 'E-Mail',
+                              icon: Icon(Icons.email),
+                            ),
+                            enabled: false,
                           ),
-                          keyboardType: TextInputType.emailAddress,
-                          validator: EmailValidator(),
                         ),
-                      ),
 
-                      IconButton(
-                        icon: Icon(Icons.edit),
-                        onPressed: () {
-                          updateProfileDataDialog.showLoginDialog(context, firebaseUser, user);
-                        },
-                      )
-                    ]
+                        IconButton(
+                          icon: Icon(Icons.edit),
+                          onPressed: () {
+                            updateProfileDataDialog.showLoginDialog(context, firebaseUser, user, "email");
+                          },
+                        )
+                      ]
+                    ),
                   ),
 
+                  Row(
+                      children: <Widget>[
+                        Expanded(
+                          child: TextFormField(
+                            initialValue: "kekomat11",
+                            decoration: InputDecoration(
+                              labelText: 'Passwort',
+                              icon: Icon(Icons.lock_outline),
+                            ),
+                            obscureText: true,
+                            enabled: false,
+                          ),
+                        ),
+
+                        IconButton(
+                          icon: Icon(Icons.edit),
+                          onPressed: () {
+                            updateProfileDataDialog.showLoginDialog(context, firebaseUser, user, "password");
+                          },
+                        )
+                      ]
+                  ),
                 ])
         ),
 

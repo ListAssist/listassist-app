@@ -173,6 +173,10 @@ class AuthService {
     return firebaseUser.updateEmail(newEmail);
   }
 
+  Future<void> updatePassword(FirebaseUser firebaseUser, String newPassword) async {
+    return firebaseUser.updatePassword(newPassword);
+  }
+
   Future setProfilePicture(User user, String newPhotoURL) async{
     /** Get users document **/
     DocumentReference userRef = _db.collection("users").document(user.uid);
