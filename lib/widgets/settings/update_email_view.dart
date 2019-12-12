@@ -42,7 +42,7 @@ class _UpdateEmailView extends State<UpdateEmailView> {
                     fontSize: 15.0
                 ),
                 children: <TextSpan>[
-                  TextSpan(text: 'Bitte geben Sie Ihre '),
+                  TextSpan(text: 'Bitte gib deine '),
                   TextSpan(text: 'neue Email-Adresse', style: TextStyle(fontWeight: FontWeight.bold)),
                   TextSpan(text: ' ein'),
                 ],

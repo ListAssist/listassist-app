@@ -2,9 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:listassist/services/auth.dart';
-import 'package:listassist/services/db.dart';
 import 'package:listassist/services/info_overlay.dart';
-import 'package:listassist/validators/email.dart';
 import 'package:progress_indicator_button/progress_button.dart';
 
 class UpdatePasswordView extends StatefulWidget {
@@ -46,7 +44,7 @@ class _UpdatePasswordView extends State<UpdatePasswordView> {
                     fontSize: 15.0
                 ),
                 children: <TextSpan>[
-                  TextSpan(text: 'Bitte geben Sie Ihr '),
+                  TextSpan(text: 'Bitte gib dein '),
                   TextSpan(text: 'neues Passwort', style: TextStyle(fontWeight: FontWeight.bold)),
                   TextSpan(text: ' ein'),
                 ],
