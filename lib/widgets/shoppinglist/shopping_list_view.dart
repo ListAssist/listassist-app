@@ -18,8 +18,26 @@ class ShoppingListView extends StatelessWidget {
           child: Icon(Icons.add),
           backgroundColor: Colors.blueAccent,
           onPressed: () {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => CreateShoppingListView()));
+            Navigator.push(context, PageRouteBuilder(
+              pageBuilder: (context, animation1, animation2) {
+                return CreateShoppingListView();
+              },
+              transitionsBuilder: (context, animation1, animation2, child) {
+                return ScaleTransition(
+                  //opacity: animation1,
+                  scale: animation1,
+                  alignment: Alignment.bottomRight,
+                  child: child,
+                );
+              },
+              transitionDuration: Duration(milliseconds: 200),
+            ),
+            );
+
+                //
+                //
+                //
+                // MaterialPageRoute(builder: (context) => CreateShoppingListView()));
           },
         ),
         appBar: AppBar(

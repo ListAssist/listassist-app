@@ -5,12 +5,15 @@ import 'package:flutter/material.dart';
 import 'add_shopping_list.dart';
 
 class SearchItemsView extends StatefulWidget {
+  final int listId;
+
+  SearchItemsView({this.listId});
+
   @override
   _SearchItemsView createState() => _SearchItemsView();
 }
 
 class _SearchItemsView extends State<SearchItemsView> {
-
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
   TextEditingController _searchController = TextEditingController();
 
@@ -18,16 +21,13 @@ class _SearchItemsView extends State<SearchItemsView> {
 
   List<dynamic> _products = [];
 
-  _searchProducts(String search) async{
+  _searchProducts(String search) async {
     AlgoliaQuery query = algolia.instance.index('products').search(search);
 
     AlgoliaQuerySnapshot snap = await query.getObjects();
     //print(snap.hits[0].data);
     List<dynamic> hits = List<dynamic>();
-    snap.hits.forEach((h) => {
-      print(h.data),
-      hits.add(h.data)
-    });
+    snap.hits.forEach((h) => {print(h.data), hits.add(h.data)});
     return hits;
   }
 
@@ -36,7 +36,7 @@ class _SearchItemsView extends State<SearchItemsView> {
     return DefaultTabController(
       length: 3,
       child: Scaffold(
-        key: _scaffoldKey,
+          key: _scaffoldKey,
 //        appBar: AppBar(
 //          leading: Container(),
 //          bottom:
@@ -47,8 +47,7 @@ class _SearchItemsView extends State<SearchItemsView> {
 //              ],
 //            ),
 //        ),
-        body: Column(
-          children: <Widget>[
+          body: Column(children: <Widget>[
             Container(
               height: 120.0,
               child: Stack(
@@ -66,8 +65,8 @@ class _SearchItemsView extends State<SearchItemsView> {
                       padding: EdgeInsets.only(left: 10.0, right: 10.0),
                       child: DecoratedBox(
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(45.0),
-                          color: Colors.white),
+                            borderRadius: BorderRadius.circular(45.0),
+                            color: Colors.white),
                         child: Row(
                           children: [
                             IconButton(
@@ -82,18 +81,15 @@ class _SearchItemsView extends State<SearchItemsView> {
                             Expanded(
                               child: TextField(
                                 controller: _searchController,
-                                style: TextStyle(
-                                  fontSize: 20
-                                ),
-                                onChanged: (text) async{
+                                style: TextStyle(fontSize: 20),
+                                onChanged: (text) async {
                                   _products = await _searchProducts(text);
                                   setState(() {});
                                 },
                                 decoration: InputDecoration(
-                                  border: InputBorder.none,
-                                  hintText: "Produkt Suchen",
-                                  contentPadding: EdgeInsets.all(17)
-                                ),
+                                    border: InputBorder.none,
+                                    hintText: "Produkt Suchen",
+                                    contentPadding: EdgeInsets.all(17)),
                               ),
                             ),
                             IconButton(
@@ -113,61 +109,81 @@ class _SearchItemsView extends State<SearchItemsView> {
                 ],
               ),
             ),
-
-            _searchController.text.length == 0 ? Container(
-              color: Theme.of(context).primaryColor,
-              child: TabBar(
-                indicatorColor: Colors.white,
-                tabs: [
-                  Tab(text: "Zuletzt"),
-                  Tab(text: "Beliebt"),
-                  Tab(text: "Kategorien")
-                ],
-              ),
-            ) : Container(),
-
-            _searchController.text.length == 0 ? Expanded(
-              child: TabBarView(
-                children: <Widget>[
-                  Container(
-                    child: ListView.builder(
-                      itemCount: 10,
-                      itemBuilder:  (context, index) {
-                        return ListTile(
-                          leading: Icon(Icons.local_dining),
-                          title: Text("Produkt"),
-                          subtitle: Text("Kategorie"),
-                        );
-                      },
+            _searchController.text.length == 0
+                ? Container(
+                    color: Theme.of(context).primaryColor,
+                    child: TabBar(
+                      indicatorColor: Colors.white,
+                      tabs: [
+                        Tab(text: "Zuletzt"),
+                        Tab(text: "Beliebt"),
+                        Tab(text: "Kategorien")
+                      ],
                     ),
                   )
-                  ,
-                  Text("kek2"),
-                  Text("kek3")
-                ],
-              ),
-            )
-
-            : Expanded(
-              child: Container(
-                child: ListView.builder(
-                  itemCount: _products.length,
-                  itemBuilder:  (context, index) {
-                    return ListTile(
-                      leading: Icon(Icons.local_dining),
-                      title: Text(_products[index]["name"]),
-                      subtitle: Text(_products[index]["category"]),
-                      onTap: () {
-
-                      },
-                    );
-                  },
-                ),
-              ),
-            )
-        ])
-      ),
+                : Container(),
+            _searchController.text.length == 0
+                ? Expanded(
+                    child: TabBarView(
+                      children: <Widget>[
+                        MediaQuery.removePadding(
+                          removeTop: true,
+                            context: context,
+                            child: ListView.separated(
+                              itemCount: 10,
+                              separatorBuilder: (ctx, i) => Divider(
+                                indent: 70,
+                                endIndent: 10,
+                                color: Colors.grey,
+                              ),
+                              itemBuilder: (context, index) {
+                                return Container(
+                                  height: 60,
+                                  child: ListTile(
+                                    leading: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Icon(Icons.local_dining),
+                                    ),
+                                    title: Text("Produkt"),
+                                    subtitle: Text("Kategorie"),
+                                  ),
+                                );
+                              },
+                            )),
+                        Text("kek2"),
+                        Text("kek3")
+                      ],
+                    ),
+                  )
+                : Expanded(
+                    child: MediaQuery.removePadding(
+                      removeTop: true,
+                      context: context,
+                      child: ListView.separated(
+                        itemCount: _products.length,
+                        separatorBuilder: (ctx, i) => Divider(
+                          indent: 70,
+                          endIndent: 10,
+                          color: Colors.grey,
+                        ),
+                        itemBuilder: (context, index) {
+                          return Container(
+                            height: 60,
+                            child: ListTile(
+                              leading: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Icon(Icons.local_dining),
+                              ),
+                              title: Text(_products[index]["name"]),
+                              subtitle: Text(_products[index]["category"]),
+                              onTap: () {},
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  )
+          ])),
     );
   }
-
 }
