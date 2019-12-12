@@ -3,7 +3,7 @@ import 'dart:convert';
 class PossibleProduct {
   List<String> name;
   double price;
-  bool selected = false;
+  bool selected = true;
 
   PossibleProduct({this.name, this.price});
 

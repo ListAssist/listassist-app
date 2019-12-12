@@ -19,7 +19,7 @@ Future<List<PossibleProduct>> showSelectDialog(BuildContext context, List<Possib
                     return Container(
                         child: CheckboxListTile(
                             value: detectedProducts[index].selected,
-                            title: Text("${detectedProducts[index].name.join(" ")} für ${detectedProducts[index].price}"),
+                            title: Text("${detectedProducts[index].name.join(" ")} für ${detectedProducts[index].price}€"),
                             controlAffinity: ListTileControlAffinity.leading,
                             onChanged: (bool val) {
                               setState(() {

@@ -147,17 +147,17 @@ class CameraScannerState extends State<CameraScanner> with AfterInitMixin<Camera
                       break;
                   }
 
-                  List<PossibleProduct> products = recognizeService.processResponse(detection, removeIfNoMapping: true);
-                  if (products.isNotEmpty) {
+                  List<PossibleProduct> detectedProducts = recognizeService.processResponse(detection, removeIfNoMapping: true);
+                  if (detectedProducts.isNotEmpty) {
                     /// Check if the camera scanner should check shopping lists or create a new one
                     if (widget.listIndex != null) {
-                      ShoppingList selectedList = Provider.of<List<ShoppingList>>(context)[widget.listIndex];
+                      ShoppingList shoppingList = Provider.of<List<ShoppingList>>(context)[widget.listIndex];
 
                       /// let user choose what is corrrect of our detections
-                      if ("Settings" == "are okay with this" || true) {
-                        var selectedProducts = await showSelectDialog(context, products);
+                      if ("Settings" == "are okay with this" || false) {
+                        var selectedProducts = await showSelectDialog(context, detectedProducts);
                         if (selectedProducts != null) {
-                          products = selectedProducts;
+                          detectedProducts = selectedProducts;
                         }
                       }
 
@@ -165,25 +165,37 @@ class CameraScannerState extends State<CameraScanner> with AfterInitMixin<Camera
                       /// TODO: Combine with other distance forms to optimize result
                       List<String> detectedItems = [];
                       List<int> indecesToCheck = [];
-                      for (int i = 0; i < products.length; i++) {
-                        String name = products[i].name.join("");
-                        int closestDistanceItemIndex = -1;
-                        int score = -1;
 
-                        for (int j = 0; j < selectedList.items.length; j++) {
+                      List<List<List>> idxToDistanceForDetections =  List.generate(detectedProducts.length, (_) => List.generate(shoppingList.items.length, (_) => List(2)));
+                      Map<int, Map<int, int>> shoppingIdxToProductIdx = {};
+                      for(int i = 0; i < shoppingList.items.length; i++) {
+                        shoppingIdxToProductIdx[i]
+                      }
+                      /// Calculate distances
+                      for (int i = 0; i < detectedProducts.length; i++) {
+                        String name = detectedProducts[i].name.join("");
+                        for (int j = 0; j < shoppingList.items.length; j++) {
+                          String trimmedDetect = name.replaceAll(" ", "");
+                          String trimmedShopping = shoppingList.items[j].name.replaceAll(" ", "");
+
                           /// Get edit distance and check for a threshold if it's somewhere similar
-                          int distance = recognizeService.editDistance(name.replaceAll(" ", ""), selectedList.items[j].name.replaceAll(" ", ""));
-
-                          if (distance == score) {
-
-                          }
-                          /// add to detected items and add to array of indeces to be checked
-                          detectedItems.add(selectedList.items[j].name);
-                          indecesToCheck.add(j);
+                          int distance = recognizeService.editDistance(trimmedDetect, trimmedShopping);
+                          idxToDistanceForDetections[i][j] = [j, distance];
                         }
+                        idxToDistanceForDetections[i].sort((List a, List b) => a[1] - b[1]);
+                        print(idxToDistanceForDetections[i]);
+                        print("--------------------");
                       }
 
+                      for (int i = 0; i < shoppingList.items.length; i++) {
+                      // check
+                      }
+
+
                       /*
+                     /// add to detected items and add to array of indeces to be checked
+                          detectedItems.add(shoppingList.items[j].name);
+                          indecesToCheck.add(j);
                     /// Upload to firestore
                     var task = storageService.upload(
                         _imageFile,

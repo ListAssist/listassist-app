@@ -133,7 +133,6 @@ class RecognizeService {
 
   /// Check if String contains unwanted char
   bool _containsBlacklistedItem(String toCheck) {
-    print("$toCheck is ${blackList.hasMatch(toCheck)}");
     /// Check if char in string which is not allowed and delete part from line
     if (blackList.hasMatch(toCheck)) {
       return true;
