@@ -16,8 +16,12 @@ class StorageService {
     return _storage.ref().child(filePath).putFile(imageFile, metadata);
   }
 
-  Future<List<dynamic>> getImages(List<Bill> bills){
-    return Future.wait(bills.map((b) => _storage.ref().child(b.url).getDownloadURL()));
+//  Future<List<dynamic>> getImages(List<Bill> bills){
+//    return Future.wait(bills.map((b) => _storage.ref().child(b.url).getDownloadURL()));
+//  }
+
+  List<StorageReference> getImages(List<Bill> bills){
+    return bills.map((b) => _storage.ref().child(b.url)).toList();
   }
 
 }

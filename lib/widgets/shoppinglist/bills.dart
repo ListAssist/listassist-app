@@ -1,9 +1,11 @@
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:listassist/models/CompletedShoppingList.dart';
 import 'package:listassist/services/storage.dart';
+import 'package:listassist/widgets/shoppinglist/bill_details.dart';
 import 'package:provider/provider.dart';
 
 class Bills extends StatefulWidget {
@@ -17,6 +19,7 @@ class Bills extends StatefulWidget {
 class _BillsState extends State<Bills> {
 
   List<dynamic> urls;
+  List<StorageReference> images;
   bool hasChanged = true;
   CompletedShoppingList list;
   int _current = 0;
@@ -25,10 +28,11 @@ class _BillsState extends State<Bills> {
   Widget build(BuildContext context) {
     if(list != Provider.of<List<CompletedShoppingList>>(context)[widget.index]) {
       list = Provider.of<List<CompletedShoppingList>>(context)[widget.index];
+      images = storageService.getImages(list.bills);
       hasChanged = true;
     }
     if(hasChanged) {
-      storageService.getImages(list.bills).then((val) {
+      Future.wait(images.map((im) => im.getDownloadURL())).then((val) {
         if (mounted) {
           print(val);
           setState(() {
@@ -47,24 +51,22 @@ class _BillsState extends State<Bills> {
       },
       enableInfiniteScroll: false,
       height: MediaQuery.of(context).size.height / 100 * 70,
-      items: urls != null ? urls.map((i) {
-        return Builder(
-          builder: (BuildContext context) {
-            return Container(
-              width: MediaQuery.of(context).size.width,
-              margin: EdgeInsets.symmetric(horizontal: 5.0),
-              child: GestureDetector(
-                behavior: HitTestBehavior.translucent,
-                child: Image(image: NetworkImage(i)),
-                onTap: () {
-                    //TODO: Show recognized products and prices
+      items: urls != null ? urls.asMap().map((i, url) {
+          return MapEntry(i,
+            Container(
+                width: MediaQuery.of(context).size.width,
+                margin: EdgeInsets.symmetric(horizontal: 5.0),
+                child: GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  child: Image(image: NetworkImage(url)),
+                  onTap: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => BillDetails(image: images[i])));
                     print(i);
                   },
-              )
-            );
-          },
-        );
-      }).toList() : null,
+                )
+            )
+          );
+      }).values.toList() : null,
     );
 
     return Scaffold(
