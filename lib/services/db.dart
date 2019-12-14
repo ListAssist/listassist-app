@@ -108,6 +108,16 @@ class DatabaseService {
         .add({"name": list.name , "type": list.type, "items" : items, "created": list.created});
   }
 
+  Stream<List<ShoppingList>> streamListsFromGroup(String groupid) {
+    return _db
+        .collection("groups")
+        .document(groupid)
+        .collection("lists")
+        .where("type", isEqualTo: "pending")
+        .snapshots()
+        .map((snap) => snap.documents.map((d) => ShoppingList.fromFirestore(d)).toList());
+  }
+
   Future<void> updateProfileName(String uid, String newName) {
     return _db
         .collection('users')
