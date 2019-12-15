@@ -7,7 +7,6 @@ import 'package:listassist/validators/email.dart';
 import 'package:listassist/validators/password.dart';
 import 'package:listassist/widgets/forms/formfield.dart';
 import 'package:progress_indicator_button/progress_button.dart';
-import 'package:provider/provider.dart';
 
 class LoginPage extends StatelessWidget {
   @override

@@ -3,7 +3,6 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:listassist/main.dart';
 import 'package:listassist/models/CompletedShoppingList.dart' as model2;
 import 'package:listassist/models/ShoppingList.dart' as model;
-import 'package:listassist/models/User.dart';
 import 'package:listassist/widgets/shoppinglist/completed_shopping_list.dart';
 import 'package:listassist/widgets/shoppinglist/shopping_list.dart';
 import 'package:listassist/widgets/shoppinglist/add_shopping_list.dart';

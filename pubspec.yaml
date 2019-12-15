@@ -27,7 +27,6 @@ dependencies:
   # firebase
   firebase_core:
   firebase_auth:
-  firebase_ml_vision:
   firebase_storage:
   cloud_firestore:
   cloud_functions:
@@ -37,6 +36,7 @@ dependencies:
   flutter_twitter_login:
   flutter_facebook_login:
   flutter_signin_button: ^1.0.0
+
   # state management
   rxdart:
   scoped_model:
@@ -54,6 +54,7 @@ dependencies:
   progress_indicator_button:
   algolia:
   flutter_typeahead:
+  string_similarity:
 
   # design
   fluttertoast:
@@ -65,6 +66,7 @@ dependencies:
   fancy_bottom_navigation:
   image_cropper:
   after_init:
+
 
 dev_dependencies:
   flutter_test:

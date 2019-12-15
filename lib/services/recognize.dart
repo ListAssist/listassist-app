@@ -1,5 +1,5 @@
 import 'package:listassist/models/DetectionResponse.dart';
-import 'package:listassist/models/PossibleProduct.dart';
+import 'package:listassist/models/PossibleItem.dart';
 
 class RecognizeService {
   // final String blackList = "%()[]{}²³/\\!§?^°_#";
@@ -10,8 +10,8 @@ class RecognizeService {
   final int minLength = 3;
 
 
-  List<PossibleProduct> processResponse(DetectionResponse response, {bool removeIfNoMapping = false, double priceThreshold = 1000}) {
-    List<PossibleProduct> output = [];
+  List<PossibleItem> processResponse(DetectionResponse response, {bool removeIfNoMapping = false, double priceThreshold = 1000}) {
+    List<PossibleItem> output = [];
 
     /// Split texts into array seperated by new lines
     String responseString = response.detectedString.replaceAll(",", ".").replaceAll("..", ".");
@@ -26,18 +26,18 @@ class RecognizeService {
 
         /// seperate price and product name
         if (correctedLine.isNotEmpty) {
-          PossibleProduct product;
+          PossibleItem product;
           if (double.tryParse(correctedLine.last) != null) {
             double price = double.parse(correctedLine.last);
             if (price < priceThreshold) {
               correctedLine.removeLast();
               if (!removeIfNoMapping || correctedLine.join("").isNotEmpty) {
-                product = PossibleProduct(name: _preprocessName(correctedLine), price: price);
+                product = PossibleItem(name: _preprocessName(correctedLine), price: price);
                 output.add(product);
               }
             }
           } else if (!removeIfNoMapping) {
-            product = PossibleProduct(name: _preprocessName(correctedLine));
+            product = PossibleItem(name: _preprocessName(correctedLine));
             output.add(product);
           }
         }

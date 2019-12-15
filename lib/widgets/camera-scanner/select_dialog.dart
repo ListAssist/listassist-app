@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:listassist/models/PossibleProduct.dart';
+import 'package:listassist/models/PossibleItem.dart';
 
-Future<List<PossibleProduct>> showSelectDialog(BuildContext context, List<PossibleProduct> detectedProducts) async {
-  return showDialog<List<PossibleProduct>>(
+Future<List<PossibleItem>> showSelectDialog(BuildContext context, List<PossibleItem> detectedProducts) async {
+  return showDialog<List<PossibleItem>>(
     context: context,
     barrierDismissible: false, // user must tap button!
     builder: (BuildContext context) {

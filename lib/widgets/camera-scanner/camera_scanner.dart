@@ -4,6 +4,7 @@ import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:after_init/after_init.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:fancy_bottom_navigation/fancy_bottom_navigation.dart';
@@ -12,14 +13,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:listassist/models/DetectionResponse.dart';
-import 'package:listassist/models/PossibleProduct.dart';
+import 'package:listassist/models/Item.dart';
+import 'package:listassist/models/PossibleItem.dart';
 import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
 import 'package:listassist/services/camera.dart';
 import 'package:listassist/services/http.dart';
 import 'package:listassist/services/calc.dart';
 import 'package:listassist/services/info_overlay.dart';
+import 'package:listassist/services/mappings.dart';
 import 'package:listassist/services/recognize.dart';
+import 'package:listassist/services/storage.dart';
 import 'package:listassist/widgets/camera-scanner/polygon_painter.dart';
 import 'package:listassist/widgets/camera-scanner/select_dialog.dart';
 import 'package:progress_dialog/progress_dialog.dart';
@@ -147,59 +151,40 @@ class CameraScannerState extends State<CameraScanner> with AfterInitMixin<Camera
                       break;
                   }
 
-                  List<PossibleProduct> detectedProducts = recognizeService.processResponse(detection, removeIfNoMapping: true);
-                  if (detectedProducts.isNotEmpty) {
+                  List<PossibleItem> detectedItems = recognizeService.processResponse(detection, removeIfNoMapping: true);
+                  if (detectedItems.isNotEmpty) {
                     /// Check if the camera scanner should check shopping lists or create a new one
                     if (widget.listIndex != null) {
-                      ShoppingList shoppingList = Provider.of<List<ShoppingList>>(context)[widget.listIndex];
+                      var originalList = Provider.of<List<ShoppingList>>(context)[widget.listIndex];
+                      var shoppingList = ShoppingList(id: originalList.id, created: originalList.created, name: originalList.name, type: originalList.type, items: originalList.items);
 
                       /// let user choose what is corrrect of our detections
                       if ("Settings" == "are okay with this" || false) {
-                        var selectedProducts = await showSelectDialog(context, detectedProducts);
+                        var selectedProducts = await showSelectDialog(context, detectedItems);
                         if (selectedProducts != null) {
-                          detectedProducts = selectedProducts;
+                          detectedItems = selectedProducts;
                         }
                       }
 
-                      /// Check for matches in shopping list with Edit Distance
-                      /// TODO: Combine with other distance forms to optimize result
-                      List<String> detectedItems = [];
-                      List<int> indecesToCheck = [];
+                      /// get mappings between Item and PossibleItem (only get items which aren't checked!)
+                      Map<Item, PossibleItem> finalMappings = findMappings(possibleItems: detectedItems, shoppingItems: shoppingList.items.where((Item item) => item.bought == false).toList());
 
-                      List<List<List>> idxToDistanceForDetections =  List.generate(detectedProducts.length, (_) => List.generate(shoppingList.items.length, (_) => List(2)));
-                      Map<int, Map<int, int>> shoppingIdxToProductIdx = {};
-                      for(int i = 0; i < shoppingList.items.length; i++) {
-                        shoppingIdxToProductIdx[i]
-                      }
-                      /// Calculate distances
-                      for (int i = 0; i < detectedProducts.length; i++) {
-                        String name = detectedProducts[i].name.join("");
-                        for (int j = 0; j < shoppingList.items.length; j++) {
-                          String trimmedDetect = name.replaceAll(" ", "");
-                          String trimmedShopping = shoppingList.items[j].name.replaceAll(" ", "");
-
-                          /// Get edit distance and check for a threshold if it's somewhere similar
-                          int distance = recognizeService.editDistance(trimmedDetect, trimmedShopping);
-                          idxToDistanceForDetections[i][j] = [j, distance];
-                        }
-                        idxToDistanceForDetections[i].sort((List a, List b) => a[1] - b[1]);
-                        print(idxToDistanceForDetections[i]);
-                        print("--------------------");
+                      /// get indices to check
+                      List<int> indicesToCheck = [];
+                      finalMappings.forEach((Item key, PossibleItem value) {
+                        indicesToCheck.add(originalList.items.indexOf(key));
+                      });
+                      if (indicesToCheck.isEmpty) {
+                        InfoOverlay.showErrorSnackBar("Keine Übereinstimmungen mit Produkten aus der Einkaufsliste");
                       }
 
-                      for (int i = 0; i < shoppingList.items.length; i++) {
-                      // check
-                      }
+                      print("mapping");
+                      print(finalMappings);
 
-
-                      /*
-                     /// add to detected items and add to array of indeces to be checked
-                          detectedItems.add(shoppingList.items[j].name);
-                          indecesToCheck.add(j);
                     /// Upload to firestore
                     var task = storageService.upload(
                         _imageFile,
-                        "users/${user.uid}/lists/${selectedList.id}/",
+                        "users/${user.uid}/lists/${shoppingList.id}/",
                         concatString: "",
                         includeTimestamp: true,
                         metadata: StorageMetadata(customMetadata: {
@@ -215,10 +200,9 @@ class CameraScannerState extends State<CameraScanner> with AfterInitMixin<Camera
                     });
                     /// wait for task to finish to proceed going back
                     await task.onComplete;
-                    */
 
                       /// Send calculated data back to the screen
-                      //Navigator.pop(context, foundIndeces);
+                      Navigator.pop(context, indicesToCheck);
                     } else {
                       /// TODO: Implement Logic for creating new shopping lists from scanning an existing one
                     }

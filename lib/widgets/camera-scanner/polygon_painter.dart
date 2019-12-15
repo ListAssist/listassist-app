@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'dart:ui' as ui;
 
@@ -39,7 +38,7 @@ class PolygonPainter extends CustomPainter {
         ..strokeWidth = 2;
       /// paint for lines
       final imagePaint = Paint();
-      /// paint for fill
+      /// TODO: paint for fill
       final fillPaint = Paint()
         ..color = mainColor
         ..strokeCap = StrokeCap.square
