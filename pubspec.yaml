@@ -66,6 +66,7 @@ dependencies:
   image_cropper:
   after_init:
   carousel_slider:
+  photo_view:
 
 dev_dependencies:
   flutter_test:
