@@ -15,6 +15,8 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:listassist/models/DetectionResponse.dart';
 import 'package:listassist/models/Item.dart';
 import 'package:listassist/models/PossibleItem.dart';
+import 'package:listassist/models/ScannedItem.dart';
+import 'package:listassist/models/ScannedShoppinglist.dart';
 import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
 import 'package:listassist/services/camera.dart';
@@ -117,104 +119,7 @@ class CameraScannerState extends State<CameraScanner> with AfterInitMixin<Camera
               labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
               onTap: () async {
                 /// Show dialog while execution is made
-                ProgressDialog dialog = InfoOverlay.showDynamicProgressDialog(context, "Rechnung wird analysiert..");
-                dialog.show();
-                print("Hey");
-                try {
-                  DetectionResponse detection;
-                  /// Do actions depending on what type of trainer was used
-                  switch (_currentEditorType) {
-                    case EditorType.Editor:
-                      detection = await httpService.getDetection(_imageFile);
-                      break;
-                    case EditorType.Trainer:
-                      /*
-                      API Logic for trainer which trains our network
-                       */
-                      /// Upload for detection
-                      detection = await httpService.getDetectionWithCoords(
-                          _imageFile,
-                          calcService.exportPoints(
-                            [_points[0], _points[2], _points[4], _points[6]],
-                            _image,
-                            boundingBox,
-                          ),
-                          onProgress: (int sent, int total) {
-                            double percentage = (sent * 100 / total).roundToDouble();
-                            dialog.update(progress: percentage / 2);
-                          }
-                      );
-                      break;
-                    case EditorType.Recognizer:
-                      /* API Logic for auto reocgnizer */
-                      detection = await httpService.getAutoDetection(_imageFile);
-                      break;
-                  }
-
-                  List<PossibleItem> detectedItems = recognizeService.processResponse(detection, removeIfNoMapping: true);
-                  if (detectedItems.isNotEmpty) {
-                    /// Check if the camera scanner should check shopping lists or create a new one
-                    if (widget.listIndex != null) {
-                      var originalList = Provider.of<List<ShoppingList>>(context)[widget.listIndex];
-                      var shoppingList = ShoppingList(id: originalList.id, created: originalList.created, name: originalList.name, type: originalList.type, items: originalList.items);
-
-                      /// let user choose what is corrrect of our detections
-                      if ("Settings" == "are okay with this" || false) {
-                        var selectedProducts = await showSelectDialog(context, detectedItems);
-                        if (selectedProducts != null) {
-                          detectedItems = selectedProducts;
-                        }
-                      }
-
-                      /// get mappings between Item and PossibleItem (only get items which aren't checked!)
-                      Map<Item, PossibleItem> finalMappings = findMappings(possibleItems: detectedItems, shoppingItems: shoppingList.items.where((Item item) => item.bought == false).toList());
-
-                      /// get indices to check
-                      List<int> indicesToCheck = [];
-                      finalMappings.forEach((Item key, PossibleItem value) {
-                        indicesToCheck.add(originalList.items.indexOf(key));
-                      });
-                      if (indicesToCheck.isEmpty) {
-                        InfoOverlay.showErrorSnackBar("Keine Übereinstimmungen mit Produkten aus der Einkaufsliste");
-                      } else {
-                        print("mapping");
-                        print(finalMappings);
-
-                        /// Upload to firestore
-                        var task = storageService.upload(
-                            _imageFile,
-                            "users/${user.uid}/lists/${shoppingList.id}/",
-                            concatString: "",
-                            includeTimestamp: true,
-                            metadata: StorageMetadata(customMetadata: {
-                              "quadliteral_coordinates": _currentEditorType == EditorType.Trainer ? jsonEncode(calcService.exportPoints([_points[0], _points[2], _points[4], _points[6]], _image, boundingBox)) : null,
-                              "detected_products": jsonEncode(detectedItems)
-                            }));
-
-                        /// execute task to upload and display current progress
-                        task.events.listen((event) async {
-                          if (task.isInProgress) {
-                            double percentage = (event.snapshot.bytesTransferred * 100 / event.snapshot.totalByteCount).roundToDouble();
-                            dialog.update(progress: 50 + percentage / 2, message: percentage / 2 > 50 ? "Fast fertig.." : null);
-                          }
-                        });
-                        /// wait for task to finish to proceed going back
-                        await task.onComplete;
-                      }
-                      /// Send calculated data back to the screen
-                      Navigator.pop(context, indicesToCheck);
-                    } else {
-                      /// TODO: Implement Logic for creating new shopping lists from scanning an existing one
-                    }
-                  } else {
-                    InfoOverlay.showErrorSnackBar("Leider konnten wir keine Produkte erkennen. Versuchen Sie es erneut!");
-                  }
-                } on HttpException catch (e) {
-                  print(e);
-                  InfoOverlay.showErrorSnackBar("Hochladevorgang fehlgeschlagen.");
-                } finally {
-                  dialog.dismiss();
-                }
+                await detect(context, user);
               }
           ),
           SpeedDialChild(
@@ -238,107 +143,17 @@ class CameraScannerState extends State<CameraScanner> with AfterInitMixin<Camera
           TabData(iconData: Icons.chrome_reader_mode, title: "Auto Detection")
         ],
         onTabChangedListener: (position) async {
-          setState(() {
-            _currentEditorType = EditorType.values[position];
-          });
-          /// Open Crop widget if user chooses to use cropping
-          if (_currentEditorType == EditorType.Editor) {
-            File cropped = await ImageCropper.cropImage(
-                sourcePath: _imageFile.path,
-                androidUiSettings: AndroidUiSettings(toolbarTitle: "Foto bearbeiten"),
-                compressFormat: ImageCompressFormat.png,
-                compressQuality: 100
-            );
-            if (cropped != null) {
-              ui.Image newImage = await cameraService.loadLowLevelFromFile(cropped);
-              setState(() {
-                _imageFile = cropped;
-                _image = newImage;
-                getInputRectAndBoundingRect();
-                _points = calcService.getStartingPointsForImage(boundingBox);
-              });
-            }
-          }
+          await handleTabChange(position);
         }
       ),
       backgroundColor: _imageFile != null ? Colors.black : (Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white),
       body: GestureDetector(
           onPanStart: (DragStartDetails details) {
             /// get distance from points to check if is in circle
-            int indexMatch = -1;
-            double lastDistance = -1;
-
-            /// loop over and take the point which is the closest to the coordinate
-            for (int i = 0; i < _points.length; i++) {
-              double distance = sqrt(pow(details.localPosition.dx - _points[i].dx, 2) + pow(details.localPosition.dy - _points[i].dy, 2));
-              if (distance <= radius) {
-                if (distance < lastDistance || lastDistance == -1) {
-                  indexMatch = i;
-                  lastDistance = distance;
-                }
-              }
-            }
-            /// if a match is found => set index to matched index
-            if (indexMatch != -1) {
-              _currentlyDraggedIndex = indexMatch;
-            }
+            renderPanStart(details);
           },
           onPanUpdate: (DragUpdateDetails details) {
-            if (_currentlyDraggedIndex != -1) {
-              if (_currentlyDraggedIndex % 2 == 0) {
-                ui.Offset correctedOffset = calcService.correctCollisions(details.localPosition, boundingBox);
-                /// Check if angles are correct of each point of polygon using law of cosine
-                List<ui.Offset> futurePoints = List.from(_points);
-                futurePoints[_currentlyDraggedIndex] = correctedOffset;
-                futurePoints = calcService.recalculateMiddlePoints(futurePoints);
-                if (calcService.checkAngles(futurePoints)) {
-                  setState(() {
-                    _points = futurePoints;
-                    _overflow = false;
-                  });
-                } else {
-                  setState(() {
-                    _overflow = true;
-                  });
-                }
-              } else {
-                List<ui.Offset> newPoints = List.from(_points);
-                /// case 1 and 5 are cases where the polygon gets pulled in the x direction
-                /// case 3 and 7 are cases where the polygon gets pulled in the y direction
-                switch (_currentlyDraggedIndex) {
-                  case 1:
-                    calcService.correctedPolygonCoordinates(newPoints, boundingBox, details.delta, dy: false, fromIndex: 0, toIndex: 3);
-                    break;
-                  case 5:
-                    calcService.correctedPolygonCoordinates(newPoints, boundingBox, details.delta, dy: false, fromIndex: 4, toIndex: 6);
-                    break;
-                  case 3:
-                    calcService.correctedPolygonCoordinates(newPoints, boundingBox, details.delta, dx: false, fromIndex: 2, toIndex: 4);
-                    break;
-                  case 7:
-                    calcService.correctedPolygonCoordinates(newPoints, boundingBox, details.delta, dx: false, fromIndex: 6, toIndex: 8);
-                    break;
-                }
-                /// check if angle is okay
-                if (!calcService.checkAngles(newPoints) || !calcService.checkDistancesPoints(newPoints)) {
-                  setState(() {
-                    _overflow = true;
-                  });
-                } else {
-                  setState(() {
-                    _points = newPoints;
-                    _overflow = false;
-                  });
-                }
-              }
-            } else {
-              /// Check if one point will be out of bound and if size is still okay
-              List<ui.Offset> newPoints = List.from(_points);
-              calcService.correctedPolygonCoordinates(newPoints, boundingBox, details.delta);
-              setState(() {
-                _points = newPoints;
-              });
-            }
+            renderPanUpdate(details);
           },
           onPanEnd: (_) {
             setState(() {
@@ -351,6 +166,237 @@ class CameraScannerState extends State<CameraScanner> with AfterInitMixin<Camera
           )
       ),
     );
+  }
+
+  Future detect(BuildContext context, User user) async {
+    /// Show dialog while execution is made
+    ProgressDialog dialog = InfoOverlay.showDynamicProgressDialog(context, "Rechnung wird analysiert..");
+    dialog.show();
+
+    try {
+      /// Do actions depending on what type of trainer was used
+      DetectionResponse detection = await getResponseForType(dialog);
+
+      List<PossibleItem> detectedItems = recognizeService.processResponse(detection, removeIfNoMapping: true);
+      if (detectedItems.isNotEmpty) {
+        /// Check if the camera scanner should check shopping lists or create a new one
+        if (widget.listIndex != null) {
+          /// Clone shopping list
+          await checkShoppingList(context, detectedItems, user, dialog);
+        } else {
+          /// TODO: Implement Logic for creating new shopping lists from scanning an existing one
+        }
+      } else {
+        InfoOverlay.showErrorSnackBar("Leider konnten wir keine Produkte erkennen. Versuchen Sie es erneut!");
+      }
+    } on HttpException catch (e) {
+      print(e);
+      InfoOverlay.showErrorSnackBar("Hochladevorgang fehlgeschlagen.");
+    } finally {
+      dialog.dismiss();
+    }
+  }
+
+  /// Method for using detected items to check shopping list items
+  Future checkShoppingList(BuildContext context, List<PossibleItem> detectedItems, User user, ProgressDialog dialog) async {
+    /// Clone shopping list
+    var originalList = Provider.of<List<ShoppingList>>(context)[widget.listIndex];
+    var shoppingList = ShoppingList(id: originalList.id, created: originalList.created, name: originalList.name, type: originalList.type, items: originalList.items);
+
+    /// let user choose what is corrrect of our detections
+    if ("Settings" == "are okay with this" || false) {
+      var selectedProducts = await showSelectDialog(context, detectedItems);
+      if (selectedProducts != null) {
+        detectedItems = selectedProducts;
+      }
+    }
+
+    /// get mappings between Item and PossibleItem (only get items which aren't checked!)
+    Map<Item, PossibleItem> finalMappings = findMappings(possibleItems: detectedItems, shoppingItems: shoppingList.items.where((Item item) => item.bought == false).toList());
+
+    /// get indices to check
+    List<int> indicesToCheck = [];
+    finalMappings.forEach((Item key, PossibleItem value) {
+      indicesToCheck.add(originalList.items.indexOf(key));
+    });
+    if (indicesToCheck.isEmpty) {
+      InfoOverlay.showErrorSnackBar("Keine Übereinstimmungen mit Produkten aus der Einkaufsliste");
+    } else {
+      /// Create metadata so data can be read later
+      var scannedList = ScannedShoppingList.fromScannedItems(items: ScannedItem.itemsFromMapping(finalMappings));
+      StorageMetadata metadata = StorageMetadata(customMetadata: {
+        "quadliteral_coordinates": _currentEditorType ==
+            EditorType.Trainer ? jsonEncode(calcService
+            .exportPoints(
+            [_points[0], _points[2], _points[4], _points[6]],
+            _image, boundingBox)) : null,
+        "list": scannedList.toJSON()
+      });
+
+      /// Upload to firestore
+      var task = storageService.upload(
+          _imageFile,
+          "users/${user.uid}/lists/${shoppingList.id}/",
+          concatString: "",
+          includeTimestamp: true,
+          metadata: metadata);
+
+      /// execute task to upload and display current progress
+      task.events.listen((event) async {
+        if (task.isInProgress) {
+          double percentage = (event.snapshot.bytesTransferred * 100 / event.snapshot.totalByteCount).roundToDouble();
+          dialog.update(progress: 50 + percentage / 2, message: percentage / 2 > 50 ? "Fast fertig.." : null);
+        }
+      });
+      /// wait for task to finish to proceed going back
+      await task.onComplete;
+
+    }
+    /// Send calculated data back to the screen
+    Navigator.pop(context, indicesToCheck);
+  }
+
+  /// Gets http resonse for specific editor type
+  Future<DetectionResponse> getResponseForType(ProgressDialog dialog) async {
+    /// Do actions depending on what type of trainer was used
+    switch (_currentEditorType) {
+      case EditorType.Editor:
+        return await httpService.getDetection(_imageFile);
+        break;
+      case EditorType.Trainer:
+        /*
+        API Logic for trainer which trains our network
+         */
+        /// Upload for detection
+        return await httpService.getDetectionWithCoords(
+            _imageFile,
+            calcService.exportPoints(
+              [_points[0], _points[2], _points[4], _points[6]],
+              _image,
+              boundingBox,
+            ),
+            onProgress: (int sent, int total) {
+              double percentage = (sent * 100 / total).roundToDouble();
+              dialog.update(progress: percentage / 2);
+            }
+        );
+        break;
+      case EditorType.Recognizer:
+        /* API Logic for auto reocgnizer */
+        return await httpService.getAutoDetection(_imageFile);
+        break;
+    }
+    return null;
+  }
+
+  /// handles the tab change in the bottom nav bar
+  Future handleTabChange(int position) async {
+    setState(() {
+      _currentEditorType = EditorType.values[position];
+    });
+    /// Open Crop widget if user chooses to use cropping
+    if (_currentEditorType == EditorType.Editor) {
+      File cropped = await ImageCropper.cropImage(
+          sourcePath: _imageFile.path,
+          androidUiSettings: AndroidUiSettings(toolbarTitle: "Foto bearbeiten"),
+          compressFormat: ImageCompressFormat.png,
+          compressQuality: 100
+      );
+      if (cropped != null) {
+        ui.Image newImage = await cameraService.loadLowLevelFromFile(cropped);
+        setState(() {
+          _imageFile = cropped;
+          _image = newImage;
+          getInputRectAndBoundingRect();
+          _points = calcService.getStartingPointsForImage(boundingBox);
+        });
+      }
+    }
+  }
+
+  /// renders the pan start
+  void renderPanStart(DragStartDetails details) {
+    /// get distance from points to check if is in circle
+    int indexMatch = -1;
+    double lastDistance = -1;
+
+    /// loop over and take the point which is the closest to the coordinate
+    for (int i = 0; i < _points.length; i++) {
+      double distance = sqrt(pow(details.localPosition.dx - _points[i].dx, 2) + pow(details.localPosition.dy - _points[i].dy, 2));
+      if (distance <= radius) {
+        if (distance < lastDistance || lastDistance == -1) {
+          indexMatch = i;
+          lastDistance = distance;
+        }
+      }
+    }
+    /// if a match is found => set index to matched index
+    if (indexMatch != -1) {
+      _currentlyDraggedIndex = indexMatch;
+    }
+  }
+
+  /// renders the pan update
+  void renderPanUpdate(DragUpdateDetails details) {
+    if (_currentlyDraggedIndex != -1) {
+      if (_currentlyDraggedIndex % 2 == 0) {
+        ui.Offset correctedOffset = calcService.correctCollisions(details.localPosition, boundingBox);
+        /// Check if angles are correct of each point of polygon using law of cosine
+        List<ui.Offset> futurePoints = List.from(_points);
+        futurePoints[_currentlyDraggedIndex] = correctedOffset;
+        futurePoints = calcService.recalculateMiddlePoints(futurePoints);
+
+        /// check those calculated angles
+        if (calcService.checkAngles(futurePoints)) {
+          setState(() {
+            _points = futurePoints;
+            _overflow = false;
+          });
+        } else {
+          setState(() {
+            _overflow = true;
+          });
+        }
+      } else {
+        List<ui.Offset> newPoints = List.from(_points);
+        /// case 1 and 5 are cases where the polygon gets pulled in the x direction
+        /// case 3 and 7 are cases where the polygon gets pulled in the y direction
+        switch (_currentlyDraggedIndex) {
+          case 1:
+            calcService.correctedPolygonCoordinates(newPoints, boundingBox, details.delta, dy: false, fromIndex: 0, toIndex: 3);
+            break;
+          case 5:
+            calcService.correctedPolygonCoordinates(newPoints, boundingBox, details.delta, dy: false, fromIndex: 4, toIndex: 6);
+            break;
+          case 3:
+            calcService.correctedPolygonCoordinates(newPoints, boundingBox, details.delta, dx: false, fromIndex: 2, toIndex: 4);
+            break;
+          case 7:
+            calcService.correctedPolygonCoordinates(newPoints, boundingBox, details.delta, dx: false, fromIndex: 6, toIndex: 8);
+            break;
+        }
+        /// check if angle is okay
+        if (!calcService.checkAngles(newPoints) || !calcService.checkDistancesPoints(newPoints)) {
+          setState(() {
+            _overflow = true;
+          });
+        } else {
+          setState(() {
+            _points = newPoints;
+            _overflow = false;
+          });
+        }
+      }
+    } else {
+      /// Check if one point will be out of bound and if size is still okay
+      List<ui.Offset> newPoints = List.from(_points);
+      calcService.correctedPolygonCoordinates(newPoints, boundingBox, details.delta);
+
+      /// Set corrected coordinates
+      setState(() {
+        _points = newPoints;
+      });
+    }
   }
 }
 

@@ -1,46 +1,50 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/widgets.dart';
 import 'package:listassist/models/CompletedShoppingList.dart';
 import 'package:listassist/models/Item.dart';
 import 'package:listassist/models/ShoppingList.dart';
 
 import 'PossibleItem.dart';
+import 'ScannedItem.dart';
 
 class ScannedShoppingList {
   final double completePrice;
-  final List<PossibleItem> items;
-  final Timestamp scanned;
+  final List<ScannedItem> items;
+  final DateTime scanned;
 
-  ScannedShoppingList({this.completePrice, this.items, this.scanned});
+  ScannedShoppingList({@required this.completePrice, @required this.items, @required this.scanned});
 
-  factory ScannedShoppingList.fromJSON(String jsonString) {
-    Map data = doc.data;
-
-    List<Item> tempCompletedItems = List.from(data["items"] ?? []).map((x) => Item.fromMap(x)).toList();
-    tempCompletedItems.removeWhere((item) => !item.bought);
-
-    List<Item> tempAllItems = List.from(data["items"] ?? []).map((x) => Item.fromMap(x)).toList();
-    tempAllItems.sort((a, b) => (b.bought ? 1 : 0) - (a.bought ? 1 : 0));
-
-    return null;
-  }
-
-  factory ScannedShoppingList.fromMap(Map data) {
-    data = data ?? { };
-
-    return null;
-  }
-
-  factory ScannedShoppingList.fromItems(List<PossibleItem> items) {
+  factory ScannedShoppingList.fromScannedItems({@required List<ScannedItem> items}) {
+    /// get list price
     double price = items.map((item) => item.price).reduce((double value, double currentPrice) => value += currentPrice);
-    return ScannedShoppingList(completePrice: price, items: items, scanned: Timestamp.now());
+
+    /// Return ScannedShoppingList from Items
+    return ScannedShoppingList(completePrice: price, items: items, scanned: DateTime.now());
   }
 
-  ShoppingList createNewCopy([String newName]) {
-    return ShoppingList(
-        created: Timestamp.now(),
-        name: newName ?? this.name,
-        type: "pending",
-        items: this.completedItems.map((item) => Item(name: item.name, bought: item.bought = false)).toList());
+  factory ScannedShoppingList.fromJSON(String json) {
+    Map<String, dynamic> obj = jsonDecode(json);
+
+    return ScannedShoppingList(completePrice: obj["completePrice"], scanned: DateTime.parse(obj["scanned"]), items: ScannedItem.fromMapArray(obj["items"]));
   }
 
+  String toJSON() {
+    List<Map<String, dynamic>> itemsAsArrayMap = [];
+    /// create map and set properties
+    Map<String, dynamic> listAsMap = {
+      "completePrice": completePrice,
+      "scanned": scanned.toIso8601String()
+    };
+
+    /// Create JSON Array with Items inside
+    items.forEach((item) => itemsAsArrayMap.add({
+      "price": item.price,
+      "name": item.name
+    }));
+    listAsMap["items"] = itemsAsArrayMap;
+
+    return jsonEncode(listAsMap);
+  }
 }

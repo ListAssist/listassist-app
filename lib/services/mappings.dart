@@ -40,8 +40,6 @@ Map<PossibleItem, List<Item>> getDetectedToShoppingSorted({List<PossibleItem> de
       }
     }
 
-    print("reached");
-    print(itemToDistance);
     /// Sort the map by the values (=distances)
     var sortedKeys = itemToDistance.keys.toList(growable:false)
       ..sort((Item a, Item b) => sortDistances(itemToDistance[a], itemToDistance[b]));
