@@ -42,7 +42,7 @@ dependencies:
   rxdart:
   scoped_model:
   provider:
-  shimmer:
+  shimmer: ^1.0.1
   connectivity:
 
   # addons

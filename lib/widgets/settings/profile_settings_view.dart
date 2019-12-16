@@ -16,6 +16,7 @@ import 'package:listassist/services/storage.dart';
 import 'package:listassist/widgets/settings/updateProfileDataDialog.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 
 class ProfileSettingsView extends StatefulWidget {
   @override
@@ -269,7 +270,7 @@ class _ProfileSettingsView extends State<ProfileSettingsView> {
                   updateProfileDataDialog.showLoginDialog(context, firebaseUser, user, "password");
                 },
               )
-            ])
+            ]),
           ])),
 
       floatingActionButton: FloatingActionButton(
