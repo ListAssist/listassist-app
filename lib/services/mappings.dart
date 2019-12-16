@@ -100,8 +100,9 @@ Map<Item, PossibleItem> findMappings({List<PossibleItem> possibleItems, List<Ite
   /// TODO: Remove checked items on mapping
   /** Mapping Detected Items to ShoppingList items **/
   int cycleTimeout = 0;
-  while (possibleItems.isNotEmpty || cycleTimeout > shoppingItems.length * 2) {
+  while (possibleItems.isNotEmpty && cycleTimeout > shoppingItems.length * 2) {
     /// Get Mappings for item
+    print(possibleItems.isNotEmpty);
     PossibleItem currentPossibleItem = possibleItems.removeAt(0);
     List<Item> prefsForItem = detectedToShopping[currentPossibleItem];
 

@@ -176,31 +176,31 @@ class CameraScannerState extends State<CameraScanner> with AfterInitMixin<Camera
                       });
                       if (indicesToCheck.isEmpty) {
                         InfoOverlay.showErrorSnackBar("Keine Übereinstimmungen mit Produkten aus der Einkaufsliste");
+                      } else {
+                        print("mapping");
+                        print(finalMappings);
+
+                        /// Upload to firestore
+                        var task = storageService.upload(
+                            _imageFile,
+                            "users/${user.uid}/lists/${shoppingList.id}/",
+                            concatString: "",
+                            includeTimestamp: true,
+                            metadata: StorageMetadata(customMetadata: {
+                              "quadliteral_coordinates": _currentEditorType == EditorType.Trainer ? jsonEncode(calcService.exportPoints([_points[0], _points[2], _points[4], _points[6]], _image, boundingBox)) : null,
+                              "detected_products": jsonEncode(detectedItems)
+                            }));
+
+                        /// execute task to upload and display current progress
+                        task.events.listen((event) async {
+                          if (task.isInProgress) {
+                            double percentage = (event.snapshot.bytesTransferred * 100 / event.snapshot.totalByteCount).roundToDouble();
+                            dialog.update(progress: 50 + percentage / 2, message: percentage / 2 > 50 ? "Fast fertig.." : null);
+                          }
+                        });
+                        /// wait for task to finish to proceed going back
+                        await task.onComplete;
                       }
-
-                      print("mapping");
-                      print(finalMappings);
-
-                    /// Upload to firestore
-                    var task = storageService.upload(
-                        _imageFile,
-                        "users/${user.uid}/lists/${shoppingList.id}/",
-                        concatString: "",
-                        includeTimestamp: true,
-                        metadata: StorageMetadata(customMetadata: {
-                          "quadliteral_coordinates": _currentEditorType == EditorType.Trainer ? jsonEncode(calcService.exportPoints([_points[0], _points[2], _points[4], _points[6]], _image, boundingBox)) : null,
-                          "detected_products": jsonEncode(detectedItems)
-                        }));
-                    /// execute task to upload and display current progress
-                    task.events.listen((event) async {
-                      if (task.isInProgress) {
-                        double percentage = (event.snapshot.bytesTransferred * 100 / event.snapshot.totalByteCount).roundToDouble();
-                        dialog.update(progress: 50 + percentage / 2, message: percentage / 2 > 50 ? "Fast fertig.." : null);
-                      }
-                    });
-                    /// wait for task to finish to proceed going back
-                    await task.onComplete;
-
                       /// Send calculated data back to the screen
                       Navigator.pop(context, indicesToCheck);
                     } else {
