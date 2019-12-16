@@ -193,11 +193,12 @@ class CameraScannerState extends State<CameraScanner> with AfterInitMixin<Camera
           await checkShoppingList(context, detectedItems, user, dialog);
         } else {
           /// TODO: Implement Logic for creating new shopping lists from scanning an existing one
-          /// Check if user wants to compare
+          /// Check if user wants to make sure and compare with DB or create own list with own Strings
           if ("settings" == "synced" || true) {
-
+            /// TODO: algolia search
           } else {
-
+            /// let user choose what is corrrect of our detections
+            await createFromScratch(context, detectedItems);
           }
         }
       } else {
@@ -209,6 +210,20 @@ class CameraScannerState extends State<CameraScanner> with AfterInitMixin<Camera
     } finally {
       dialog.dismiss();
     }
+  }
+
+  Future createFromScratch(BuildContext context, List<PossibleItem> detectedItems) async {
+    /// let user choose what is corrrect of our detections
+    if ("Settings" == "are okay with this" || false) {
+      var selectedProducts = await showSelectDialog(context, detectedItems);
+      if (selectedProducts != null) {
+        detectedItems = selectedProducts;
+      }
+    }
+    var scannedList = ScannedShoppingList.fromScannedItems(items: ScannedItem.fromPossibleItems(detectedItems));
+    scannedList.imageFile = _imageFile;
+
+    Navigator.pop<ScannedShoppingList>(context, scannedList);
   }
 
   /// Method for using detected items to check shopping list items

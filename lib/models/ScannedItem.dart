@@ -20,6 +20,11 @@ class ScannedItem {
     return transformedItems;
   }
 
+  static List<ScannedItem> fromPossibleItems(List<PossibleItem> items) {
+    List<ScannedItem> transformedItems = [];
+    items.forEach((item) => transformedItems.add(ScannedItem(price: item.price, name: item.name.join(" "))));
+  }
+
   static List<ScannedItem> fromMapArray(List<dynamic> items) {
     List<ScannedItem> transformedItems = [];
 

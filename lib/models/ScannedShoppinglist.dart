@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/widgets.dart';
@@ -13,8 +14,9 @@ class ScannedShoppingList {
   final double completePrice;
   final List<ScannedItem> items;
   final DateTime scanned;
+  File imageFile;
 
-  ScannedShoppingList({@required this.completePrice, @required this.items, @required this.scanned});
+  ScannedShoppingList({@required this.completePrice, @required this.items, @required this.scanned, this.imageFile});
 
   factory ScannedShoppingList.fromScannedItems({@required List<ScannedItem> items}) {
     /// get list price
