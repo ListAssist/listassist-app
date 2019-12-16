@@ -98,8 +98,7 @@ Map<Item, PossibleItem> findMappings({List<PossibleItem> possibleItems, List<Ite
   Map<PossibleItem, List<Item>> detectedToShopping = getDetectedToShoppingSorted(detectedItems: possibleItems, shoppingItems: shoppingItems);
   Map<Item, PossibleItem> finalMappings = {};
 
-  /// TODO: Remove checked items on mapping
-  /** Mapping Detected Items to ShoppingList items **/
+  /// Mapping Detected Items to ShoppingList items
   int cycleTimeout = 0;
   while (possibleItems.isNotEmpty && cycleTimeout < shoppingItems.length * 2) {
     /// Get Mappings for item

@@ -184,6 +184,7 @@ class CameraScannerState extends State<CameraScanner> with AfterInitMixin<Camera
       /// Do actions depending on what type of trainer was used
       DetectionResponse detection = await getResponseForType(dialog);
 
+      /// prepare, filter, process response which we got from above
       List<PossibleItem> detectedItems = recognizeService.processResponse(detection, removeIfNoMapping: true);
       if (detectedItems.isNotEmpty) {
         /// Check if the camera scanner should check shopping lists or create a new one
@@ -192,6 +193,12 @@ class CameraScannerState extends State<CameraScanner> with AfterInitMixin<Camera
           await checkShoppingList(context, detectedItems, user, dialog);
         } else {
           /// TODO: Implement Logic for creating new shopping lists from scanning an existing one
+          /// Check if user wants to compare
+          if ("settings" == "synced" || true) {
+
+          } else {
+
+          }
         }
       } else {
         InfoOverlay.showErrorSnackBar("Leider konnten wir keine Produkte erkennen. Versuchen Sie es erneut!");
