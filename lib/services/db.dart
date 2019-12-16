@@ -5,6 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:listassist/models/CompletedShoppingList.dart';
 import 'package:listassist/models/Group.dart';
 import 'package:listassist/models/Invite.dart';
+import 'package:listassist/models/Item.dart';
 import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
 
@@ -89,13 +90,24 @@ class DatabaseService {
         .map((snap) => snap.documents.map((d) => CompletedShoppingList.fromFirestore(d)).toList());
   }
 
-  Future<void> completeList(String uid, String listid) {
-    return _db
+  Future<void> completeList(String uid, ShoppingList list) {
+    Timestamp now = Timestamp.now();
+    List<Item> completedItems = List.from(list.items);
+    completedItems.removeWhere((item) => !item.bought);
+    return Future.wait([
+      _db
         .collection("users")
         .document(uid)
         .collection("lists")
-        .document(listid)
-        .setData({"type": "completed", "completed": Timestamp.now()}, merge: true);
+        .document(list.id)
+        .setData({"type": "completed", "completed": now}, merge: true),
+      _db
+        .collection("users")
+        .document(uid)
+        .collection("shopping_data")
+        .document("data")
+        .setData({"last": FieldValue.arrayUnion([{ "completed": now, "items": completedItems.map((item) => item.name).toList() }])}, merge: true)
+    ]);
   }
 
   Future<DocumentReference> createList(String uid, ShoppingList list) {

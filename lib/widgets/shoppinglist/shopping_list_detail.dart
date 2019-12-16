@@ -204,7 +204,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
                   name: list.name,
                   items: list.items,
                 );
-                databaseService.completeList(uid, list.id)
+                databaseService.completeList(uid, list)
                 .catchError((_) {
                   InfoOverlay.showErrorSnackBar("Fehler beim Abschließen der Einkaufsliste");
                   useCache = false;
