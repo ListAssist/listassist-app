@@ -63,12 +63,16 @@ class CameraScannerState extends State<CameraScanner> with AfterInitMixin<Camera
   @override
   void dispose() {
     super.dispose();
+
+    /// show toolbar again if closed
     SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
   }
 
   @override
   void initState() {
     super.initState();
+
+    /// hide top bar and set images for current session
     _image = widget.image;
     _imageFile = widget.imageFile;
     SystemChrome.setEnabledSystemUIOverlays([]);
@@ -76,13 +80,16 @@ class CameraScannerState extends State<CameraScanner> with AfterInitMixin<Camera
 
   @override
   void didInitState() {
-    getInputRectAndBoundingRect();
+    /// if state intialized, get starting point for the image and set bounding rect
+
+    setInputRectAndBoundingRect();
     setState(() {
       _points = calcService.getStartingPointsForImage(boundingBox);
     });
   }
 
-  void getInputRectAndBoundingRect() {
+  /// sets the input rect and the bounding rect of the image in the canvas
+  void setInputRectAndBoundingRect() {
     final outputRect = Rect.fromPoints(ui.Offset.zero, ui.Offset(MediaQuery.of(context).size.width, MediaQuery.of(context).size.height - 12));
     final Size imageSize = Size(_image.width.toDouble(), _image.height.toDouble());
     final FittedSizes sizes = applyBoxFit(BoxFit.contain, imageSize, outputRect.size);
@@ -307,7 +314,7 @@ class CameraScannerState extends State<CameraScanner> with AfterInitMixin<Camera
         setState(() {
           _imageFile = cropped;
           _image = newImage;
-          getInputRectAndBoundingRect();
+          setInputRectAndBoundingRect();
           _points = calcService.getStartingPointsForImage(boundingBox);
         });
       }
