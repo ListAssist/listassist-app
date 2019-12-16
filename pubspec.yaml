@@ -37,10 +37,13 @@ dependencies:
   flutter_twitter_login:
   flutter_facebook_login:
   flutter_signin_button: ^1.0.0
+
   # state management
   rxdart:
   scoped_model:
   provider:
+  shimmer:
+  connectivity:
 
   # addons
   url_launcher:

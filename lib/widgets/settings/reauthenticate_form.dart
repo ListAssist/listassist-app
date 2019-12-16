@@ -1,8 +1,11 @@
+import 'package:connectivity/connectivity.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:listassist/models/User.dart';
 import 'package:listassist/services/auth.dart';
+import 'package:listassist/services/info_overlay.dart';
 import 'package:listassist/widgets/settings/updateProfileDataDialog.dart';
 import 'package:progress_indicator_button/progress_button.dart';
 
@@ -84,21 +87,50 @@ class _ReauthenticateForm extends State<ReauthenticateForm> {
               progressIndicatorSize: 20,
               //textColor: Colors.white,
               onPressed: (AnimationController controller) async{
-                controller.forward();
-                String erg = await authService.reauthenticateUser(widget.firebaseUser, widget.firebaseUser.email, _passwordControllerrrrr.text);
-                controller.reverse();
-                print(erg);
-                if(erg == "loggedin"){
-                  Navigator.pop(context);
-                  if(widget.mode == "email"){
-                    loginDialog.showUpdateEmailDialog(context, widget.firebaseUser);
-                  } else if(widget.mode == "password"){
-                    loginDialog.showUpdatePasswordDialog(context, widget.firebaseUser);
-                  }
-                }else {
-                  setState(() {
-                    _errorText = erg;
+
+                if(_passwordControllerrrrr.text.isEmpty) {
+                  _errorText = "Bitte Passwort eingeben";
+                  setState(() {});
+                  return;
+                }
+
+                var connectivityResult;
+                try {
+                  connectivityResult = await Connectivity().checkConnectivity();
+                } on PlatformException catch (e) {
+                  print(e.toString());
+                }
+                if (!(connectivityResult == ConnectivityResult.mobile || connectivityResult == ConnectivityResult.wifi)) {
+
+                  // I am not connected to a network
+                  controller.forward();
+                  Future.delayed(Duration(seconds: 1)).then((value) async{
+                    controller.reverse();
+                    //Navigator.of(context).pop();
+                    InfoOverlay.showErrorSnackBar("Kein Internetzugriff, versuche es erneut");
+                    setState(() {
+                      _errorText = "Kein Internetzugriff";
+                    });
                   });
+                } else {
+
+                  // I am connected to a network
+                  controller.forward();
+                  String erg = await authService.reauthenticateUser(widget.firebaseUser, _passwordControllerrrrr.text);
+                  controller.reverse();
+                  print(erg);
+                  if(erg == "loggedin"){
+                    Navigator.pop(context);
+                    if(widget.mode == "email"){
+                      loginDialog.showUpdateEmailDialog(context, widget.firebaseUser);
+                    } else if(widget.mode == "password"){
+                      loginDialog.showUpdatePasswordDialog(context, widget.firebaseUser);
+                    }
+                  }else {
+                    setState(() {
+                      _errorText = erg;
+                    });
+                  }
                 }
               },
             ),

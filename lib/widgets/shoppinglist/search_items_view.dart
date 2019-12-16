@@ -159,28 +159,46 @@ class _SearchItemsView extends State<SearchItemsView> {
                     child: MediaQuery.removePadding(
                       removeTop: true,
                       context: context,
-                      child: ListView.separated(
-                        itemCount: _products.length,
-                        separatorBuilder: (ctx, i) => Divider(
-                          indent: 70,
-                          endIndent: 10,
-                          color: Colors.grey,
-                        ),
-                        itemBuilder: (context, index) {
-                          return Container(
-                            height: 60,
-                            child: ListTile(
-                              leading: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Icon(Icons.local_dining),
+                      child:
+                          _products.length > 0 ?
+                        ListView.separated(
+                          itemCount: _products.length,
+                          separatorBuilder: (ctx, i) => Divider(
+                            indent: 70,
+                            endIndent: 10,
+                            color: Colors.grey,
+                          ),
+                          itemBuilder: (context, index) {
+                            return Container(
+                              height: 60,
+                              child: ListTile(
+                                leading: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Icon(Icons.local_dining),
+                                ),
+                                title: Text(_products[index]["name"]),
+                                subtitle: Text(_products[index]["category"]),
+                                onTap: () {},
                               ),
-                              title: Text(_products[index]["name"]),
-                              subtitle: Text(_products[index]["category"]),
-                              onTap: () {},
-                            ),
-                          );
-                        },
-                      ),
+                            );
+                          },
+                        ) :
+                              Padding(
+                                padding: EdgeInsets.only(top: 30),
+                                child: Column(
+                                  children: <Widget>[
+                                    Padding(
+                                      padding: EdgeInsets.only(bottom: 15.0),
+                                      child: Icon(Icons.sentiment_dissatisfied, size: 50),
+                                    ),
+                                    Text("Keine Produkte gefunden",
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
                     ),
                   )
           ])),

@@ -7,7 +7,6 @@ import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:flutter_twitter_login/flutter_twitter_login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:listassist/models/User.dart';
-import 'package:listassist/models/current-screen.dart';
 import 'package:listassist/services/db.dart';
 import 'package:listassist/services/info_overlay.dart';
 import 'package:rxdart/rxdart.dart';
@@ -158,12 +157,18 @@ class AuthService {
     }, merge: true);
   }
 
-  Future<String> reauthenticateUser(FirebaseUser firebaseUser, String email, String password) async{
+  Future<String> reauthenticateUser(FirebaseUser firebaseUser, String password) async{
+    String currentEmail;
+    await _auth.currentUser().then((u) => {
+      currentEmail = u.email
+    });
+    print("currentEmail: " + currentEmail);
     try{
-      AuthCredential credential = EmailAuthProvider.getCredential(email: email, password: password);
+      AuthCredential credential = EmailAuthProvider.getCredential(email: currentEmail, password: password);
       await firebaseUser.reauthenticateWithCredential(credential);
       return "loggedin";
-    } on PlatformException {
+    } on PlatformException catch(e) {
+      print(e.toString());
       return "Falsches Passwort";
     }
 

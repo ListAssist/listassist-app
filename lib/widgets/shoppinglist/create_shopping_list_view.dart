@@ -138,8 +138,8 @@ class _CreateShoppingListView extends State<CreateShoppingListView> {
                               style: TextStyle(fontSize: 20),
                               decoration: InputDecoration(
                                   border: UnderlineInputBorder(),
-                                  hintText: "Neue Einkaufsliste",
-                                  contentPadding: EdgeInsets.only(top: 17, left: 17, right: 17, bottom: 10)
+                                  hintText: "Name",
+                                  contentPadding: EdgeInsets.only(top: 17, left: 5, right: 17, bottom: 10)
                               ),
                             ),
                           ),
