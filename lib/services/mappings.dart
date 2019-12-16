@@ -7,7 +7,7 @@ const double SORENSEN_THRESHOLD = 0.55;
 
 int sortDistances(a, b) {
   /// TODO: Add third metric for matching
-  int aEdit = a[0], bEdit = b[0];
+  double aEdit = a[0], bEdit = b[0];
   double aSorensen = a[1], bSorensen = b[1];
 
   if (aSorensen > bSorensen) {
@@ -40,9 +40,11 @@ Map<PossibleItem, List<Item>> getDetectedToShoppingSorted({List<PossibleItem> de
       }
     }
 
+    print("reached");
+    print(itemToDistance);
     /// Sort the map by the values (=distances)
     var sortedKeys = itemToDistance.keys.toList(growable:false)
-      ..sort(sortDistances);
+      ..sort((Item a, Item b) => sortDistances(itemToDistance[a], itemToDistance[b]));
     distanceSortedItems = sortedKeys;
 
     /// set the value in Map
@@ -77,7 +79,8 @@ Map<Item, List<PossibleItem>> getShoppingToDetectedSorted({List<PossibleItem> de
 
     /// Sort the map by the values (=distances)
     var sortedKeys = possibleItemToDistance.keys.toList(growable:false)
-      ..sort(sortDistances);
+      ..sort((PossibleItem a, PossibleItem b) => sortDistances(possibleItemToDistance[a], possibleItemToDistance[b]));
+
     distanceSortedItems = sortedKeys;
 
     /// set the value in Map
@@ -100,9 +103,8 @@ Map<Item, PossibleItem> findMappings({List<PossibleItem> possibleItems, List<Ite
   /// TODO: Remove checked items on mapping
   /** Mapping Detected Items to ShoppingList items **/
   int cycleTimeout = 0;
-  while (possibleItems.isNotEmpty && cycleTimeout > shoppingItems.length * 2) {
+  while (possibleItems.isNotEmpty && cycleTimeout < shoppingItems.length * 2) {
     /// Get Mappings for item
-    print(possibleItems.isNotEmpty);
     PossibleItem currentPossibleItem = possibleItems.removeAt(0);
     List<Item> prefsForItem = detectedToShopping[currentPossibleItem];
 
