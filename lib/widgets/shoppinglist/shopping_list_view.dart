@@ -3,6 +3,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:listassist/main.dart';
 import 'package:listassist/models/CompletedShoppingList.dart' as model2;
 import 'package:listassist/models/ShoppingList.dart' as model;
+import 'package:listassist/widgets/shimmer/shoppy_shimmer.dart';
 import 'package:listassist/widgets/shoppinglist/completed_shopping_list.dart';
 import 'package:listassist/widgets/shoppinglist/create_shopping_list_view.dart';
 import 'package:listassist/widgets/shoppinglist/shopping_list.dart';
@@ -89,58 +90,7 @@ class ShoppingLists extends StatelessWidget {
                     ),
                 itemCount: lists.length,
                 itemBuilder: (ctx, index) => ShoppingList(index: index))
-        : Shimmer.fromColors(
-            baseColor: Colors.grey[300],
-            highlightColor: Colors.grey[100],
-            enabled: true,
-            child: Column(
-              children: [0, 1, 2, 3, 4, 5, 6]
-                  .map((_) => Padding(
-                        padding: const EdgeInsets.only(bottom: 8.0),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              width: 48.0,
-                              height: 48.0,
-                              color: Colors.white,
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                            ),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Container(
-                                    width: double.infinity,
-                                    height: 8.0,
-                                    color: Colors.white,
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 2.0),
-                                  ),
-                                  Container(
-                                    width: double.infinity,
-                                    height: 8.0,
-                                    color: Colors.white,
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 2.0),
-                                  ),
-                                  Container(
-                                    width: 40.0,
-                                    height: 8.0,
-                                    color: Colors.white,
-                                  ),
-                                ],
-                              ),
-                            )
-                          ],
-                        ),
-                      ))
-                  .toList(),
-            ));
+        : ShoppyShimmer();
   }
 }
 

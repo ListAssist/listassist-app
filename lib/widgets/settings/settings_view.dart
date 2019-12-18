@@ -4,6 +4,7 @@ import 'package:listassist/widgets/settings/notification_settings_view.dart';
 import 'package:listassist/services/auth.dart';
 import 'package:listassist/widgets/settings/profile_settings_view.dart';
 import 'package:listassist/widgets/settings/shopping_list_settings_view.dart';
+import 'package:listassist/widgets/shoppinglist/item_counter.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -118,7 +119,6 @@ class Test extends StatelessWidget {
             //style: Theme.of(context).textTheme.headline,
             textAlign: TextAlign.center,
           ),
-
 
           Container(
               margin: const EdgeInsets.only(top: 30.0),

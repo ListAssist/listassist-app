@@ -1,14 +1,22 @@
 import 'package:algolia/algolia.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:listassist/models/Item.dart';
+import 'package:listassist/models/ShoppingList.dart';
+import 'package:listassist/models/User.dart';
+import 'package:listassist/services/db.dart';
+import 'package:listassist/widgets/shimmer/shoppy_shimmer.dart';
+import 'package:listassist/widgets/shoppinglist/item_counter.dart';
+import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 
 import 'add_shopping_list.dart';
 
 class SearchItemsView extends StatefulWidget {
-  final int listId;
+  final String listId;
 
-  SearchItemsView({this.listId});
+  SearchItemsView(this.listId);
 
   @override
   _SearchItemsView createState() => _SearchItemsView();
@@ -18,10 +26,13 @@ class _SearchItemsView extends State<SearchItemsView> {
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
   TextEditingController _searchController = TextEditingController();
 
+  User _user;
+
   Algolia algolia = Application.algolia;
   bool _searching = false;
 
   List<dynamic> _products = [];
+  List<Item> _items = [];
 
   _searchProducts(String search) async {
     _searching = true;
@@ -37,8 +48,14 @@ class _SearchItemsView extends State<SearchItemsView> {
     return hits;
   }
 
+  _addProduct(String product) {
+    databaseService.addItemToList(_user.uid, widget.listId, new Item(name: product, count: 1, bought: false));
+  }
+
   @override
   Widget build(BuildContext context) {
+    _user = Provider.of<User>(context);
+
     return DefaultTabController(
       length: 3,
       child: Scaffold(
@@ -168,7 +185,10 @@ class _SearchItemsView extends State<SearchItemsView> {
                                           ),
                                           title: Text(_products[index]["name"]),
                                           subtitle: Text(_products[index]["category"]),
-                                          onTap: () {},
+                                          trailing: ItemCounter(),
+                                          onTap: () {
+                                            _addProduct(_products[index]["name"]);
+                                          },
                                         ),
                                       );
                                     },
@@ -190,62 +210,8 @@ class _SearchItemsView extends State<SearchItemsView> {
                                       ],
                                     ),
                                   )
-                            : Shimmer.fromColors(
-                                baseColor: Colors.grey[300],
-                                highlightColor: Colors.grey[100],
-                                enabled: true,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(20.0),
-                                  child: Column(
-                                    children: [0, 1, 2, 3]
-                                        .map((_) => Padding(
-                                              padding: const EdgeInsets.only(bottom: 8.0),
-                                              child: Row(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                  Container(
-                                                    width: 48.0,
-                                                    height: 48.0,
-                                                    color: Colors.white,
-                                                  ),
-                                                  Padding(
-                                                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                                                  ),
-                                                  Expanded(
-                                                    child: Column(
-                                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                                      children: [
-                                                        Container(
-                                                          width: double.infinity,
-                                                          height: 8.0,
-                                                          color: Colors.white,
-                                                        ),
-                                                        Padding(
-                                                          padding: const EdgeInsets.symmetric(vertical: 2.0),
-                                                        ),
-                                                        Container(
-                                                          width: double.infinity,
-                                                          height: 8.0,
-                                                          color: Colors.white,
-                                                        ),
-                                                        Padding(
-                                                          padding: const EdgeInsets.symmetric(vertical: 2.0),
-                                                        ),
-                                                        Container(
-                                                          width: 40.0,
-                                                          height: 8.0,
-                                                          color: Colors.white,
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  )
-                                                ],
-                                              ),
-                                            ))
-                                        .toList(),
-                                  ),
-                                ),
-                              )),
+                            : ShoppyShimmer()
+                    ),
                   )
           ])),
     );

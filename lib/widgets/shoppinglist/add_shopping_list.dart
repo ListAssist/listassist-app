@@ -179,7 +179,6 @@ class _AddShoppinglist extends State<AddShoppinglist> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
 
-
                       Row(
                         children: <Widget>[
                           Expanded(
@@ -242,7 +241,6 @@ class _AddShoppinglist extends State<AddShoppinglist> {
                               },
                             }
                           ),
-
 
                           PopupMenuButton<int>(
                             itemBuilder: (context) => [

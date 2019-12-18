@@ -2,9 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
 import 'package:listassist/models/CompletedShoppingList.dart';
 import 'package:listassist/models/Group.dart';
 import 'package:listassist/models/Invite.dart';
+import 'package:listassist/models/Item.dart';
 import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
 
@@ -115,7 +117,7 @@ class DatabaseService {
         .updateData({'displayName': newName});
   }
   
-  Future<void> updateList(String uid, ShoppingList list) {
+  Future<void> updateList(String uid, ShoppingList list) async {
     var items = list.items.map((e) => e.toJson()).toList();
 
     return _db
@@ -124,6 +126,29 @@ class DatabaseService {
         .collection("lists")
         .document(list.id)
         .setData({"name": list.name, "items" : items}, merge: true);
+  }
+
+  Future<void> addItemToList(String uid, String listId, Item newItem) async{
+    List items;
+    String name;
+    var document = _db
+        .collection("users")
+        .document(uid)
+        .collection("lists")
+        .document(listId);
+
+    await document.get().then((value) => {
+      items = value.data["items"],
+      name = value.data["name"]
+    });
+    items.add(newItem);
+
+    return _db
+        .collection("users")
+        .document(uid)
+        .collection("lists")
+        .document(listId)
+        .setData({"name" : name, "items" : items.map((e) => e.toJson()).toList()}, merge: true);
   }
 
   Future<void> deleteList(String uid, String listid) {

@@ -103,19 +103,15 @@ class _CreateShoppingListView extends State<CreateShoppingListView> {
                             items: [],
                           );
                         }
-                        await databaseService.createList(_user.uid, _newShoppingList);
+
+                        DocumentReference docRef = await databaseService.createList(_user.uid, _newShoppingList);
                         controller.reverse();
                         Navigator.pop(context);
-
-
-                        /*TODO
-                        index von der _newShoppingList bekommen und vorher noch pushen*/
-
 
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => SearchItemsView()));
+                                builder: (context) => SearchItemsView(docRef.documentID)));
                       },
                     ),
                   ),
@@ -143,6 +139,12 @@ class _CreateShoppingListView extends State<CreateShoppingListView> {
                               ),
                             ),
                           ),
+                          IconButton(
+                            icon: Icon(Icons.camera_alt),
+                            onPressed: () {
+                              
+                            },
+                          )
                         ],
                       ),
                     ),
