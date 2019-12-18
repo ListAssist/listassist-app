@@ -71,10 +71,11 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
         children: <Widget>[
           Container(
             padding: EdgeInsets.all(10.0),
-            child: Text("${list.items.map((e) => e.bought ? 1 : 0).reduce((a, b) => a + b)} von ${list.items.length} Produkten gekauft", style: Theme.of(context).textTheme.headline)
+            child: list.items.isNotEmpty ? Text("${list.items.map((e) => e.bought ? 1 : 0).reduce((a, b) => a + b)} von ${list.items.length} Produkten gekauft", style: Theme.of(context).textTheme.headline)
+                : Center(child: Text("Die Einkaufsliste hat noch keine Produkte"))
           ),
           Expanded(
-            child: ListView.builder(
+            child: list.items.isNotEmpty ? ListView.builder(
               itemCount: list.items.length,
               itemBuilder: (BuildContext context, int index){
                 return Container(
@@ -86,7 +87,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
                   )
                 );
               }
-            )
+            ) : Container()
           ),
         ],
       ),

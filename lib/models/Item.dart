@@ -2,13 +2,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Item {
   final String name;
+  int count;
   bool bought;
 
-  Item({this.name, this.bought});
+  Item({this.name, this.count, this.bought});
 
   Map<String, dynamic> toJson() =>
       {
         'name': name,
+        'count': count,
         'bought': bought,
       };
 
@@ -17,6 +19,7 @@ class Item {
 
     return Item(
       name: data["name"],
+      count: data["count"],
       bought: data["bought"],
     );
   }
@@ -26,6 +29,7 @@ class Item {
 
     return Item(
         name: data["name"],
+        count: data["count"],
         bought: data["bought"]
     );
   }

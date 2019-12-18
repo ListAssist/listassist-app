@@ -161,6 +161,31 @@ class AuthService {
     }, merge: true);
   }
 
+  Future<String> reauthenticateUser(FirebaseUser firebaseUser, String password) async{
+    String currentEmail;
+    await _auth.currentUser().then((u) => {
+      currentEmail = u.email
+    });
+    print("currentEmail: " + currentEmail);
+    try{
+      AuthCredential credential = EmailAuthProvider.getCredential(email: currentEmail, password: password);
+      await firebaseUser.reauthenticateWithCredential(credential);
+      return "loggedin";
+    } on PlatformException catch(e) {
+      print(e.toString());
+      return "Falsches Passwort";
+    }
+
+  }
+
+  Future<void> updateEmail(FirebaseUser firebaseUser, String newEmail) async {
+    return firebaseUser.updateEmail(newEmail);
+  }
+
+  Future<void> updatePassword(FirebaseUser firebaseUser, String newPassword) async {
+    return firebaseUser.updatePassword(newPassword);
+  }
+
   Future setProfilePicture(User user, String newPhotoURL) async{
     /** Get users document **/
     DocumentReference userRef = _db.collection("users").document(user.uid);

@@ -57,7 +57,7 @@ class ShoppingList extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text(list.name, style: Theme.of(context).textTheme.title),
-              Text("${list.items.map((e) => e.bought ? 1 : 0).reduce((a, b) => a + b)}/${list.items.length} eingekauft")
+              list.items.isNotEmpty ? Text("${list.items.map((e) => e.bought ? 1 : 0).reduce((a, b) => a + b)}/${list.items.length} eingekauft") : Text("0/0 eingekauft")
             ],
           ),
         ),

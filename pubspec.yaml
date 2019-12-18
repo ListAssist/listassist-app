@@ -41,6 +41,8 @@ dependencies:
   rxdart:
   scoped_model:
   provider:
+  shimmer: ^1.0.1
+  connectivity:
 
   # addons
   url_launcher:
