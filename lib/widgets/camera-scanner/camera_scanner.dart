@@ -23,7 +23,7 @@ import 'package:listassist/services/camera.dart';
 import 'package:listassist/services/http.dart';
 import 'package:listassist/services/calc.dart';
 import 'package:listassist/services/info_overlay.dart';
-import 'package:listassist/services/mappings.dart';
+import 'package:listassist/widgets/camera-scanner/mappings.dart';
 import 'package:listassist/services/recognize.dart';
 import 'package:listassist/services/storage.dart';
 import 'package:listassist/widgets/camera-scanner/polygon_painter.dart';
@@ -45,17 +45,18 @@ class CameraScanner extends StatefulWidget {
 }
 
 class CameraScannerState extends State<CameraScanner> with AfterInitMixin<CameraScanner> {
-  ui.Image _image;
-  File _imageFile;
   final GlobalKey<FancyBottomNavigationState> bottomNavKey = GlobalKey<FancyBottomNavigationState>();
-
-  EditorType _currentEditorType = EditorType.Trainer;
   final double radius = 12;
 
+  /// Image related variables
+  ui.Image _image;
+  File _imageFile;
+  EditorType _currentEditorType = EditorType.Trainer;
+
+  /// Canvas related Variables
   List<ui.Offset> _points = [];
   bool _overflow = false;
   int _currentlyDraggedIndex = -1;
-
   Rect boundingBox;
   Rect inputRect;
 

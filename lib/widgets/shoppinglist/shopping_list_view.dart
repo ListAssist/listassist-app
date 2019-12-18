@@ -18,7 +18,7 @@ class ShoppingListView extends StatelessWidget {
         child: Scaffold(
           floatingActionButton: FloatingActionButton(
             child: Icon(Icons.add),
-            backgroundColor: Colors.blueAccent,
+            backgroundColor: Theme.of(context).colorScheme.primary,
             onPressed: () {
               Navigator.push(
                 context,
