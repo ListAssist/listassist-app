@@ -1,24 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 
 /// Reserved for later use..
 class InfoOverlay {
 
-  static void showInfoSnackBar(String message) {
+  static void showInfoSnackBar(String message, {Toast toastLength = Toast.LENGTH_LONG}) {
     Fluttertoast.showToast(
         msg: message,
         textColor: Colors.white,
+        toastLength: toastLength
     );
   }
 
-  static void showErrorSnackBar(String message) {
+  static void showErrorSnackBar(String message, {Toast toastLength = Toast.LENGTH_LONG}) {
     Fluttertoast.showToast(
         msg: message,
         backgroundColor: Colors.red,
         textColor: Colors.white,
+        timeInSecForIos: 3,
+        toastLength: toastLength
     );
   }
 

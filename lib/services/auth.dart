@@ -15,7 +15,6 @@ import 'package:listassist/widgets/authentication/authentication.dart';
 enum AuthenticationType {Facebook, Google, Twitter}
 
 class AuthService {
-
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   final FacebookLogin _facebookSignIn = FacebookLogin();
   final TwitterLogin _twitterSignIn = TwitterLogin(
@@ -27,7 +26,6 @@ class AuthService {
   Firestore _db = Firestore.instance;
 
   Stream<FirebaseUser> get user => _auth.onAuthStateChanged;
-
   Observable<User> get userDoc => Observable(user).switchMap(
       (FirebaseUser user)  {
         if (user != null) {
@@ -97,33 +95,39 @@ class AuthService {
 
     /** Handle depending on auth type **/
     AuthCredential credential;
-    switch (type) {
-      case AuthenticationType.Facebook:
+    try {
+      switch (type) {
+        case AuthenticationType.Facebook:
         /** Native Facebook login screen **/
-        FacebookLoginResult result = await _facebookSignIn.logIn(["email"]);
+          FacebookLoginResult result = await _facebookSignIn.logIn(["email"]);
 
-        if (ResultHandler.handleFacebookResultError(result)) return null;
+          if (ResultHandler.handleFacebookResultError(result)) return null;
 
-        credential = FacebookAuthProvider.getCredential(accessToken: result.accessToken.token);
-        break;
-      case AuthenticationType.Google:
+          credential = FacebookAuthProvider.getCredential(accessToken: result.accessToken.token);
+          break;
+        case AuthenticationType.Google:
         /** Native Google login screen **/
-        GoogleSignInAccount googleUser = await _googleSignIn.signIn();
-        GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+          GoogleSignInAccount googleUser = await _googleSignIn.signIn();
+          GoogleSignInAuthentication googleAuth = await googleUser.authentication;
 
-        credential = GoogleAuthProvider.getCredential(
-          accessToken: googleAuth.accessToken,
-          idToken: googleAuth.idToken,
-        );
-        break;
-      case AuthenticationType.Twitter:
-        TwitterLoginResult result = await _twitterSignIn.authorize();
+          credential = GoogleAuthProvider.getCredential(
+            accessToken: googleAuth.accessToken,
+            idToken: googleAuth.idToken,
+          );
+          break;
+        case AuthenticationType.Twitter:
+          TwitterLoginResult result = await _twitterSignIn.authorize();
 
-        /// Signing in with Twitter currently doesn't work. Created Issue at firebase_auth repo
-        if (ResultHandler.handleTwitterResultError(result)) return null;
+          /// Signing in with Twitter currently doesn't work. Created Issue at firebase_auth repo
+          if (ResultHandler.handleTwitterResultError(result)) return null;
 
-        credential = TwitterAuthProvider.getCredential(authToken: result.session.token, authTokenSecret: result.session.secret);
-        break;
+          credential = TwitterAuthProvider.getCredential(authToken: result.session.token, authTokenSecret: result.session.secret);
+          break;
+      }
+    } catch (e) {
+      InfoOverlay.showInfoSnackBar("There was an error with the Sign-in method you used. Try again or use another one.");
+      loading.add(false);
+      return null;
     }
 
     try {
