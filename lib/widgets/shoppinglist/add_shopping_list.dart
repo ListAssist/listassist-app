@@ -107,9 +107,6 @@ class _AddShoppinglist extends State<AddShoppinglist> {
 
     AlgoliaQuerySnapshot snap = await query.getObjects();
 
-    print("keko");
-    print(snap.hits[0].data);
-
     List<dynamic> hits = List<dynamic>();
     snap.hits.forEach((h) => {
       hits.add(h.data)
@@ -191,7 +188,7 @@ class _AddShoppinglist extends State<AddShoppinglist> {
                                 return null;
                               },
                               itemBuilder:  (context, suggestion) {
-                                print(suggestion);
+                                print("Suggestion: $suggestion");
                                 return ListTile(
                                   leading: suggestion['category'] == "Allgemein" ? Icon(Icons.local_dining) : Icon(Icons.directions_run),
                                   title: Text(suggestion['name']),

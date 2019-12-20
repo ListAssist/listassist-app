@@ -43,7 +43,6 @@ class ShoppingList {
 
   @override
   String toString() {
-    // TODO: implement toString
     return "Name: $name, Items: ${items.map((i) => i.name).join(", ")}";
   }
 }

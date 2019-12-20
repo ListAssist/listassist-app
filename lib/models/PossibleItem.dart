@@ -1,13 +1,13 @@
 import 'dart:convert';
 
-class PossibleProduct {
+class PossibleItem {
   List<String> name;
   double price;
-  bool selected = false;
+  bool selected = true;
 
-  PossibleProduct({this.name, this.price});
+  PossibleItem({this.name, this.price});
 
-  static String productsToJson(List<PossibleProduct> products) {
+  static String productsToJson(List<PossibleItem> products) {
     List<Map<String, String>> mappedProducts = [];
     products.forEach((product) {
       mappedProducts.add({

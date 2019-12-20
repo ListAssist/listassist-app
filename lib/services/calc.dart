@@ -71,7 +71,7 @@ class CalcService {
 
 
   /// check if distance between all polygon points is okay
-  bool checkDistancesPoints(List<ui.Offset> points, {double minDistance = 60}) {
+  bool checkDistancesPoints(List<ui.Offset> points, {double minDistance = 20}) {
     for (int i = 0; i < points.length; i += 2) {
       if (i + 2 == points.length) {
         if (pointDistance(points[i], points[0]) < minDistance) return false;
