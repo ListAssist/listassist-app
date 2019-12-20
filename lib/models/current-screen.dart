@@ -28,7 +28,9 @@ class FirstView extends StatelessWidget {
     return MultiProvider(
       providers: [
         StreamProvider.value(value: databaseService.streamLists(user.uid)),
-        StreamProvider.value(value: databaseService.streamListsHistory(user.uid))
+        StreamProvider.value(value: databaseService.streamListsHistory(user.uid)),
+        //StreamProvider.value(value: databaseService.streamPopularProducts())
+
       ],
       child: CustomNavigator(
         home: ShoppingListView(),

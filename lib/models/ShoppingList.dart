@@ -33,6 +33,14 @@ class ShoppingList {
     );
   }
 
+  bool hasItem(String itemName) {
+    return items.indexWhere((i) => i.name == itemName) != -1;
+  }
+
+  int getItemCount(String itemName) {
+    return items.where((i) => i.name == itemName).toList()[0].count;
+  }
+
   @override
   String toString() {
     // TODO: implement toString

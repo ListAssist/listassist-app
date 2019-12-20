@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:listassist/models/Item.dart';
+import 'package:listassist/models/Product.dart';
 import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
 import 'package:listassist/services/db.dart';
@@ -27,12 +28,14 @@ class _SearchItemsView extends State<SearchItemsView> {
   TextEditingController _searchController = TextEditingController();
 
   User _user;
+  ShoppingList _list;
 
   Algolia algolia = Application.algolia;
   bool _searching = false;
 
   List<dynamic> _products = [];
   List<Item> _items = [];
+  List<Item> _popularItems = [];
 
   _searchProducts(String search) async {
     _searching = true;
@@ -48,13 +51,42 @@ class _SearchItemsView extends State<SearchItemsView> {
     return hits;
   }
 
-  _addProduct(String product) {
-    databaseService.addItemToList(_user.uid, widget.listId, new Item(name: product, count: 1, bought: false));
+  _addItem(String productName) {
+    databaseService.addItemToList(_user.uid, widget.listId, new Item(name: productName, count: 1, bought: false));
+  }
+
+  _addCount(String itemName) {
+    databaseService.changeItemCount(_user.uid, widget.listId, itemName, 1);
+  }
+
+  _subtractCount(String itemName) {
+    if (_list.getItemCount(itemName) == 1) {
+      databaseService.removeItemFromList(_user.uid, widget.listId, itemName);
+    } else {
+      databaseService.changeItemCount(_user.uid, widget.listId, itemName, -1);
+    }
+  }
+
+  _addCountUserInput() {
+    databaseService.changeItemCount(_user.uid, widget.listId, _searchController.text, 1);
+  }
+
+  _subtractCountUserInput() {
+    if (_list.getItemCount(_searchController.text) == 1) {
+      databaseService.removeItemFromList(_user.uid, widget.listId, _searchController.text);
+    } else {
+      databaseService.changeItemCount(_user.uid, widget.listId, _searchController.text, -1);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     _user = Provider.of<User>(context);
+    List lists = Provider.of<List<ShoppingList>>(context);
+    int index = lists.indexWhere((e) => e.id == widget.listId);
+    _list = lists[index];
+
+    print(_list.name);
 
     return DefaultTabController(
       length: 3,
@@ -96,7 +128,9 @@ class _SearchItemsView extends State<SearchItemsView> {
                                 onChanged: (text) async {
                                   _products.clear();
                                   setState(() {});
-                                  if(text.length == 0) {return;}
+                                  if (text.length == 0) {
+                                    return;
+                                  }
                                   _products = await _searchProducts(text);
                                   setState(() {});
                                 },
@@ -148,7 +182,7 @@ class _SearchItemsView extends State<SearchItemsView> {
                                   height: 60,
                                   child: ListTile(
                                     leading: Padding(
-                                      padding: const EdgeInsets.all(8.0),
+                                      padding: EdgeInsets.all(8.0),
                                       child: Icon(Icons.local_dining),
                                     ),
                                     title: Text("Produkt"),
@@ -169,49 +203,133 @@ class _SearchItemsView extends State<SearchItemsView> {
                         child: _searching == false
                             ? _products.length > 0
                                 ? ListView.separated(
-                                    itemCount: _products.length,
+                                    // length + 1, weil noch ein Listtile erstellt wird mit der Eingabe vom Benutzer
+                                    itemCount: _products.length + 1,
                                     separatorBuilder: (ctx, i) => Divider(
                                       indent: 70,
                                       endIndent: 10,
                                       color: Colors.grey,
                                     ),
                                     itemBuilder: (context, index) {
+                                      _subtract() {
+                                        index > 0 ? _subtractCount(_products[index - 1]["name"]) : _subtractCount(_searchController.text);
+                                      }
+
+                                      _add() {
+                                        index > 0 ? _addCount(_products[index - 1]["name"]) : _addCount(_searchController.text);
+                                      }
+
+                                      int count;
+                                      if (index == 0) {
+                                        if (_list.hasItem(_searchController.text)) {
+                                          count = _list.items.firstWhere((i) => i.name == _searchController.text).count;
+                                        }
+                                      } else {
+                                        if (_list.hasItem(_products[index - 1]["name"])) {
+                                          count = _list.items.firstWhere((i) => i.name == _products[index - 1]["name"]).count;
+                                        }
+                                      }
+
+                                      if (index == 0) {
+                                        return Container(
+                                          height: 60,
+                                          child: ListTile(
+                                            leading: Padding(
+                                              padding: EdgeInsets.all(8.0),
+                                              child: Icon(Icons.local_dining, color: _list.hasItem(_searchController.text) ? Theme.of(context).primaryColor : null),
+                                            ),
+                                            title: Text(_searchController.text),
+                                            subtitle: Text("Kategorie"),
+                                            trailing: _list.hasItem(_searchController.text)
+                                                ? ItemCounter(count: count, subtractCount: _subtract, addCount: _add)
+                                                : Container(
+                                                    width: 0,
+                                                    height: 0,
+                                                  ),
+                                            onTap: () {
+                                              if (!_list.hasItem(_searchController.text)) {
+                                                _addItem(_searchController.text);
+                                              } else {
+                                                _addCountUserInput();
+                                              }
+                                            },
+                                          ),
+                                        );
+                                      }
+
                                       return Container(
                                         height: 60,
                                         child: ListTile(
                                           leading: Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: Icon(Icons.local_dining),
+                                            padding: EdgeInsets.all(8.0),
+                                            child: Icon(Icons.local_dining, color: _list.hasItem(_products[index - 1]["name"]) ? Theme.of(context).primaryColor : null),
                                           ),
-                                          title: Text(_products[index]["name"]),
-                                          subtitle: Text(_products[index]["category"]),
-                                          trailing: ItemCounter(),
+                                          title: Text(_products[index - 1]["name"]),
+                                          subtitle: Text(_products[index - 1]["category"]),
+                                          trailing: _list.hasItem(_products[index - 1]["name"])
+                                              ? ItemCounter(count: count, subtractCount: _subtract, addCount: _add)
+                                              : Container(
+                                                  width: 0,
+                                                  height: 0,
+                                                ),
                                           onTap: () {
-                                            _addProduct(_products[index]["name"]);
+                                            if (!_list.hasItem(_products[index - 1]["name"])) {
+                                              _addItem(_products[index - 1]["name"]);
+                                            } else {
+                                              _addCount(_products[index - 1]["name"]);
+                                            }
                                           },
                                         ),
                                       );
                                     },
                                   )
-                                : Padding(
-                                    padding: EdgeInsets.only(top: 30),
-                                    child: Column(
-                                      children: <Widget>[
-                                        Padding(
-                                          padding: EdgeInsets.only(bottom: 15.0),
-                                          child: Icon(Icons.sentiment_dissatisfied, size: 50),
-                                        ),
-                                        Text(
-                                          "Keine Produkte gefunden",
-                                          style: TextStyle(
-                                            fontSize: 15,
+                                : Column(
+                                    children: <Widget>[
+                                      Container(
+                                        height: 60,
+                                        child: ListTile(
+                                          leading: Padding(
+                                            padding: EdgeInsets.all(8.0),
+                                            child: Icon(Icons.local_dining, color: _list.hasItem(_searchController.text) ? Theme.of(context).primaryColor : null),
                                           ),
+                                          title: Text(_searchController.text),
+                                          subtitle: Text("Kategorie"),
+                                          trailing: _list.hasItem(_searchController.text)
+                                              ? ItemCounter(
+                                                  count: _list.items.firstWhere((i) => i.name == _searchController.text).count,
+                                                  subtractCount: _subtractCountUserInput,
+                                                  addCount: _addCountUserInput,
+                                                )
+                                              : Container(
+                                                  width: 0,
+                                                  height: 0,
+                                                ),
+                                          onTap: () {
+                                            if (!_list.hasItem(_searchController.text)) {
+                                              _addItem(_searchController.text);
+                                            } else {
+                                              _addCountUserInput();
+                                            }
+                                          },
                                         ),
-                                      ],
-                                    ),
+                                      ),
+                                      Padding(
+                                        padding: EdgeInsets.only(top: 50.0, bottom: 15.0),
+                                        child: Icon(
+                                          Icons.sentiment_dissatisfied,
+                                          size: 50,
+                                          color: Theme.of(context).primaryColor,
+                                        ),
+                                      ),
+                                      Text(
+                                        "Keine Produkte gefunden",
+                                        style: TextStyle(
+                                          fontSize: 15,
+                                        ),
+                                      ),
+                                    ],
                                   )
-                            : ShoppyShimmer()
-                    ),
+                            : ShoppyShimmer()),
                   )
           ])),
     );

@@ -5,6 +5,7 @@ import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
 import 'package:listassist/services/db.dart';
 import 'package:listassist/widgets/shoppinglist/edit_shopping_list.dart';
+import 'package:listassist/widgets/shoppinglist/search_items_view.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:listassist/services/camera.dart';
@@ -47,6 +48,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
 
   @override
   Widget build(BuildContext context) {
+    List<ShoppingList> lists = Provider.of<List<ShoppingList>>(context);
     if(!useCache) {
       list = Provider.of<List<ShoppingList>>(context)[widget.index];
     }
@@ -91,52 +93,72 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
           ),
         ],
       ),
-      floatingActionButton: SpeedDial(
-        animatedIcon: AnimatedIcons.menu_close,
-        animatedIconTheme: IconThemeData(size: 22.0),
-        closeManually: false,
-        curve: Curves.easeIn,
-        overlayOpacity: 0.35,
-        backgroundColor: Theme.of(context).primaryColor,
-        elevation: 8.0,
-        shape: CircleBorder(),
-        children: [
-          SpeedDialChild(
-              child: Icon(Icons.check),
-              backgroundColor: Colors.green,
-              labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
-              label: "Complete",
-              labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
-              onTap: _showCompleteDialog
+      floatingActionButton: Stack(
+        children: <Widget>[
+          Padding(
+            padding: EdgeInsets.only(right: 80.0),
+            child: Align(
+              alignment: Alignment.bottomRight,
+              child: FloatingActionButton(
+                child: Icon(Icons.add),
+                backgroundColor: Colors.green,
+                onPressed: (){
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => SearchItemsView(lists.elementAt(widget.index).id)));
+                },
+              ),
+            ),
           ),
-          SpeedDialChild(
-            child: Icon(Icons.delete),
-            backgroundColor: Colors.red,
-            labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
-            label: "Delete",
-            labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
-            onTap: _showDeleteDialog
-          ),
-          SpeedDialChild(
-            child: Icon(Icons.camera),
-            backgroundColor: Colors.blue,
-            label: "Image Check",
-            labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
-            labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
-            onTap: () {
-              InfoOverlay.mainModalBottomSheet(context, [
-                ListTile(
-                  leading: Icon(Icons.camera_alt),
-                  title: Text("Kamera"),
-                  onTap: () => _pickImage(context, ImageSource.camera, widget.index),
-                ),
-                ListTile(
-                  leading: Icon(Icons.photo),
-                  title: Text("Galerie"),
-                  onTap: () => _pickImage(context, ImageSource.gallery, widget.index),
-                )
-              ]);
-            },
+          SpeedDial(
+            animatedIcon: AnimatedIcons.menu_close,
+            animatedIconTheme: IconThemeData(size: 22.0),
+            closeManually: false,
+            curve: Curves.easeIn,
+            overlayOpacity: 0.35,
+            backgroundColor: Theme.of(context).primaryColor,
+            elevation: 8.0,
+            shape: CircleBorder(),
+            children: [
+              SpeedDialChild(
+                  child: Icon(Icons.check),
+                  backgroundColor: Colors.green,
+                  labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
+                  label: "Complete",
+                  labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
+                  onTap: _showCompleteDialog
+              ),
+              SpeedDialChild(
+                child: Icon(Icons.delete),
+                backgroundColor: Colors.red,
+                labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
+                label: "Delete",
+                labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
+                onTap: _showDeleteDialog
+              ),
+              SpeedDialChild(
+                child: Icon(Icons.camera),
+                backgroundColor: Colors.blue,
+                label: "Image Check",
+                labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
+                labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
+                onTap: () {
+                  InfoOverlay.mainModalBottomSheet(context, [
+                    ListTile(
+                      leading: Icon(Icons.camera_alt),
+                      title: Text("Kamera"),
+                      onTap: () => _pickImage(context, ImageSource.camera, widget.index),
+                    ),
+                    ListTile(
+                      leading: Icon(Icons.photo),
+                      title: Text("Galerie"),
+                      onTap: () => _pickImage(context, ImageSource.gallery, widget.index),
+                    )
+                  ]);
+                },
+              ),
+            ],
           ),
         ],
       ),

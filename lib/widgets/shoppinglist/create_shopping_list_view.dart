@@ -142,7 +142,7 @@ class _CreateShoppingListView extends State<CreateShoppingListView> {
                           IconButton(
                             icon: Icon(Icons.camera_alt),
                             onPressed: () {
-                              
+
                             },
                           )
                         ],
