@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
@@ -137,7 +138,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
             label: "Image Check",
             labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
             labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
-            onTap: () => InfoOverlay.showSourceSelectionSheet(context, callback: _startCameraScanner),
+            onTap: () => InfoOverlay.showSourceSelectionSheet(context, callback: _startCameraScanner, arg: widget.index),
           ),
         ],
       ),

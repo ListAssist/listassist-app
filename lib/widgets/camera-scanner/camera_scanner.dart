@@ -234,10 +234,12 @@ class CameraScannerState extends State<CameraScanner> with AfterInitMixin<Camera
     var shoppingList = ShoppingList(id: originalList.id, created: originalList.created, name: originalList.name, type: originalList.type, items: originalList.items);
 
     /// let user choose what is corrrect of our detections
-    if ("Settings" == "are okay with this" || false) {
+    if ("Settings" == "are okay with this" || true) {
       var selectedProducts = await showSelectDialog(context, detectedItems);
       if (selectedProducts != null) {
         detectedItems = selectedProducts;
+      } else {
+        return;
       }
     }
 

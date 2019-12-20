@@ -61,17 +61,17 @@ class InfoOverlay {
     return progressDialog;
   }
 
-  static showSourceSelectionSheet(BuildContext context, {Function callback}) {
+  static showSourceSelectionSheet(BuildContext context, {Function callback, dynamic arg}) {
     mainModalBottomSheet(context, [
       ListTile(
         leading: Icon(Icons.camera_alt),
         title: Text("Kamera"),
-        onTap: () => callback(context, ImageSource.camera),
+        onTap: () => callback(context, ImageSource.camera, arg),
       ),
       ListTile(
         leading: Icon(Icons.photo),
         title: Text("Galerie"),
-        onTap: () => callback(context, ImageSource.gallery),
+        onTap: () => callback(context, ImageSource.gallery, arg),
       )
     ]);
   }
