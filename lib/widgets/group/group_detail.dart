@@ -6,6 +6,7 @@ import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
 import 'package:listassist/services/db.dart';
 import 'package:listassist/services/info_overlay.dart';
+import 'package:listassist/widgets/group/edit_group.dart';
 import 'package:listassist/widgets/group/group_userlist.dart';
 import 'package:listassist/widgets/shoppinglist/shopping_list.dart' as widget;
 import 'package:provider/provider.dart';
@@ -88,6 +89,14 @@ class GroupMenu extends StatelessWidget {
           }catch(e) {
             InfoOverlay.showErrorSnackBar("Fehler: ${e.message}");
           }
+        }else if(result == GroupAction.edit) {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => Provider<Group>.value(
+                  value: group,
+                  child: EditGroup()),
+            )
+          );
         }
       },
       itemBuilder: (BuildContext context) => <PopupMenuEntry<GroupAction>>[

@@ -12,7 +12,7 @@ class DatabaseService {
   final Firestore _db = Firestore.instance;
 
   Stream<User> streamProfile(FirebaseUser user) {
-    print("READ USER");
+    print("----- READ USER -----");
     return _db
         .collection("users")
         .document(user.uid)
@@ -21,7 +21,8 @@ class DatabaseService {
   }
 
   Stream<List<Stream<Group>>> streamGroupsFromUser(String uid) {
-    print(uid);
+    print("----- READ GROUPS -----");
+    //print(uid);
     return _db
       .collection("groups_user")
       .document(uid)
@@ -60,6 +61,7 @@ class DatabaseService {
   }
 
   Stream<List<Invite>> streamInvites(String uid) {
+    print("----- READ INVITES -----");
     return _db
         .collection("invites")
         .where("to", isEqualTo: uid)
@@ -69,6 +71,7 @@ class DatabaseService {
   }
 
   Stream<List<ShoppingList>> streamLists(String uid) {
+    print("----- READ LISTS -----");
     return _db
         .collection("users")
         .document(uid)
@@ -79,6 +82,7 @@ class DatabaseService {
   }
 
   Stream<List<CompletedShoppingList>> streamListsHistory(String uid) {
+    print("----- READ COMPLETED LISTS -----");
     return _db
         .collection("users")
         .document(uid)
