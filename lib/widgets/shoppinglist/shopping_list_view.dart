@@ -59,6 +59,7 @@ class ShoppingLists extends StatelessWidget {
           endIndent: 10,
           color: Colors.grey,
         ),
+        physics: BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
         itemCount: lists.length,
         itemBuilder: (ctx, index) => ShoppingList(index: index)
     ) : SpinKitDoubleBounce(color: Colors.blueAccent,);
@@ -76,6 +77,7 @@ class ShoppingListsHistory extends StatelessWidget {
           endIndent: 10,
           color: Colors.grey,
         ),
+        physics: BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
         itemCount: lists.length,
         itemBuilder: (ctx, index) => CompletedShoppingList(index: index)
     ) : SpinKitDoubleBounce(color: Colors.blueAccent,);
