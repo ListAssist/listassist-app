@@ -37,27 +37,20 @@ class DatabaseService {
           ).toList() : List<Stream<Group>>();
       });
 
-//    return _db
-//        .collection("groups_user")
-//        .document(uid)
-//        .snapshots()
-//        .map<List<Group>>((list) {
-//          print(list);
-//          print(list.data);
-//          return list.data != null ? list.data["groups"]
-//          .map<Stream<Group>>((groupId) => _db
-//            .collection("groups")
-//            .document(groupId)
-//            .snapshots()
-//            .map<Group>((snap) => Group.fromMap(snap.data))
-//          ).toList() : List<Group>();
-//    });
+    //TODO: Read groups array from groups_user document and use it below
+    /*return _db
+        .collection("groups")
+        .where(FieldPath.documentId, whereIn: data.data["groups"])
+        .snapshots()
+        .map((snap) => snap.documents.map((d) => Group.fromFirestore(d)).toList());
 
-//    return db
-//            .collection("groups")
-//            .document('89XF5ZpygJtmMxWQ0Weo')
-//            .snapshots()
-//            .map((snap) => Group.fromMap(snap.data));
+    return _db
+        .collection("groups_user")
+        .document(uid)
+        .snapshots()
+        .map<List<Group>>((data) {
+
+        });*/
   }
 
   Stream<List<Invite>> streamInvites(String uid) {
