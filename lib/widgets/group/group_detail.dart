@@ -97,6 +97,23 @@ class GroupMenu extends StatelessWidget {
                   child: EditGroup()),
             )
           );
+        }else if(result == GroupAction.delete) {
+          try {
+            final HttpsCallable delete = cloudFunctionInstance.getHttpsCallable(
+                functionName: "deleteGroup"
+            );
+            dynamic resp = await delete.call(<String, dynamic>{
+              "groupid": group.id
+            });
+            if (resp.data["status"] == "Failed") {
+              InfoOverlay.showErrorSnackBar("Fehler beim Löschen der Gruppe");
+            } else {
+              InfoOverlay.showInfoSnackBar("Gruppe gelöscht");
+              Navigator.pop(context);
+            }
+          }catch(e) {
+            InfoOverlay.showErrorSnackBar("Fehler: ${e.message}");
+          }
         }
       },
       itemBuilder: (BuildContext context) => <PopupMenuEntry<GroupAction>>[
@@ -108,6 +125,7 @@ class GroupMenu extends StatelessWidget {
         PopupMenuItem<GroupAction>(
           value: GroupAction.delete,
           enabled: group.creator.uid == uid,
+          //TODO: Delete document including subcollections, like lists
           child: Text('Gruppe löschen'),
         ),
         PopupMenuItem<GroupAction>(
