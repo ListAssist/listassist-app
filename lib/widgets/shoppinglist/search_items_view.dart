@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:algolia/algolia.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
@@ -9,6 +11,7 @@ import 'package:listassist/models/User.dart';
 import 'package:listassist/services/db.dart';
 import 'package:listassist/widgets/shimmer/shoppy_shimmer.dart';
 import 'package:listassist/widgets/shoppinglist/item_counter.dart';
+import 'package:localstorage/localstorage.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -26,6 +29,7 @@ class SearchItemsView extends StatefulWidget {
 class _SearchItemsView extends State<SearchItemsView> {
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
   TextEditingController _searchController = TextEditingController();
+  LocalStorage _storage = new LocalStorage("popular_products.json");
 
   User _user;
   ShoppingList _list;
@@ -33,9 +37,14 @@ class _SearchItemsView extends State<SearchItemsView> {
   Algolia algolia = Application.algolia;
   bool _searching = false;
 
+  Timer _debounce;
+  int _debounceTime = 2000;
+
   List<dynamic> _products = [];
-  List<Item> _items = [];
-  List<Item> _popularItems = [];
+  List<Product> _popularProducts = [];
+
+  List<Product> _recentProducts = [];
+  bool initialized = false;
 
   _searchProducts(String search) async {
     _searching = true;
@@ -43,7 +52,6 @@ class _SearchItemsView extends State<SearchItemsView> {
     AlgoliaQuery query = algolia.instance.index('products').search(search);
 
     AlgoliaQuerySnapshot snap = await query.getObjects();
-    //print(snap.hits[0].data);
     List<dynamic> hits = List<dynamic>();
     snap.hits.forEach((h) => {print(h.data), hits.add(h.data)});
     _searching = false;
@@ -51,24 +59,39 @@ class _SearchItemsView extends State<SearchItemsView> {
     return hits;
   }
 
-  _addItem(String productName) {
-    databaseService.addItemToList(_user.uid, widget.listId, new Item(name: productName, count: 1, bought: false));
+  _addItem(Product product) {
+    _list.addItem(product.name);
+    _addToRecentProducts(product);
+    setState(() {});
+    _requestListUpdate();
   }
 
   _addCount(String itemName) {
-    databaseService.changeItemCount(_user.uid, widget.listId, itemName, 1);
+    _list.changeItemCount(itemName, 1);
+    setState(() {});
+    _requestListUpdate();
   }
 
   _subtractCount(String itemName) {
     if (_list.getItemCount(itemName) == 1) {
-      databaseService.removeItemFromList(_user.uid, widget.listId, itemName);
+      _list.removeItem(itemName);
+      setState(() {});
+      _requestListUpdate();
     } else {
-      databaseService.changeItemCount(_user.uid, widget.listId, itemName, -1);
+      _list.changeItemCount(itemName, -1);
+      setState(() {});
+      _requestListUpdate();
     }
   }
 
-  _addCountUserInput() {
-    databaseService.changeItemCount(_user.uid, widget.listId, _searchController.text, 1);
+  // Updated mit Debounce die Einkaufsliste in der Datenbank
+  _requestListUpdate() {
+    if (_debounce?.isActive ?? false) _debounce.cancel();
+    _debounce = Timer(Duration(milliseconds: _debounceTime), () {
+      if (_list != null && _user.uid != null || _user.uid.length > 0) {
+        databaseService.updateList(_user.uid, _list).then((value) => {print("Liste wurde erfolgreich upgedated")}).catchError((_) => {print(_.toString())});
+      }
+    });
   }
 
   _subtractCountUserInput() {
@@ -77,6 +100,18 @@ class _SearchItemsView extends State<SearchItemsView> {
     } else {
       databaseService.changeItemCount(_user.uid, widget.listId, _searchController.text, -1);
     }
+  }
+
+  _addToRecentProducts(Product product) {
+    _recentProducts.removeWhere((p) => p.name == product.name);
+    _recentProducts.length >= 10 ? _recentProducts.removeLast() : {};
+    print(_recentProducts[0].toString());
+    _recentProducts.insert(0, product);
+    _storage.setItem(
+        'list',
+        _recentProducts.map((product) {
+          return product.toJson();
+        }).toList());
   }
 
   @override
@@ -92,6 +127,7 @@ class _SearchItemsView extends State<SearchItemsView> {
       length: 3,
       child: Scaffold(
           key: _scaffoldKey,
+          floatingActionButton: FloatingActionButton(child: Icon(Icons.check), onPressed: (){Navigator.pop(context);}, backgroundColor: Colors.green,),
           body: Column(children: <Widget>[
             Container(
               height: 120.0,
@@ -167,31 +203,129 @@ class _SearchItemsView extends State<SearchItemsView> {
                 ? Expanded(
                     child: TabBarView(
                       children: <Widget>[
-                        MediaQuery.removePadding(
-                            removeTop: true,
-                            context: context,
-                            child: ListView.separated(
-                              itemCount: 10,
-                              separatorBuilder: (ctx, i) => Divider(
-                                indent: 70,
-                                endIndent: 10,
-                                color: Colors.grey,
-                              ),
-                              itemBuilder: (context, index) {
-                                return Container(
-                                  height: 60,
-                                  child: ListTile(
-                                    leading: Padding(
-                                      padding: EdgeInsets.all(8.0),
-                                      child: Icon(Icons.local_dining),
+                        FutureBuilder(
+                            future: _storage.ready,
+                            builder: (context, snapshot) {
+                              if (snapshot.data == null) {
+                                return ShoppyShimmer();
+                              }
+
+                              _recentProducts = _storage.getItem("list").map((product) {
+                                return new Product(name: product["name"], category: product["category"]);
+                              }).cast<Product>().toList();
+
+                              if (_recentProducts.isNotEmpty != null) {
+                                return MediaQuery.removePadding(
+                                    removeTop: true,
+                                    context: context,
+                                    child: ListView.separated(
+                                      itemCount: _recentProducts.length,
+                                      separatorBuilder: (ctx, i) => Divider(
+                                        indent: 70,
+                                        endIndent: 10,
+                                        color: Colors.grey,
+                                      ),
+                                      itemBuilder: (context, index) {
+                                        _subtract() {
+                                          _subtractCount(_recentProducts[index].name);
+                                        }
+                                        int count;
+                                        if (_list.hasItem(_recentProducts[index].name)) {
+                                          count = _list.items.firstWhere((i) => i.name == _recentProducts[index].name).count;
+                                        }
+                                        return Container(
+                                          height: 60,
+                                          child: ListTile(
+                                            leading: Padding(
+                                              padding: EdgeInsets.all(8.0),
+                                              child: Icon(Icons.local_dining),
+                                            ),
+                                            title: Text(_recentProducts[index].name),
+                                            subtitle: Text(_recentProducts[index].category),
+                                            trailing: _list.hasItem(_recentProducts[index].name)
+                                                ? ItemCounter(count: count, subtractCount: _subtract)
+                                                : Container(
+                                              width: 0,
+                                              height: 0,
+                                            ),
+                                            onTap: () {
+                                              if (!_list.hasItem(_recentProducts[index].name)) {
+                                                _addItem(new Product(name: _recentProducts[index].name, category: _recentProducts[index].category));
+                                              } else {
+                                                _addCount(_recentProducts[index].name);
+                                              }
+                                            }
+                                          ),
+                                        );
+                                      },
+                                    ));
+                              }
+
+                              return FutureBuilder(
+                                  future: databaseService.getPopularProducts(),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.connectionState == ConnectionState.waiting) {
+                                      return ShoppyShimmer();
+                                    }
+
+                                    return MediaQuery.removePadding(
+                                        removeTop: true,
+                                        context: context,
+                                        child: ListView.separated(
+                                          itemCount: snapshot.data.length,
+                                          separatorBuilder: (ctx, i) => Divider(
+                                            indent: 70,
+                                            endIndent: 10,
+                                            color: Colors.grey,
+                                          ),
+                                          itemBuilder: (context, index) {
+                                            return Container(
+                                              height: 60,
+                                              child: ListTile(
+                                                leading: Padding(
+                                                  padding: EdgeInsets.all(8.0),
+                                                  child: Icon(Icons.local_dining),
+                                                ),
+                                                title: Text(snapshot.data[index].name),
+                                                subtitle: Text(snapshot.data[index].category),
+                                              ),
+                                            );
+                                          },
+                                        ));
+                                  });
+                            }),
+                        FutureBuilder(
+                            future: databaseService.getPopularProducts(),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState == ConnectionState.waiting) {
+                                return ShoppyShimmer();
+                              }
+
+                              return MediaQuery.removePadding(
+                                  removeTop: true,
+                                  context: context,
+                                  child: ListView.separated(
+                                    itemCount: snapshot.data.length,
+                                    separatorBuilder: (ctx, i) => Divider(
+                                      indent: 70,
+                                      endIndent: 10,
+                                      color: Colors.grey,
                                     ),
-                                    title: Text("Produkt"),
-                                    subtitle: Text("Kategorie"),
-                                  ),
-                                );
-                              },
-                            )),
-                        Text("kek2"),
+                                    itemBuilder: (context, index) {
+                                      return Container(
+                                        height: 60,
+                                        child: ListTile(
+                                          leading: Padding(
+                                            padding: EdgeInsets.all(8.0),
+                                            child: Icon(Icons.local_dining),
+                                          ),
+                                          title: Text(snapshot.data[index].name),
+                                          subtitle: Text(snapshot.data[index].category),
+                                        ),
+                                      );
+                                    },
+                                  ));
+                            }),
                         Text("kek3")
                       ],
                     ),
@@ -213,10 +347,6 @@ class _SearchItemsView extends State<SearchItemsView> {
                                     itemBuilder: (context, index) {
                                       _subtract() {
                                         index > 0 ? _subtractCount(_products[index - 1]["name"]) : _subtractCount(_searchController.text);
-                                      }
-
-                                      _add() {
-                                        index > 0 ? _addCount(_products[index - 1]["name"]) : _addCount(_searchController.text);
                                       }
 
                                       int count;
@@ -241,16 +371,16 @@ class _SearchItemsView extends State<SearchItemsView> {
                                             title: Text(_searchController.text),
                                             subtitle: Text("Kategorie"),
                                             trailing: _list.hasItem(_searchController.text)
-                                                ? ItemCounter(count: count, subtractCount: _subtract, addCount: _add)
+                                                ? ItemCounter(count: count, subtractCount: _subtract)
                                                 : Container(
                                                     width: 0,
                                                     height: 0,
                                                   ),
                                             onTap: () {
                                               if (!_list.hasItem(_searchController.text)) {
-                                                _addItem(_searchController.text);
+                                                _addItem(new Product(name: _searchController.text, category: "Selbst erstellt"));
                                               } else {
-                                                _addCountUserInput();
+                                                _addCount(_searchController.text);
                                               }
                                             },
                                           ),
@@ -267,14 +397,14 @@ class _SearchItemsView extends State<SearchItemsView> {
                                           title: Text(_products[index - 1]["name"]),
                                           subtitle: Text(_products[index - 1]["category"]),
                                           trailing: _list.hasItem(_products[index - 1]["name"])
-                                              ? ItemCounter(count: count, subtractCount: _subtract, addCount: _add)
+                                              ? ItemCounter(count: count, subtractCount: _subtract)
                                               : Container(
                                                   width: 0,
                                                   height: 0,
                                                 ),
                                           onTap: () {
                                             if (!_list.hasItem(_products[index - 1]["name"])) {
-                                              _addItem(_products[index - 1]["name"]);
+                                              _addItem(new Product(name: _products[index - 1]["name"], category: _products[index - 1]["category"]));
                                             } else {
                                               _addCount(_products[index - 1]["name"]);
                                             }
@@ -298,7 +428,6 @@ class _SearchItemsView extends State<SearchItemsView> {
                                               ? ItemCounter(
                                                   count: _list.items.firstWhere((i) => i.name == _searchController.text).count,
                                                   subtractCount: _subtractCountUserInput,
-                                                  addCount: _addCountUserInput,
                                                 )
                                               : Container(
                                                   width: 0,
@@ -306,9 +435,9 @@ class _SearchItemsView extends State<SearchItemsView> {
                                                 ),
                                           onTap: () {
                                             if (!_list.hasItem(_searchController.text)) {
-                                              _addItem(_searchController.text);
+                                              _addItem(new Product(name: _searchController.text, category: "Selbst erstellt"));
                                             } else {
-                                              _addCountUserInput();
+                                              _addCount(_searchController.text);
                                             }
                                           },
                                         ),

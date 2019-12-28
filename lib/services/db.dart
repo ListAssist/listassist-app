@@ -195,6 +195,20 @@ class DatabaseService {
         .setData({"name" : name, "items" : items.map((e) => e.toJson()).toList()}, merge: true);
   }
 
+  Future<List<Product>> getPopularProducts() async{
+    List<Product> products;
+
+    var document = _db
+        .collection("popular_products")
+        .document("products");
+
+    await document.get().then((value) => {
+      products = new List.from(value.data["products"].map((p) => Product.fromMap(p)).toList()),
+    });
+
+    return products;
+  }
+
   Future<void> updateProfileName(String uid, String newName) {
     return _db
         .collection('users')

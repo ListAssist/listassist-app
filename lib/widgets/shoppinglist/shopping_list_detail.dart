@@ -14,6 +14,7 @@ import 'package:listassist/widgets/camera-scanner/camera_scanner.dart';
 
 class ShoppingListDetail extends StatefulWidget {
   final int index;
+
   ShoppingListDetail({this.index});
 
   @override
@@ -28,20 +29,18 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
   Timer _debounce;
   int _debounceTime = 1500;
 
-  void itemChange(bool val, int index){
+  void itemChange(bool val, int index) {
     setState(() {
       list.items[index].bought = val;
     });
     if (_debounce?.isActive ?? false) _debounce.cancel();
     _debounce = Timer(Duration(milliseconds: _debounceTime), () {
-      if(list != null && uid != null || uid.length > 0){
-        databaseService.updateList(uid, list)
-          .then((onUpdate) {
-            print("Saved items");
-          })
-          .catchError((onError) {
-            InfoOverlay.showErrorSnackBar("Fehler beim aktualisieren der Einkaufsliste");
-          });
+      if (list != null && uid != null || uid.length > 0) {
+        databaseService.updateList(uid, list).then((onUpdate) {
+          print("Saved items");
+        }).catchError((onError) {
+          InfoOverlay.showErrorSnackBar("Fehler beim aktualisieren der Einkaufsliste");
+        });
       }
     });
   }
@@ -49,7 +48,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
   @override
   Widget build(BuildContext context) {
     List<ShoppingList> lists = Provider.of<List<ShoppingList>>(context);
-    if(!useCache) {
+    if (!useCache) {
       list = Provider.of<List<ShoppingList>>(context)[widget.index];
     }
     uid = Provider.of<User>(context).uid;
@@ -72,25 +71,25 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Container(
-            padding: EdgeInsets.all(10.0),
-            child: list.items.isNotEmpty ? Text("${list.items.map((e) => e.bought ? 1 : 0).reduce((a, b) => a + b)} von ${list.items.length} Produkten gekauft", style: Theme.of(context).textTheme.headline)
-                : Center(child: Text("Die Einkaufsliste hat noch keine Produkte"))
-          ),
+              padding: EdgeInsets.all(10.0),
+              child: list.items.isNotEmpty
+                  ? Text("${list.items.map((e) => e.bought ? 1 : 0).reduce((a, b) => a + b)} von ${list.items.length} Produkten gekauft", style: Theme.of(context).textTheme.headline)
+                  : Center(child: Text("Die Einkaufsliste hat noch keine Produkte"))),
           Expanded(
-            child: list.items.isNotEmpty ? ListView.builder(
-              itemCount: list.items.length,
-              itemBuilder: (BuildContext context, int index){
-                return Container(
-                  child: CheckboxListTile(
-                    value: list.items[index].bought,
-                    title: Text("${list.items[index].name}", style: list.items[index].bought ? TextStyle(decoration: TextDecoration.lineThrough, decorationThickness: 3) : null),
-                    controlAffinity: ListTileControlAffinity.leading,
-                    onChanged: (bool val) { itemChange(val, index); }
-                  )
-                );
-              }
-            ) : Container()
-          ),
+              child: list.items.isNotEmpty
+                  ? ListView.builder(
+                      itemCount: list.items.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return Container(
+                            child: CheckboxListTile(
+                                value: list.items[index].bought,
+                                title: Text("${list.items[index].name}", style: list.items[index].bought ? TextStyle(decoration: TextDecoration.lineThrough, decorationThickness: 3) : null),
+                                controlAffinity: ListTileControlAffinity.leading,
+                                onChanged: (bool val) {
+                                  itemChange(val, index);
+                                }));
+                      })
+                  : Container()),
         ],
       ),
       floatingActionButton: Stack(
@@ -102,11 +101,8 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
               child: FloatingActionButton(
                 child: Icon(Icons.add),
                 backgroundColor: Colors.green,
-                onPressed: (){
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => SearchItemsView(lists.elementAt(widget.index).id)));
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => SearchItemsView(lists.elementAt(widget.index).id)));
                 },
               ),
             ),
@@ -127,16 +123,14 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
                   labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
                   label: "Complete",
                   labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
-                  onTap: _showCompleteDialog
-              ),
+                  onTap: _showCompleteDialog),
               SpeedDialChild(
-                child: Icon(Icons.delete),
-                backgroundColor: Colors.red,
-                labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
-                label: "Delete",
-                labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
-                onTap: _showDeleteDialog
-              ),
+                  child: Icon(Icons.delete),
+                  backgroundColor: Colors.red,
+                  labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
+                  label: "Delete",
+                  labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
+                  onTap: _showDeleteDialog),
               SpeedDialChild(
                 child: Icon(Icons.camera),
                 backgroundColor: Colors.blue,
@@ -172,14 +166,21 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
       var _image = imageFormats["lowLevelImage"];
 
       /// get result from camera scanner
-      List<int> indecesToCheck = await Navigator.push(context, MaterialPageRoute(builder: (context) => CameraScanner(image: _image, imageFile: _imageFile, listIndex: index,)));
+      List<int> indecesToCheck = await Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => CameraScanner(
+                    image: _image,
+                    imageFile: _imageFile,
+                    listIndex: index,
+                  )));
       if (indecesToCheck != null) {
         for (int i = 0; i < indecesToCheck.length; i++) {
           itemChange(true, indecesToCheck[i]);
         }
       }
       Navigator.pop(context);
-    } catch(e)  {
+    } catch (e) {
       print(e.toString());
     }
   }
@@ -194,18 +195,16 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
-                RichText(text:
-                TextSpan(
-                    style: TextStyle(
-                      color: Theme.of(context).textTheme.title.color,
-                    ),
-                    children: <TextSpan> [
+                RichText(
+                    text: TextSpan(
+                        style: TextStyle(
+                          color: Theme.of(context).textTheme.title.color,
+                        ),
+                        children: <TextSpan>[
                       TextSpan(text: "Sind Sie sicher, dass Sie die Einkaufsliste "),
                       TextSpan(text: "${list.name}", style: TextStyle(fontWeight: FontWeight.bold)),
                       TextSpan(text: " abschließen möchten?")
-                    ]
-                )
-                )
+                    ]))
               ],
             ),
           ),
@@ -227,12 +226,10 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
                   name: list.name,
                   items: list.items,
                 );
-                databaseService.completeList(uid, list.id)
-                .catchError((_) {
+                databaseService.completeList(uid, list.id).catchError((_) {
                   InfoOverlay.showErrorSnackBar("Fehler beim Abschließen der Einkaufsliste");
                   useCache = false;
-                })
-                .then((_) {
+                }).then((_) {
                   InfoOverlay.showInfoSnackBar("Einkaufsliste ${list.name} abgeschlossen");
                   Navigator.of(context).pop();
                   Navigator.of(this.context).pop();
@@ -255,18 +252,16 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
-                RichText(text:
-                TextSpan(
-                    style: new TextStyle(
-                      color: Theme.of(context).textTheme.title.color,
-                    ),
-                    children: <TextSpan> [
+                RichText(
+                    text: TextSpan(
+                        style: new TextStyle(
+                          color: Theme.of(context).textTheme.title.color,
+                        ),
+                        children: <TextSpan>[
                       TextSpan(text: "Sind Sie sicher, dass Sie die Einkaufsliste "),
                       TextSpan(text: "${list.name}", style: TextStyle(fontWeight: FontWeight.bold)),
                       TextSpan(text: " löschen möchten?")
-                    ]
-                )
-                )
+                    ]))
               ],
             ),
           ),
@@ -288,16 +283,14 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
                   name: list.name,
                   items: list.items,
                 );
-                databaseService.deleteList(uid, list.id)
-                  .catchError((_) {
-                    InfoOverlay.showErrorSnackBar("Fehler beim Löschen der Einkaufsliste");
-                    useCache = false;
-                  })
-                  .then((_) {
-                    InfoOverlay.showInfoSnackBar("Einkaufsliste ${list.name} gelöscht");
-                    Navigator.of(context).pop();
-                    Navigator.of(this.context).pop();
-                  });
+                databaseService.deleteList(uid, list.id).catchError((_) {
+                  InfoOverlay.showErrorSnackBar("Fehler beim Löschen der Einkaufsliste");
+                  useCache = false;
+                }).then((_) {
+                  InfoOverlay.showInfoSnackBar("Einkaufsliste ${list.name} gelöscht");
+                  Navigator.of(context).pop();
+                  Navigator.of(this.context).pop();
+                });
               },
             ),
           ],
@@ -305,5 +298,4 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
       },
     );
   }
-
 }

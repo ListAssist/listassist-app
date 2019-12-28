@@ -43,6 +43,7 @@ dependencies:
   provider:
   shimmer: ^1.0.1
   connectivity:
+  localstorage: ^3.0.0
 
   # addons
   url_launcher:

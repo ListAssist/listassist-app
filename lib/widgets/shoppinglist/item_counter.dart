@@ -4,9 +4,8 @@ import 'package:flutter/material.dart';
 class ItemCounter extends StatefulWidget {
 
   int count;
-  final Function() addCount;
   final Function() subtractCount;
-  ItemCounter({Key key, this.count, @required this.addCount, @required this.subtractCount}) : super(key: key);
+  ItemCounter({Key key, this.count, @required this.subtractCount}) : super(key: key);
 
   @override
   _ItemCounter createState() => _ItemCounter();
@@ -25,14 +24,10 @@ class _ItemCounter extends State<ItemCounter> {
             icon: Icon(Icons.remove_circle_outline, color: widget.count == 1 ? Colors.red : Theme.of(context).primaryColor),
             onPressed: () {
               widget.subtractCount();
+              widget.count--;
+              setState(() {});
             },
           ),
-          /*IconButton(
-            icon: Icon(Icons.add_circle_outline, color: Theme.of(context).primaryColor),
-            onPressed: () {
-              widget.addCount();
-            },
-          ),*/
         ],
       ),
     );

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -5,6 +7,7 @@ import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
 import 'package:listassist/services/db.dart';
 import 'package:listassist/widgets/shoppinglist/search_items_view.dart';
+import 'package:listassist/widgets/shoppinglist/shopping_list_detail.dart';
 import 'package:progress_indicator_button/progress_button.dart';
 import 'package:provider/provider.dart';
 import 'package:listassist/models/ShoppingList.dart' as model;
@@ -105,13 +108,26 @@ class _CreateShoppingListView extends State<CreateShoppingListView> {
                         }
 
                         DocumentReference docRef = await databaseService.createList(_user.uid, _newShoppingList);
-                        controller.reverse();
-                        Navigator.pop(context);
+                        Timer(Duration(milliseconds: 3000), () {
+                          controller.reverse();
+                          Navigator.pop(context);
 
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => SearchItemsView(docRef.documentID)));
+                          setState(() {
+
+                          });
+                          print("DOCREFFFF  " + docRef.documentID);
+                          lists.forEach((l) => {
+                            print(l.id)
+                          });
+
+
+/*
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => ShoppingListDetail(index: lists.indexWhere((l) => l.id == docRef.))));*/
+                        });
+
                       },
                     ),
                   ),

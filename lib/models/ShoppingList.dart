@@ -41,6 +41,20 @@ class ShoppingList {
     return items.where((i) => i.name == itemName).toList()[0].count;
   }
 
+  void addItem(String productName){
+    items.add(new Item(name: productName, count: 1, bought: false));
+  }
+
+  void changeItemCount(String itemName, int value) {
+    if(hasItem(itemName)) {
+      items.where((i) => i.name == itemName).toList()[0].count += value;
+    }
+  }
+
+  void removeItem(String itemName) {
+    items.removeWhere((i) => i.name == itemName);
+  }
+
   @override
   String toString() {
     return "Name: $name, Items: ${items.map((i) => i.name).join(", ")}";
