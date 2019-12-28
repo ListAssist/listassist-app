@@ -8,7 +8,7 @@ import 'package:listassist/services/db.dart';
 import 'package:listassist/services/info_overlay.dart';
 import 'package:listassist/widgets/group/edit_group.dart';
 import 'package:listassist/widgets/group/group_userlist.dart';
-import 'package:listassist/widgets/shoppinglist/shopping_list.dart' as widget;
+import 'package:listassist/widgets/shoppinglist/shopping_list.dart' as w;
 import 'package:provider/provider.dart';
 
 class GroupDetail extends StatefulWidget {
@@ -23,7 +23,7 @@ class _GroupDetail extends State<GroupDetail> {
 
   @override
   Widget build(BuildContext context) {
-    Group group = Provider.of<Group>(context);
+    Group group = Provider.of<List<Group>>(context)[widget.index];
     User user = Provider.of<User>(context);
 
     return DefaultTabController(
@@ -50,7 +50,7 @@ class _GroupDetail extends State<GroupDetail> {
               child: ShoppingLists(),
             ),
             Text("Statistiken der Gruppe"),
-            GroupUserList()
+            GroupUserList(index: widget.index)
           ],
         ),
         floatingActionButton: FloatingActionButton(
@@ -125,7 +125,6 @@ class GroupMenu extends StatelessWidget {
         PopupMenuItem<GroupAction>(
           value: GroupAction.delete,
           enabled: group.creator.uid == uid,
-          //TODO: Delete document including subcollections, like lists
           child: Text('Gruppe löschen'),
         ),
         PopupMenuItem<GroupAction>(
@@ -152,7 +151,7 @@ class ShoppingLists extends StatelessWidget {
         ),
         itemCount: lists.length,
         //TODO: Provider not found
-        itemBuilder: (ctx, index) => widget.ShoppingList(index: index)
+        itemBuilder: (ctx, index) => w.ShoppingList(index: index)
     ) : SpinKitDoubleBounce(color: Colors.blueAccent,);
   }
 }

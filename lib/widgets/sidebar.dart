@@ -73,7 +73,7 @@ class _Sidebar extends State<Sidebar> {
             leading: Icon(Icons.group),
             title: Text("Gruppen"),
             onTap: () {
-              ScreenModel.of(context).setScreen(StreamProvider<List<Stream<Group>>>.value(
+              ScreenModel.of(context).setScreen(StreamProvider<List<Group>>.value(
                 value: databaseService.streamGroupsFromUser(user.uid),
                 child: CustomNavigator(
                   home: GroupView(),

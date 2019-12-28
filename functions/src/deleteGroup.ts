@@ -21,6 +21,8 @@ export const deleteGroup = functions.region("europe-west1").https.onCall((data, 
                 return { status: "Failed" };
             }
             return Promise.all([
+                deleteCollection(snap.ref.path + "/lists", 5),
+                deleteCollection(snap.ref.path + "/shopping_data", 5),
                 db.collection("groups")
                     .doc(groupid)
                     .delete(),
@@ -46,3 +48,50 @@ export const deleteGroup = functions.region("europe-west1").https.onCall((data, 
             return { status: "Failed exception" };
         });
 });
+
+//@ts-ignore
+function deleteCollection(collectionPath, batchSize) {
+    let collectionRef = db.collection(collectionPath);
+    let query = collectionRef.orderBy('__name__').limit(batchSize);
+
+    return new Promise((resolve, reject) => {
+        deleteQueryBatch(query, batchSize, resolve, reject);
+    });
+}
+
+//@ts-ignore
+function deleteQueryBatch(query, batchSize, resolve, reject) {
+    query.get()
+        //@ts-ignore
+        .then((snapshot) => {
+            // When there are no documents left, we are done
+            if (snapshot.size == 0) {
+                return 0;
+            }
+
+            // Delete documents in a batch
+            let batch = db.batch();
+            //@ts-ignore
+            snapshot.docs.forEach((doc) => {
+                batch.delete(doc.ref);
+            });
+
+            return batch.commit().then(() => {
+                return snapshot.size;
+            });
+            //@ts-ignore
+        }).then((numDeleted) => {
+        if (numDeleted === 0) {
+            resolve();
+            return;
+        }
+
+        // Recurse on the next process tick, to avoid
+        // exploding the stack.
+        process.nextTick(() => {
+            deleteQueryBatch(query, batchSize, resolve, reject);
+        });
+    })
+        .catch(reject);
+}
+

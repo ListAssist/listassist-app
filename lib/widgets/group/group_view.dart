@@ -10,7 +10,7 @@ class GroupView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<Stream<Group>> groups = Provider.of<List<Stream<Group>>>(context);
+    List<Group> groups = Provider.of<List<Group>>(context);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.primary,
@@ -29,11 +29,7 @@ class GroupView extends StatelessWidget {
           color: Colors.grey,
         ),
         itemCount: groups.length,
-        itemBuilder: (BuildContext ctx, int index) =>
-          StreamProvider<Group>.value(
-            value: groups[index],
-            child: GroupItem(index: index),
-          )
+        itemBuilder: (BuildContext ctx, int index) => GroupItem(index: index)
       ) : SpinKitDoubleBounce(color: Colors.blueAccent),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),

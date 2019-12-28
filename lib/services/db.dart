@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -7,6 +8,7 @@ import 'package:listassist/models/Group.dart';
 import 'package:listassist/models/Invite.dart';
 import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
+import 'package:rxdart/rxdart.dart';
 
 class DatabaseService {
   final Firestore _db = Firestore.instance;
@@ -20,10 +22,10 @@ class DatabaseService {
         .map((snap) => User.fromMap(snap.data));
   }
 
-  Stream<List<Stream<Group>>> streamGroupsFromUser(String uid) {
+  Stream<List<Group>> streamGroupsFromUser(String uid) {
     print("----- READ GROUPS -----");
     //print(uid);
-    return _db
+    /*return _db
       .collection("groups_user")
       .document(uid)
       .snapshots()
@@ -35,22 +37,18 @@ class DatabaseService {
             .snapshots()
             .map<Group>((snap) => Group.fromFirestore(snap))
           ).toList() : List<Stream<Group>>();
-      });
+      });*/
 
-    //TODO: Read groups array from groups_user document and use it below
-    /*return _db
-        .collection("groups")
-        .where(FieldPath.documentId, whereIn: data.data["groups"])
-        .snapshots()
-        .map((snap) => snap.documents.map((d) => Group.fromFirestore(d)).toList());
-
-    return _db
+    return Observable(_db
         .collection("groups_user")
         .document(uid)
-        .snapshots()
-        .map<List<Group>>((data) {
-
-        });*/
+        .snapshots()).switchMap((DocumentSnapshot snap) {
+          return _db
+            .collection("groups")
+            .where(FieldPath.documentId, whereIn: snap.data["groups"])
+            .snapshots()
+            .map((snap) => snap.documents.map((d) => Group.fromFirestore(d)).toList());
+        });
   }
 
   Stream<List<Invite>> streamInvites(String uid) {
