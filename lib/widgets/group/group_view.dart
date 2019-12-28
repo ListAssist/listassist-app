@@ -11,6 +11,7 @@ class GroupView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     List<Group> groups = Provider.of<List<Group>>(context);
+    print(groups);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.primary,
@@ -21,7 +22,7 @@ class GroupView extends StatelessWidget {
           onPressed: () => mainScaffoldKey.currentState.openDrawer(),
         ),
       ),
-      body: groups != null ?
+      body: groups != null ? groups.length == 0 ? Center(child: Text("Keine Gruppen", style: Theme.of(context).textTheme.title)) :
       ListView.separated(
         separatorBuilder: (ctx, i) => Divider(
           indent: 10,

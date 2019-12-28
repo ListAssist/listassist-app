@@ -24,25 +24,13 @@ class DatabaseService {
 
   Stream<List<Group>> streamGroupsFromUser(String uid) {
     print("----- READ GROUPS -----");
-    //print(uid);
-    /*return _db
-      .collection("groups_user")
-      .document(uid)
-      .snapshots()
-      .map((list) {
-        return list.data != null ? list.data["groups"]
-          .map<Stream<Group>>((groupId) => _db
-            .collection("groups")
-            .document(groupId)
-            .snapshots()
-            .map<Group>((snap) => Group.fromFirestore(snap))
-          ).toList() : List<Stream<Group>>();
-      });*/
-
     return Observable(_db
         .collection("groups_user")
         .document(uid)
         .snapshots()).switchMap((DocumentSnapshot snap) {
+          if(snap.data == null || snap.data["groups"] == null || snap.data["groups"].length == 0){
+            return Stream.value(List<Group>.from([]));
+          }
           return _db
             .collection("groups")
             .where(FieldPath.documentId, whereIn: snap.data["groups"])
