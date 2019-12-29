@@ -35,6 +35,7 @@ class _EditShoppingListState extends State<EditShoppingList> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Einkaufsliste bearbeiten"),
+        backgroundColor: Theme.of(context).colorScheme.primary,
       ),
       body: Container(
           child: ListView(

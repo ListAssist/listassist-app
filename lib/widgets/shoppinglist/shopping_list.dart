@@ -12,6 +12,7 @@ class ShoppingList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     model.ShoppingList list = Provider.of<List<model.ShoppingList>>(context)[this.index];
+    //print(list);
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () => Navigator.push(
@@ -57,7 +58,7 @@ class ShoppingList extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text(list.name, style: Theme.of(context).textTheme.title),
-              Text("${list.items.map((e) => e.bought ? 1 : 0).reduce((a, b) => a + b)}/${list.items.length} eingekauft")
+              Text(list.items.length > 0 ? "${list.items.map((e) => e.bought ? 1 : 0).reduce((a, b) => a + b)}/${list.items.length} eingekauft" : "Keine Produkte vorhanden")
             ],
           ),
         ),

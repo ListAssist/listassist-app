@@ -41,6 +41,10 @@ class _AddGroup extends State<AddGroup> {
         InfoOverlay.showErrorSnackBar("Fehler beim Erstellen der Gruppe");
       }else {
         InfoOverlay.showInfoSnackBar("Gruppe ${_nameTextController.text} erstellt");
+        if(_members.length == 0) {
+          Navigator.pop(context);
+          return;
+        }
         final HttpsCallable invite = cloudFunctionInstance.getHttpsCallable(
             functionName: "inviteUsers"
         );

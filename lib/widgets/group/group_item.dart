@@ -11,17 +11,13 @@ class GroupItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Group group = Provider.of<Group>(context);
+    Group group = Provider.of<List<Group>>(context)[index];
     return group != null ?
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () => Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) =>
-              Provider<Group>.value(
-                value: group,
-                child: GroupDetail(index: index)),
-              )
+            MaterialPageRoute(builder: (context) => GroupDetail(index: index)),
           ),
           child: Container(
             padding: EdgeInsets.all(20),
