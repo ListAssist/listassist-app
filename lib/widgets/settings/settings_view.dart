@@ -4,12 +4,17 @@ import 'package:listassist/widgets/settings/notification_settings_view.dart';
 import 'package:listassist/services/auth.dart';
 import 'package:listassist/widgets/settings/profile_settings_view.dart';
 import 'package:listassist/widgets/settings/shopping_list_settings_view.dart';
+import 'package:listassist/widgets/shoppinglist/item_counter.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class SettingsView extends StatelessWidget {
-  String img = "https://www.indiewire.com/wp-content/uploads/2019/05/shutterstock_8999492b.jpg?w=780";
+class SettingsView extends StatefulWidget {
+  @override
+  _SettingsViewState createState() => _SettingsViewState();
+}
 
+class _SettingsViewState extends State<SettingsView> {
+  String img = "https://www.indiewire.com/wp-content/uploads/2019/05/shutterstock_8999492b.jpg?w=780";
 
   void _showDialog(BuildContext context) {
     // flutter defined function
@@ -49,7 +54,6 @@ class SettingsView extends StatelessWidget {
       },
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -118,7 +122,6 @@ class Test extends StatelessWidget {
             //style: Theme.of(context).textTheme.headline,
             textAlign: TextAlign.center,
           ),
-
 
           Container(
               margin: const EdgeInsets.only(top: 30.0),

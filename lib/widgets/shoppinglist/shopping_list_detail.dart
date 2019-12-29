@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
@@ -27,13 +28,13 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
   Timer _debounce;
   int _debounceTime = 1500;
 
-  void itemChange(bool val, int index){
+  void itemChange(bool val, int index) {
     setState(() {
       list.items[index].bought = val;
     });
     if (_debounce?.isActive ?? false) _debounce.cancel();
     _debounce = Timer(Duration(milliseconds: _debounceTime), () {
-      if(list != null && uid != null || uid.length > 0){
+      if(list != null && uid != null || uid.length > 0) {
         databaseService.updateList(uid, list)
           .then((onUpdate) {
             print("Saved items");
@@ -43,6 +44,20 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
           });
       }
     });
+  }
+
+  void itemChangeMultiple({bool val = true, List<int> indecesToCheck}) async {
+    setState(() {
+      for (int i = 0; i < indecesToCheck.length; i++) {
+        list.items[indecesToCheck[i]].bought = val;
+      }
+    });
+
+    try {
+      await databaseService.updateList(uid, list);
+    } catch (e) {
+      InfoOverlay.showErrorSnackBar("Fehler beim aktualisieren der Einkaufsliste");
+    }
   }
 
   @override
@@ -122,43 +137,20 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
             label: "Image Check",
             labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
             labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
-            onTap: () {
-              InfoOverlay.mainModalBottomSheet(context, [
-                ListTile(
-                  leading: Icon(Icons.camera_alt),
-                  title: Text("Kamera"),
-                  onTap: () => _pickImage(context, ImageSource.camera, widget.index),
-                ),
-                ListTile(
-                  leading: Icon(Icons.photo),
-                  title: Text("Galerie"),
-                  onTap: () => _pickImage(context, ImageSource.gallery, widget.index),
-                )
-              ]);
-            },
+            onTap: () => InfoOverlay.showSourceSelectionSheet(context, callback: _startCameraScanner, arg: widget.index),
           ),
         ],
       ),
     );
   }
 
-  Future<void> _pickImage(BuildContext context, ImageSource imageSource, int index) async {
-    try {
-      Map<String, dynamic> imageFormats = await cameraService.pickImage(imageSource);
-      var _imageFile = imageFormats["imageFile"];
-      var _image = imageFormats["lowLevelImage"];
-
-      /// get result from camera scanner
-      List<int> indecesToCheck = await Navigator.push(context, MaterialPageRoute(builder: (context) => CameraScanner(image: _image, imageFile: _imageFile, listIndex: index,)));
-      if (indecesToCheck != null) {
-        for (int i = 0; i < indecesToCheck.length; i++) {
-          itemChange(true, indecesToCheck[i]);
-        }
-      }
-      Navigator.pop(context);
-    } catch(e)  {
-      print(e.toString());
+  /// Starts up the camera scanner and awaits the output
+  Future<void> _startCameraScanner(BuildContext context, ImageSource imageSource, int index) async {
+    List<int> indecesToCheck = await cameraService.getResultFromCameraScanner(context, imageSource, listIndex: index);
+    if (indecesToCheck != null) {
+      itemChangeMultiple(indecesToCheck: indecesToCheck);
     }
+    Navigator.pop(context);
   }
 
   Future<void> _showCompleteDialog() async {

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:algolia/algolia.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
@@ -22,6 +24,7 @@ class _AddShoppinglist extends State<AddShoppinglist> {
   final _nameTextController = TextEditingController();
 
   Algolia algolia = Application.algolia;
+  Timer _debounce;
 
   bool _nameIsValid = false;
   bool _productsIsNotEmpty = true;
@@ -97,12 +100,12 @@ class _AddShoppinglist extends State<AddShoppinglist> {
   }
 
   _searchProducts(String search) async{
+
+
+
     AlgoliaQuery query = algolia.instance.index('products').search(search);
 
     AlgoliaQuerySnapshot snap = await query.getObjects();
-
-    print("keko");
-    print(snap.hits[0].data);
 
     List<dynamic> hits = List<dynamic>();
     snap.hits.forEach((h) => {
@@ -173,7 +176,6 @@ class _AddShoppinglist extends State<AddShoppinglist> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
 
-
                       Row(
                         children: <Widget>[
                           Expanded(
@@ -186,7 +188,7 @@ class _AddShoppinglist extends State<AddShoppinglist> {
                                 return null;
                               },
                               itemBuilder:  (context, suggestion) {
-                                print(suggestion);
+                                print("Suggestion: $suggestion");
                                 return ListTile(
                                   leading: suggestion['category'] == "Allgemein" ? Icon(Icons.local_dining) : Icon(Icons.directions_run),
                                   title: Text(suggestion['name']),
@@ -236,7 +238,6 @@ class _AddShoppinglist extends State<AddShoppinglist> {
                               },
                             }
                           ),
-
 
                           PopupMenuButton<int>(
                             itemBuilder: (context) => [
