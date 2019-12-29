@@ -60,7 +60,7 @@ class _BillsState extends State<Bills> {
                   behavior: HitTestBehavior.translucent,
                   child: Image(image: NetworkImage(url)),
                   onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => BillDetails(image: images[i])));
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => BillDetails(image: images[i], imageurl: url)));
                     print(i);
                   },
                 )
