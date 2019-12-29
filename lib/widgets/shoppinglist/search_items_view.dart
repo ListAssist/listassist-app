@@ -105,7 +105,6 @@ class _SearchItemsView extends State<SearchItemsView> {
   _addToRecentProducts(Product product) {
     _recentProducts.removeWhere((p) => p.name == product.name);
     _recentProducts.length >= 10 ? _recentProducts.removeLast() : {};
-    print(_recentProducts[0].toString());
     _recentProducts.insert(0, product);
     _storage.setItem(
         'list',
