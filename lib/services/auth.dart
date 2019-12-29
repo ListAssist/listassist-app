@@ -161,11 +161,9 @@ class AuthService {
     }, merge: true);
   }
 
-  Future<String> reauthenticateUser(FirebaseUser firebaseUser, String password) async{
-    String currentEmail;
-    await _auth.currentUser().then((u) => {
-      currentEmail = u.email
-    });
+  Future<String> reauthenticateUser(FirebaseUser firebaseUser, String password) async {
+    String currentEmail = (await _auth.currentUser()).email;
+
     print("currentEmail: " + currentEmail);
     try{
       AuthCredential credential = EmailAuthProvider.getCredential(email: currentEmail, password: password);
