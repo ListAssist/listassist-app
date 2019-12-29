@@ -220,13 +220,6 @@ class DatabaseService {
     return products;
   }
 
-  Future<void> updateProfileName(String uid, String newName) {
-    return _db
-        .collection('users')
-        .document(uid)
-        .updateData({'displayName': newName});
-  }
-
   Future<void> deleteList(String uid, String listid) {
     return _db
         .collection("users")
