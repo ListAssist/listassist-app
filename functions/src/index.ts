@@ -8,3 +8,4 @@ export { inviteUser } from './inviteUser';
 export { inviteUsers } from './inviteUsers';
 export { createGroup } from './createGroup';
 export { leaveGroup } from './onLeaveGroup';
+export { deleteGroup } from './deleteGroup';

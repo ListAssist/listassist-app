@@ -8,6 +8,7 @@ import 'package:listassist/services/db.dart';
 import 'package:listassist/services/info_overlay.dart';
 import 'package:provider/provider.dart';
 import 'package:listassist/models/CompletedShoppingList.dart';
+import 'bills.dart';
 
 class CompletedShoppingListDetail extends StatefulWidget {
   final int index;
@@ -63,13 +64,23 @@ class _CompletedShoppingListDetailState extends State<CompletedShoppingListDetai
         shape: CircleBorder(),
         children: [
           SpeedDialChild(
+            child: Icon(Icons.list),
+            backgroundColor: (list.bills != null && list.bills.length > 0) ? Colors.blue : Colors.grey,
+            label: "Rechnungen",
+            labelStyle: TextStyle(fontSize: 18.0),
+            onTap: (list.bills != null && list.bills.length > 0) ? () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => Bills(index: widget.index)));
+            } : null,
+          ),
+          SpeedDialChild(
             child: Icon(CustomIcons.content_copy),
             backgroundColor: Colors.green,
-            label: "Copy to new",
+            label: "Kopieren",
             labelStyle: TextStyle(fontSize: 18.0),
             onTap: () async {
               ShoppingList newList;
-              await _showCreateCopyDialog();
+              bool res = await _showCreateCopyDialog();
+              if(!res) return;
               if(_newName != null && _newName != "" && _newName.trim() != "") {
                 newList = list.createNewCopy(_newName);
               }else {
@@ -77,14 +88,14 @@ class _CompletedShoppingListDetailState extends State<CompletedShoppingListDetai
               }
 
               databaseService.createList(user.uid, newList).then((onComplete) {
-                InfoOverlay.showInfoSnackBar("Einkaufsliste wurde erfolgreich Kopiert");
+                InfoOverlay.showInfoSnackBar("Einkaufsliste wurde erfolgreich kopiert");
               });
             },
           ),
           SpeedDialChild(
             child: Icon(Icons.picture_as_pdf),
             backgroundColor: Colors.red,
-            label: "Export as PDF",
+            label: "Als PDF exportieren",
             labelStyle: TextStyle(fontSize: 18.0),
             onTap: () {},
           ),
@@ -93,9 +104,9 @@ class _CompletedShoppingListDetailState extends State<CompletedShoppingListDetai
     );
   }
 
-  Future<void> _showCreateCopyDialog() async {
+  Future<bool> _showCreateCopyDialog() async {
     TextEditingController _controller = TextEditingController();
-    return showDialog<void>(
+    return showDialog<bool>(
       context: context,
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
@@ -119,14 +130,14 @@ class _CompletedShoppingListDetailState extends State<CompletedShoppingListDetai
               textColor: Colors.red,
               child: Text("Abbrechen"),
               onPressed: () {
-                Navigator.of(context).pop();
+                Navigator.of(context).pop(false);
               },
             ),
             FlatButton(
               child: Text("Neue Einkaufsliste erstellen"),
               onPressed: () {
                 _newName = _controller.text;
-                Navigator.of(context).pop();
+                Navigator.of(context).pop(true);
               },
             ),
           ],

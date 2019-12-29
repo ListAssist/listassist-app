@@ -68,6 +68,8 @@ dependencies:
   fancy_bottom_navigation:
   image_cropper:
   after_init:
+  carousel_slider:
+  photo_view:
 
 
 dev_dependencies:
