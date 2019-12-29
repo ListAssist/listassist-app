@@ -17,12 +17,6 @@ class ShoppingListView extends StatefulWidget {
 class _ShoppingListView extends State<ShoppingListView> {
 
   @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return DefaultTabController(
         length: 2,
@@ -48,10 +42,6 @@ class _ShoppingListView extends State<ShoppingListView> {
                   transitionDuration: Duration(milliseconds: 200),
                 ),
               );
-
-              //
-              //
-              //
               // MaterialPageRoute(builder: (context) => CreateShoppingListView()));
             },
           ),

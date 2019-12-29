@@ -23,7 +23,6 @@ class _BillDetailsState extends State<BillDetails> {
     if(!_loaded) {
       widget.image.getMetadata().then((val) {
         print(val.customMetadata["detected_products"]);
-        //TODO: Replace with actual metadata
 //        detectedProducts = [
 //          {"name": "Milchlaible", "price": 2.59},
 //          {"name": "Lieblingsartike]", "price": -0.65},
