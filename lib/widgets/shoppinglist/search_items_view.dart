@@ -210,7 +210,7 @@ class _SearchItemsView extends State<SearchItemsView> {
                                 return ShoppyShimmer();
                               }
 
-                              _recentProducts = _storage.getItem("list").map((product) {
+                              _recentProducts = (_storage.getItem("list") ?? []).map((product) {
                                 return new Product(name: product["name"], category: product["category"]);
                               }).cast<Product>().toList();
 
