@@ -8,6 +8,7 @@ import 'package:listassist/models/CompletedShoppingList.dart';
 import 'package:listassist/models/Group.dart';
 import 'package:listassist/models/Invite.dart';
 import 'package:listassist/models/Item.dart';
+import 'package:listassist/models/Product.dart';
 import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
 import 'package:rxdart/rxdart.dart';
@@ -135,14 +136,14 @@ class DatabaseService {
   Future<void> addItemToList(String uid, String listId, Item newItem) async{
     List items;
     String name;
-    var document = _db
+    var document = await _db
         .collection("users")
         .document(uid)
         .collection("lists")
         .document(listId);
 
     await document.get().then((value) => {
-      items = value.data["items"],
+      items = new List.from(value.data["items"].map((e) => Item.fromMap(e)).toList()),
       name = value.data["name"]
     });
     items.add(newItem);
@@ -153,6 +154,77 @@ class DatabaseService {
         .collection("lists")
         .document(listId)
         .setData({"name" : name, "items" : items.map((e) => e.toJson()).toList()}, merge: true);
+  }
+
+  Future<void> removeItemFromList(String uid, String listId, String itemName) async{
+    List items;
+    String name;
+    var document = await _db
+        .collection("users")
+        .document(uid)
+        .collection("lists")
+        .document(listId);
+
+    await document.get().then((value) => {
+      items = new List.from(value.data["items"].map((e) => Item.fromMap(e)).toList()),
+      name = value.data["name"]
+    });
+    items.removeWhere((i) => i.name == itemName);
+
+    return _db
+        .collection("users")
+        .document(uid)
+        .collection("lists")
+        .document(listId)
+        .setData({"name" : name, "items" : items.map((e) => e.toJson()).toList()}, merge: true);
+  }
+
+  Future<void> changeItemCount(String uid, String listId, String itemName, int value) async{
+    List items;
+    String name;
+    var document = await _db
+        .collection("users")
+        .document(uid)
+        .collection("lists")
+        .document(listId);
+
+    await document.get().then((value) => {
+      items = new List.from(value.data["items"].map((e) => Item.fromMap(e)).toList()),
+      name = value.data["name"]
+    });
+    items.forEach((i) => {
+      if(i.name == itemName) {
+        i.count += value
+      }
+    });
+
+    return _db
+        .collection("users")
+        .document(uid)
+        .collection("lists")
+        .document(listId)
+        .setData({"name" : name, "items" : items.map((e) => e.toJson()).toList()}, merge: true);
+  }
+
+  Future<List<Product>> getPopularProducts() async{
+    List<Product> products;
+
+    var document = _db
+        .collection("popular_products")
+        .document("products");
+
+    await document.get().then((value) => {
+      products = new List.from(value.data["products"].map((p) => Product.fromMap(p)).toList()),
+    });
+
+    return products;
+  }
+
+  Future<void> updateProfileName(String uid, String newName) {
+    return _db
+        .collection('users')
+        .document(uid)
+        .updateData({'displayName': newName});
   }
 
   Future<void> deleteList(String uid, String listid) {

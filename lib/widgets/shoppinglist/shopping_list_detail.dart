@@ -6,6 +6,7 @@ import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
 import 'package:listassist/services/db.dart';
 import 'package:listassist/widgets/shoppinglist/edit_shopping_list.dart';
+import 'package:listassist/widgets/shoppinglist/search_items_view.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:listassist/services/camera.dart';
@@ -14,6 +15,7 @@ import 'package:listassist/widgets/camera-scanner/camera_scanner.dart';
 
 class ShoppingListDetail extends StatefulWidget {
   final int index;
+
   ShoppingListDetail({this.index});
 
   @override
@@ -62,7 +64,8 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
 
   @override
   Widget build(BuildContext context) {
-    if(!useCache) {
+    List<ShoppingList> lists = Provider.of<List<ShoppingList>>(context);
+    if (!useCache) {
       list = Provider.of<List<ShoppingList>>(context)[widget.index];
     }
     uid = Provider.of<User>(context).uid;
@@ -85,64 +88,83 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Container(
-            padding: EdgeInsets.all(10.0),
-            child: Text(list.items.length > 0 ?  "${list.items.map((e) => e.bought ? 1 : 0).reduce((a, b) => a + b)} von ${list.items.length} Produkten gekauft" : "Keine Produkte vorhanden", style: Theme.of(context).textTheme.headline)
-          ),
+              padding: EdgeInsets.all(10.0),
+              child: list.items.isNotEmpty
+                  ? Text("${list.items.map((e) => e.bought ? 1 : 0).reduce((a, b) => a + b)} von ${list.items.length} Produkten gekauft", style: Theme.of(context).textTheme.headline)
+                  : Center(child: Text("Die Einkaufsliste hat noch keine Produkte"))),
           Expanded(
-            child: list.items.length > 0 ? ListView.builder(
-              itemCount: list.items.length,
-              itemBuilder: (BuildContext context, int index){
-                return Container(
-                  child: CheckboxListTile(
-                    value: list.items[index].bought,
-                    title: Text("${list.items[index].name}", style: list.items[index].bought ? TextStyle(decoration: TextDecoration.lineThrough, decorationThickness: 3) : null),
-                    controlAffinity: ListTileControlAffinity.leading,
-                    onChanged: (bool val) { itemChange(val, index); }
-                  )
-                );
-              }
-            ) : Container()
-          ),
+              child: list.items.isNotEmpty
+                  ? ListView.builder(
+                      itemCount: list.items.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return Container(
+                            child: CheckboxListTile(
+                                value: list.items[index].bought,
+                                title: Text("${list.items[index].name}", style: list.items[index].bought ? TextStyle(decoration: TextDecoration.lineThrough, decorationThickness: 3) : null),
+                                controlAffinity: ListTileControlAffinity.leading,
+                                onChanged: (bool val) {
+                                  itemChange(val, index);
+                                }));
+                      })
+                  : Container()),
         ],
       ),
-      floatingActionButton: SpeedDial(
-        animatedIcon: AnimatedIcons.menu_close,
-        animatedIconTheme: IconThemeData(size: 22.0),
-        closeManually: false,
-        curve: Curves.easeIn,
-        overlayOpacity: 0.35,
-        backgroundColor: Theme.of(context).primaryColor,
-        elevation: 8.0,
-        shape: CircleBorder(),
-        children: [
-          SpeedDialChild(
-              child: Icon(Icons.check),
-              backgroundColor: Colors.green,
-              labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
-              label: "Complete",
-              labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
-              onTap: _showCompleteDialog
+      floatingActionButton: Stack(
+        children: <Widget>[
+          Padding(
+            padding: EdgeInsets.only(right: 80.0),
+            child: Align(
+              alignment: Alignment.bottomRight,
+              child: FloatingActionButton(
+                child: Icon(Icons.add),
+                backgroundColor: Colors.green,
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => SearchItemsView(lists.elementAt(widget.index).id)));
+                },
+              ),
+            ),
           ),
-          SpeedDialChild(
-            child: Icon(Icons.delete),
-            backgroundColor: Colors.red,
-            labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
-            label: "Delete",
-            labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
-            onTap: _showDeleteDialog
-          ),
-          SpeedDialChild(
-            child: Icon(Icons.camera),
-            backgroundColor: Colors.blue,
-            label: "Image Check",
-            labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
-            labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
-            onTap: () => InfoOverlay.showSourceSelectionSheet(context, callback: _startCameraScanner, arg: widget.index),
+          SpeedDial(
+            animatedIcon: AnimatedIcons.menu_close,
+            animatedIconTheme: IconThemeData(size: 22.0),
+            closeManually: false,
+            curve: Curves.easeIn,
+            overlayOpacity: 0.35,
+            backgroundColor: Theme.of(context).primaryColor,
+            elevation: 8.0,
+            shape: CircleBorder(),
+            children: [
+              SpeedDialChild(
+                  child: Icon(Icons.check),
+                  backgroundColor: Colors.green,
+                  labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
+                  label: "Complete",
+                  labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
+                  onTap: _showCompleteDialog),
+              SpeedDialChild(
+                  child: Icon(Icons.delete),
+                  backgroundColor: Colors.red,
+                  labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
+                  label: "Delete",
+                  labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
+                  onTap: _showDeleteDialog),
+              SpeedDialChild(
+                  child: Icon(Icons.camera),
+                  backgroundColor: Colors.blue,
+                  label: "Image Check",
+                  labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
+                  labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
+                  onTap: () => InfoOverlay.showSourceSelectionSheet(context, callback: _startCameraScanner, arg: widget.index),
+                  )
+                ],
+              ),
+            ],
           ),
         ],
       ),
     );
   }
+
 
   /// Starts up the camera scanner and awaits the output
   Future<void> _startCameraScanner(BuildContext context, ImageSource imageSource, int index) async {
@@ -163,18 +185,16 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
-                RichText(text:
-                TextSpan(
-                    style: TextStyle(
-                      color: Theme.of(context).textTheme.title.color,
-                    ),
-                    children: <TextSpan> [
+                RichText(
+                    text: TextSpan(
+                        style: TextStyle(
+                          color: Theme.of(context).textTheme.title.color,
+                        ),
+                        children: <TextSpan>[
                       TextSpan(text: "Sind Sie sicher, dass Sie die Einkaufsliste "),
                       TextSpan(text: "${list.name}", style: TextStyle(fontWeight: FontWeight.bold)),
                       TextSpan(text: " abschließen möchten?")
-                    ]
-                )
-                )
+                    ]))
               ],
             ),
           ),
@@ -200,8 +220,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
                 .catchError((_) {
                   InfoOverlay.showErrorSnackBar("Fehler beim Abschließen der Einkaufsliste");
                   useCache = false;
-                })
-                .then((_) {
+                }).then((_) {
                   InfoOverlay.showInfoSnackBar("Einkaufsliste ${list.name} abgeschlossen");
                   Navigator.of(context).pop();
                   Navigator.of(this.context).pop();
@@ -224,18 +243,16 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
-                RichText(text:
-                TextSpan(
-                    style: new TextStyle(
-                      color: Theme.of(context).textTheme.title.color,
-                    ),
-                    children: <TextSpan> [
+                RichText(
+                    text: TextSpan(
+                        style: new TextStyle(
+                          color: Theme.of(context).textTheme.title.color,
+                        ),
+                        children: <TextSpan>[
                       TextSpan(text: "Sind Sie sicher, dass Sie die Einkaufsliste "),
                       TextSpan(text: "${list.name}", style: TextStyle(fontWeight: FontWeight.bold)),
                       TextSpan(text: " löschen möchten?")
-                    ]
-                )
-                )
+                    ]))
               ],
             ),
           ),
@@ -257,16 +274,14 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
                   name: list.name,
                   items: list.items,
                 );
-                databaseService.deleteList(uid, list.id)
-                  .catchError((_) {
-                    InfoOverlay.showErrorSnackBar("Fehler beim Löschen der Einkaufsliste");
-                    useCache = false;
-                  })
-                  .then((_) {
-                    InfoOverlay.showInfoSnackBar("Einkaufsliste ${list.name} gelöscht");
-                    Navigator.of(context).pop();
-                    Navigator.of(this.context).pop();
-                  });
+                databaseService.deleteList(uid, list.id).catchError((_) {
+                  InfoOverlay.showErrorSnackBar("Fehler beim Löschen der Einkaufsliste");
+                  useCache = false;
+                }).then((_) {
+                  InfoOverlay.showInfoSnackBar("Einkaufsliste ${list.name} gelöscht");
+                  Navigator.of(context).pop();
+                  Navigator.of(this.context).pop();
+                });
               },
             ),
           ],
@@ -274,5 +289,4 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
       },
     );
   }
-
 }

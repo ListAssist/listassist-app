@@ -8,9 +8,20 @@ import 'package:listassist/widgets/shoppinglist/completed_shopping_list.dart';
 import 'package:listassist/widgets/shoppinglist/create_shopping_list_view.dart';
 import 'package:listassist/widgets/shoppinglist/shopping_list.dart';
 import 'package:provider/provider.dart';
-import 'package:shimmer/shimmer.dart';
 
-class ShoppingListView extends StatelessWidget {
+class ShoppingListView extends StatefulWidget {
+  @override
+  _ShoppingListView createState() => _ShoppingListView();
+}
+
+class _ShoppingListView extends State<ShoppingListView> {
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(

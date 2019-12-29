@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:listassist/models/Product.dart';
 import 'package:listassist/models/current-screen.dart';
 import 'package:provider/provider.dart';
 import 'package:scoped_model/scoped_model.dart';
@@ -23,7 +24,7 @@ class MyApp extends StatelessWidget {
       providers: [
         StreamProvider<User>.value(value: authService.userDoc,),
         StreamProvider<bool>.value(value: authService.loading.asBroadcastStream().defaultIfEmpty(true)),
-        StreamProvider<FirebaseUser>.value(value: authService.user)
+        StreamProvider<FirebaseUser>.value(value: authService.user),
       ],
       child: ScopedModel<ScreenModel>(
         model: ScreenModel(),
