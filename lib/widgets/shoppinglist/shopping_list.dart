@@ -12,7 +12,7 @@ class ShoppingList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     model.ShoppingList list = Provider.of<List<model.ShoppingList>>(context)[this.index];
-//    print(list);
+    //print(list);
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () => Navigator.push(

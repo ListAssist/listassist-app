@@ -7,9 +7,12 @@ import 'package:provider/provider.dart';
 
 class GroupUserList extends StatelessWidget {
 
+  final index;
+  GroupUserList({this.index});
+
   @override
   Widget build(BuildContext context) {
-    Group group = Provider.of<Group>(context);
+    Group group = Provider.of<List<Group>>(context)[index];
 
     List<PublicUser> membersInGroup = List.from(group.members);
     membersInGroup.removeWhere((member) => member.uid == group.creator.uid);

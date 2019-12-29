@@ -5,11 +5,10 @@ import 'PublicUser.dart';
 class Group {
   final String title;
   final PublicUser creator;
-  final int memberCount;
   final List<PublicUser> members;
   final String id;
 
-  Group({this.title, this.creator, this.memberCount, this.members, this.id});
+  Group({this.title, this.creator, this.members, this.id});
 
   factory Group.fromFirestore(DocumentSnapshot doc) {
     Map data = doc.data ?? { };

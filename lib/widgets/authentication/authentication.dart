@@ -5,14 +5,31 @@ import 'package:listassist/widgets/authentication/register.dart';
 
 
 BuildContext authContext;
-enum _AuthType {SignIn, SignUp}
 
 class AuthenticationPage extends StatefulWidget {
   @override
   _AuthenticationPageState createState() => _AuthenticationPageState();
 }
 
-class _AuthenticationPageState extends State<AuthenticationPage> {
+class _AuthenticationPageState extends State<AuthenticationPage> with SingleTickerProviderStateMixin {
+  TabController _tabController;
+  final List<Tab> tabs = [
+    Tab(text: "Login"),
+    Tab(text: "Registrieren")
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(vsync: this, length: tabs.length);
+    _tabController.addListener(_handleTabChange);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,13 +42,12 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
             backgroundColor: Theme.of(context).colorScheme.primary,
             title: Text("Authentizierung"),
             bottom: TabBar(
-              tabs: [
-                Tab(text: "Login",),
-                Tab(text: "Registrieren")
-              ],
+              controller: _tabController,
+              tabs: tabs
             ),
           ),
           body: TabBarView(
+            controller: _tabController,
             children: [
               LoginPage(),
               RegisterPage()
@@ -40,5 +56,10 @@ class _AuthenticationPageState extends State<AuthenticationPage> {
           resizeToAvoidBottomInset: false,
         )
     );
+  }
+
+  /// Remove Focus of any element on the page (e.g. keyboard)
+  void _handleTabChange() {
+    FocusScope.of(context).requestFocus(FocusNode());
   }
 }
