@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 
 /// Reserved for later use..
@@ -58,5 +59,20 @@ class InfoOverlay {
             color: Colors.black, fontSize: 16.0, fontWeight: FontWeight.w600)
     );
     return progressDialog;
+  }
+
+  static showSourceSelectionSheet(BuildContext context, {Function callback, dynamic arg}) {
+    mainModalBottomSheet(context, [
+      ListTile(
+        leading: Icon(Icons.camera_alt),
+        title: Text("Kamera"),
+        onTap: () => callback(context, ImageSource.camera, arg),
+      ),
+      ListTile(
+        leading: Icon(Icons.photo),
+        title: Text("Galerie"),
+        onTap: () => callback(context, ImageSource.gallery, arg),
+      )
+    ]);
   }
 }

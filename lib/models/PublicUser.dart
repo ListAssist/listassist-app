@@ -8,6 +8,13 @@ class PublicUser {
 
   PublicUser({this.displayName, this.photoUrl, this.uid});
 
+  Map<String, dynamic> toJson() =>
+      {
+        'uid': uid,
+        'displayName': displayName,
+        'photoURL': photoUrl,
+      };
+
   factory PublicUser.fromFirestore(DocumentSnapshot doc) {
     Map data = doc.data;
 

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:listassist/models/Item.dart';
 import 'package:listassist/models/ShoppingList.dart';
+import 'Bill.dart';
 
 class CompletedShoppingList {
   final String id;
@@ -10,8 +11,9 @@ class CompletedShoppingList {
   final String type;
   final List<Item> allItems;
   final List<Item> completedItems;
+  final List<Bill> bills;
 
-  CompletedShoppingList({this.id, this.created, this.completed, this.name, this.type, this.completedItems, this.allItems});
+  CompletedShoppingList({this.id, this.created, this.completed, this.name, this.type, this.completedItems, this.allItems, this.bills});
 
   factory CompletedShoppingList.fromFirestore(DocumentSnapshot doc) {
     Map data = doc.data;
@@ -30,6 +32,7 @@ class CompletedShoppingList {
       type: data["type"],
       allItems: tempAllItems,
       completedItems: tempCompletedItems,
+      bills: data["pictureURLs"]?.map<Bill>((b) => Bill.fromMap(b))?.toList()
     );
 }
 
@@ -41,7 +44,8 @@ class CompletedShoppingList {
         completed: data["completed"],
         name: data["name"],
         type: data["type"],
-        completedItems: List.from(data["items"] ?? []).map((x) => Item.fromMap(x)).toList()
+        completedItems: List.from(data["items"] ?? []).map((x) => Item.fromMap(x)).toList(),
+        bills: data["pictureURLs"]?.map((b) => Bill.fromMap(b))?.toList()
     );
   }
 

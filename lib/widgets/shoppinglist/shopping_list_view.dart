@@ -29,7 +29,7 @@ class _ShoppingListView extends State<ShoppingListView> {
         child: Scaffold(
           floatingActionButton: FloatingActionButton(
             child: Icon(Icons.add),
-            backgroundColor: Colors.blueAccent,
+            backgroundColor: Theme.of(context).colorScheme.primary,
             onPressed: () {
               Navigator.push(
                 context,
@@ -86,22 +86,16 @@ class ShoppingLists extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     List<model.ShoppingList> lists = Provider.of<List<model.ShoppingList>>(context);
-    return lists != null
-        ? lists.length == 0
-            ? Center(
-                child: Text(
-                "Noch keine Einkaufslisten erstellt",
-                style: Theme.of(context).textTheme.title,
-              ))
-            : ListView.separated(
-                separatorBuilder: (ctx, i) => Divider(
-                      indent: 10,
-                      endIndent: 10,
-                      color: Colors.grey,
-                    ),
-                itemCount: lists.length,
-                itemBuilder: (ctx, index) => ShoppingList(index: index))
-        : ShoppyShimmer();
+    return lists != null ? lists.length == 0 ? Center(child: Text("Noch keine Einkaufslisten erstellt", style: Theme.of(context).textTheme.title,)) : ListView.separated(
+        separatorBuilder: (ctx, i) => Divider(
+          indent: 10,
+          endIndent: 10,
+          color: Colors.grey,
+        ),
+        physics: BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+        itemCount: lists.length,
+        itemBuilder: (ctx, index) => ShoppingList(index: index)
+    ) : SpinKitDoubleBounce(color: Colors.blueAccent,);
   }
 }
 
@@ -109,23 +103,15 @@ class ShoppingListsHistory extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     List<model2.CompletedShoppingList> lists = Provider.of<List<model2.CompletedShoppingList>>(context);
-    return lists != null
-        ? lists.length == 0
-            ? Center(
-                child: Text(
-                "Noch keine Einkäufe abgeschlossen",
-                style: Theme.of(context).textTheme.title,
-              ))
-            : ListView.separated(
-                separatorBuilder: (ctx, i) => Divider(
-                      indent: 10,
-                      endIndent: 10,
-                      color: Colors.grey,
-                    ),
-                itemCount: lists.length,
-                itemBuilder: (ctx, index) => CompletedShoppingList(index: index))
-        : SpinKitDoubleBounce(
-            color: Colors.blueAccent,
-          );
+    return lists != null ? lists.length == 0 ? Center(child: Text("Noch keine Einkäufe abgeschlossen", style: Theme.of(context).textTheme.title,)) : ListView.separated(
+        separatorBuilder: (ctx, i) => Divider(
+          indent: 10,
+          endIndent: 10,
+          color: Colors.grey,
+        ),
+        physics: BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+        itemCount: lists.length,
+        itemBuilder: (ctx, index) => CompletedShoppingList(index: index)
+    ) : SpinKitDoubleBounce(color: Colors.blueAccent,);
   }
 }

@@ -3,14 +3,19 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:listassist/models/ScannedShoppinglist.dart';
 import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
+import 'package:listassist/services/camera.dart';
 import 'package:listassist/services/db.dart';
+import 'package:listassist/services/info_overlay.dart';
+import 'package:listassist/widgets/camera-scanner/camera_scanner.dart';
 import 'package:listassist/widgets/shoppinglist/search_items_view.dart';
 import 'package:listassist/widgets/shoppinglist/shopping_list_detail.dart';
 import 'package:progress_indicator_button/progress_button.dart';
 import 'package:provider/provider.dart';
-import 'package:listassist/models/ShoppingList.dart' as model;
+import 'package:listassist/models/ShoppingList.dart';
 
 class CreateShoppingListView extends StatefulWidget {
   @override
@@ -19,12 +24,12 @@ class CreateShoppingListView extends StatefulWidget {
 
 class _CreateShoppingListView extends State<CreateShoppingListView> {
   Color _backgroundColor = Colors.blueAccent[400];
+  List<ScannedShoppingList> scannedLists = [];
 
   @override
   Widget build(BuildContext context) {
-
     User _user  = Provider.of<User>(context);
-    List<model.ShoppingList> lists = Provider.of<List<model.ShoppingList>>(context);
+    List<ShoppingList> lists = Provider.of<List<ShoppingList>>(context);
 
     RegExp defaultListName = new RegExp(r"Einkaufsliste #[0-9]+");
 
@@ -89,7 +94,7 @@ class _CreateShoppingListView extends State<CreateShoppingListView> {
                             items: new List(),
                           );
                         } else {
-                          List<model.ShoppingList> listen = lists;
+                          List<ShoppingList> listen = lists;
                           listen = listen.where((i) => defaultListName.hasMatch(i.name)).toList();
                           print(listen);
                           int lastId = 0;
@@ -157,9 +162,7 @@ class _CreateShoppingListView extends State<CreateShoppingListView> {
                           ),
                           IconButton(
                             icon: Icon(Icons.camera_alt),
-                            onPressed: () {
-
-                            },
+                            onPressed: () => InfoOverlay.showSourceSelectionSheet(context, callback: _startCameraScanner),
                           )
                         ],
                       ),
@@ -181,4 +184,18 @@ class _CreateShoppingListView extends State<CreateShoppingListView> {
           )
         ]));
   }
+
+  /// Starts up the camera scanner and awaits output to process
+  Future<void> _startCameraScanner(BuildContext context, ImageSource imageSource) async {
+    ScannedShoppingList scannedShoppingList = await cameraService.getResultFromCameraScanner(context, imageSource);
+    if (scannedShoppingList != null) {
+      setState(() {
+        scannedLists.add(scannedShoppingList);
+
+      });
+    }
+
+    Navigator.pop(context);
+  }
 }
+

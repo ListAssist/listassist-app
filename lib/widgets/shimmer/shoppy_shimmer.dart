@@ -57,8 +57,7 @@ class ShoppyShimmer extends StatelessWidget {
                 )
               ],
             ),
-          ))
-              .toList(),
+          )).toList(),
         ),
       ),
     );
