@@ -8,14 +8,12 @@ import 'package:listassist/models/ScannedShoppinglist.dart';
 import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
 import 'package:listassist/services/camera.dart';
+import 'package:listassist/services/connectivity.dart';
 import 'package:listassist/services/db.dart';
 import 'package:listassist/services/info_overlay.dart';
-import 'package:listassist/widgets/camera-scanner/camera_scanner.dart';
 import 'package:listassist/widgets/shoppinglist/search_items_view.dart';
-import 'package:listassist/widgets/shoppinglist/shopping_list_detail.dart';
 import 'package:progress_indicator_button/progress_button.dart';
 import 'package:provider/provider.dart';
-import 'package:listassist/models/ShoppingList.dart';
 
 class CreateShoppingListView extends StatefulWidget {
   @override
@@ -28,7 +26,7 @@ class _CreateShoppingListView extends State<CreateShoppingListView> {
 
   @override
   Widget build(BuildContext context) {
-    User _user  = Provider.of<User>(context);
+    User _user = Provider.of<User>(context);
     List<ShoppingList> lists = Provider.of<List<ShoppingList>>(context);
 
     RegExp defaultListName = new RegExp(r"Einkaufsliste #[0-9]+");
@@ -72,67 +70,68 @@ class _CreateShoppingListView extends State<CreateShoppingListView> {
                     width: 130,
                     height: 40,
                     child: ProgressButton(
-                      child: Text("Liste erstellen",
-                        style: TextStyle(
-                            color: Colors.white
-                        ),
+                      child: Text(
+                        "Liste erstellen",
+                        style: TextStyle(color: Colors.white),
                       ),
                       borderRadius: BorderRadius.all(Radius.circular(4)),
                       color: Colors.blueAccent[400],
                       progressIndicatorColor: Colors.white,
                       progressIndicatorSize: 20,
-                      onPressed: (AnimationController controller) async{
+                      onPressed: (AnimationController controller) async {
                         controller.forward();
-                        ShoppingList _newShoppingList;
-                        if(_nameController.text.length > 0){
-                          String name = _nameController.text;
-                          _newShoppingList = new ShoppingList(
-                            id: "",
-                            created: Timestamp.now(),
-                            name: name,
-                            type: "pending",
-                            items: new List(),
-                          );
+                        bool connected = await connectivityService.testInternetConnection();
+                        if (!connected) {
+                          //I am NOT connected
+                          controller.reverse();
+                          InfoOverlay.showErrorSnackBar("Keine Internetverbindung");
                         } else {
-                          List<ShoppingList> listen = lists;
-                          listen = listen.where((i) => defaultListName.hasMatch(i.name)).toList();
-                          print(listen);
-                          int lastId = 0;
-                          listen.forEach((l) => {
-                            if(int.parse(l.name.split("#")[1]) > lastId){
-                              lastId = int.parse(l.name.split("#")[1])
-                            }
-                          });
-                          _newShoppingList = new ShoppingList(
-                            id: "",
-                            created: Timestamp.now(),
-                            name: "Einkaufsliste #" + (lastId+1).toString(),
-                            type: "pending",
-                            items: [],
-                          );
-                        }
+                          //I am connected to the Internet
+                          ShoppingList _newShoppingList;
+                          if (_nameController.text.length > 0) {
+                            String name = _nameController.text;
+                            _newShoppingList = new ShoppingList(
+                              id: "",
+                              created: Timestamp.now(),
+                              name: name,
+                              type: "pending",
+                              items: new List(),
+                            );
+                          } else {
+                            List<ShoppingList> listen = lists;
+                            listen = listen.where((i) => defaultListName.hasMatch(i.name)).toList();
+                            print(listen);
+                            int lastId = 0;
+                            listen.forEach((l) => {
+                                  if (int.parse(l.name.split("#")[1]) > lastId) {lastId = int.parse(l.name.split("#")[1])}
+                                });
+                            _newShoppingList = new ShoppingList(
+                              id: "",
+                              created: Timestamp.now(),
+                              name: "Einkaufsliste #" + (lastId + 1).toString(),
+                              type: "pending",
+                              items: [],
+                            );
+                          }
 
-                        DocumentReference docRef = await databaseService.createList(_user.uid, _newShoppingList);
-                        Timer(Duration(milliseconds: 3000), () {
+                          DocumentReference docRef = await databaseService.createList(_user.uid, _newShoppingList);
                           controller.reverse();
                           Navigator.pop(context);
 
-                          setState(() {
-
-                          });
-                          print("DOCREFFFF  " + docRef.documentID);
+                          /*print("DOCREFFFF  " + docRef.documentID);
                           lists.forEach((l) => {
                             print(l.id)
-                          });
+                          });*/
 
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => SearchItemsView(docRef.documentID)));
 
 /*
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => ShoppingListDetail(index: lists.indexWhere((l) => l.id == docRef.))));*/
-                        });
-
+                                  builder: (context) => ShoppingListDetail(index: lists.indexWhere((l) => l.id == docRef.))));
+                                  */
+                        }
                       },
                     ),
                   ),
@@ -144,25 +143,22 @@ class _CreateShoppingListView extends State<CreateShoppingListView> {
                   child: Container(
                     padding: EdgeInsets.only(top: 10, left: 50.0, right: 50.0),
                     child: DecoratedBox(
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(2.0),
-                          color: Colors.white),
+                      decoration: BoxDecoration(borderRadius: BorderRadius.circular(2.0), color: Colors.white),
                       child: Row(
                         children: [
                           Expanded(
                             child: TextField(
                               controller: _nameController,
                               style: TextStyle(fontSize: 20),
-                              decoration: InputDecoration(
-                                  border: UnderlineInputBorder(),
-                                  hintText: "Name",
-                                  contentPadding: EdgeInsets.only(top: 17, left: 5, right: 17, bottom: 10)
-                              ),
+                              decoration: InputDecoration(border: UnderlineInputBorder(), hintText: "Name", contentPadding: EdgeInsets.only(top: 17, left: 5, right: 17, bottom: 10)),
                             ),
                           ),
                           IconButton(
                             icon: Icon(Icons.camera_alt),
-                            onPressed: () => InfoOverlay.showSourceSelectionSheet(context, callback: _startCameraScanner),
+                            onPressed: () async{
+                              await connectivityService.testInternetConnection() ? InfoOverlay.showSourceSelectionSheet(context, callback: _startCameraScanner)
+                                  : InfoOverlay.showErrorSnackBar("Kein Internetzugriff");
+                            },
                           )
                         ],
                       ),
@@ -172,14 +168,11 @@ class _CreateShoppingListView extends State<CreateShoppingListView> {
               ],
             ),
           ),
-
           Expanded(
             child: Container(
               color: _backgroundColor,
               width: MediaQuery.of(context).size.width,
-              child: Stack(children: [
-
-              ]),
+              child: Stack(children: []),
             ),
           )
         ]));
@@ -191,11 +184,9 @@ class _CreateShoppingListView extends State<CreateShoppingListView> {
     if (scannedShoppingList != null) {
       setState(() {
         scannedLists.add(scannedShoppingList);
-
       });
     }
 
     Navigator.pop(context);
   }
 }
-

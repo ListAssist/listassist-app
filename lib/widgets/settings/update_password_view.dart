@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:listassist/services/auth.dart';
+import 'package:listassist/services/connectivity.dart';
 import 'package:listassist/services/info_overlay.dart';
 import 'package:progress_indicator_button/progress_button.dart';
 
@@ -143,13 +144,8 @@ class _UpdatePasswordView extends State<UpdatePasswordView> {
                       if (_passwordController.text == _repeatPasswordController.text) {
                         controller.forward();
 
-                        var connectivityResult;
-                        try {
-                          connectivityResult = await Connectivity().checkConnectivity();
-                        } on PlatformException catch (e) {
-                          print(e.toString());
-                        }
-                        if (!(connectivityResult == ConnectivityResult.mobile || connectivityResult == ConnectivityResult.wifi)) {
+                        bool connected = await connectivityService.testInternetConnection();
+                        if (!connected) {
                           // I am NOT connected to a network.
                           Future.delayed(Duration(seconds: 1)).then((value) async {
                             //Navigator.of(context).pop();
@@ -159,15 +155,14 @@ class _UpdatePasswordView extends State<UpdatePasswordView> {
                             });
                             controller.reverse();
                           });
-                          return;
+                        } else {
+                          authService.updatePassword(widget.firebaseUser, _passwordController.text).catchError((_) {
+                            InfoOverlay.showErrorSnackBar("Fehler beim Ändern des Passworts");
+                          }).then((_) {
+                            InfoOverlay.showInfoSnackBar("Das Passwort wurde geändert");
+                            Navigator.of(context).pop();
+                          });
                         }
-
-                        authService.updatePassword(widget.firebaseUser, _passwordController.text).catchError((_) {
-                          InfoOverlay.showErrorSnackBar("Fehler beim Ändern des Passworts");
-                        }).then((_) {
-                          InfoOverlay.showInfoSnackBar("Das Passwort wurde geändert");
-                          Navigator.of(context).pop();
-                        });
                       } else {
                         setState(() {
                           _errorText2 = "Die Passwörter sind nicht gleich";

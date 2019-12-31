@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
+import 'package:listassist/services/connectivity.dart';
 import 'package:listassist/services/db.dart';
 import 'package:listassist/widgets/shoppinglist/edit_shopping_list.dart';
 import 'package:listassist/widgets/shoppinglist/search_items_view.dart';
@@ -40,8 +42,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
         databaseService.updateList(uid, list).then((onUpdate) {
           print("Saved items");
         }).catchError((onError) {
-          InfoOverlay.showErrorSnackBar(
-              "Fehler beim aktualisieren der Einkaufsliste");
+          InfoOverlay.showErrorSnackBar("Fehler beim aktualisieren der Einkaufsliste");
         });
       }
     });
@@ -57,8 +58,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
     try {
       await databaseService.updateList(uid, list);
     } catch (e) {
-      InfoOverlay.showErrorSnackBar(
-          "Fehler beim aktualisieren der Einkaufsliste");
+      InfoOverlay.showErrorSnackBar("Fehler beim aktualisieren der Einkaufsliste");
     }
   }
 
@@ -79,8 +79,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
             icon: Icon(Icons.edit),
             onPressed: () => Navigator.push(
               context,
-              MaterialPageRoute(
-                  builder: (context) => EditShoppingList(index: widget.index)),
+              MaterialPageRoute(builder: (context) => EditShoppingList(index: widget.index)),
             ),
           )
         ],
@@ -91,12 +90,8 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
           Container(
               padding: EdgeInsets.all(10.0),
               child: list.items.isNotEmpty
-                  ? Text(
-                      "${list.items.map((e) => e.bought ? 1 : 0).reduce((a, b) => a + b)} von ${list.items.length} Produkten gekauft",
-                      style: Theme.of(context).textTheme.headline)
-                  : Center(
-                      child:
-                          Text("Die Einkaufsliste hat noch keine Produkte"))),
+                  ? Text("${list.items.map((e) => e.bought ? 1 : 0).reduce((a, b) => a + b)} von ${list.items.length} Produkten gekauft", style: Theme.of(context).textTheme.headline)
+                  : Center(child: Text("Die Einkaufsliste hat noch keine Produkte"))),
           Expanded(
               child: list.items.isNotEmpty
                   ? ListView.builder(
@@ -105,15 +100,8 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
                         return Container(
                             child: CheckboxListTile(
                                 value: list.items[index].bought,
-                                title: Text("${list.items[index].name}",
-                                    style: list.items[index].bought
-                                        ? TextStyle(
-                                            decoration:
-                                                TextDecoration.lineThrough,
-                                            decorationThickness: 3)
-                                        : null),
-                                controlAffinity:
-                                    ListTileControlAffinity.leading,
+                                title: Text("${list.items[index].name}", style: list.items[index].bought ? TextStyle(decoration: TextDecoration.lineThrough, decorationThickness: 3) : null),
+                                controlAffinity: ListTileControlAffinity.leading,
                                 onChanged: (bool val) {
                                   itemChange(val, index);
                                 }));
@@ -131,11 +119,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
                 child: Icon(Icons.add),
                 backgroundColor: Colors.green,
                 onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => SearchItemsView(
-                              lists.elementAt(widget.index).id)));
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => SearchItemsView(lists.elementAt(widget.index).id)));
                 },
               ),
             ),
@@ -153,46 +137,24 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
               SpeedDialChild(
                   child: Icon(Icons.check),
                   backgroundColor: Colors.green,
-                  labelBackgroundColor:
-                      Theme.of(context).brightness == Brightness.dark
-                          ? Theme.of(context).primaryColor
-                          : Colors.white,
+                  labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
                   label: "Complete",
-                  labelStyle: TextStyle(
-                      fontSize: 18.0,
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? Colors.white
-                          : Colors.black),
+                  labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
                   onTap: _showCompleteDialog),
               SpeedDialChild(
                   child: Icon(Icons.delete),
                   backgroundColor: Colors.red,
-                  labelBackgroundColor:
-                      Theme.of(context).brightness == Brightness.dark
-                          ? Theme.of(context).primaryColor
-                          : Colors.white,
+                  labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
                   label: "Delete",
-                  labelStyle: TextStyle(
-                      fontSize: 18.0,
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? Colors.white
-                          : Colors.black),
+                  labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
                   onTap: _showDeleteDialog),
               SpeedDialChild(
                 child: Icon(Icons.camera),
                 backgroundColor: Colors.blue,
                 label: "Image Check",
-                labelBackgroundColor:
-                    Theme.of(context).brightness == Brightness.dark
-                        ? Theme.of(context).primaryColor
-                        : Colors.white,
-                labelStyle: TextStyle(
-                    fontSize: 18.0,
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? Colors.white
-                        : Colors.black),
-                onTap: () => InfoOverlay.showSourceSelectionSheet(context,
-                    callback: _startCameraScanner, arg: widget.index),
+                labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
+                labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
+                onTap: () => InfoOverlay.showSourceSelectionSheet(context, callback: _startCameraScanner, arg: widget.index),
               )
             ],
           ),
@@ -202,10 +164,8 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
   }
 
   /// Starts up the camera scanner and awaits the output
-  Future<void> _startCameraScanner(
-      BuildContext context, ImageSource imageSource, int index) async {
-    List<int> indecesToCheck = await cameraService
-        .getResultFromCameraScanner(context, imageSource, listIndex: index);
+  Future<void> _startCameraScanner(BuildContext context, ImageSource imageSource, int index) async {
+    List<int> indecesToCheck = await cameraService.getResultFromCameraScanner(context, imageSource, listIndex: index);
     if (indecesToCheck != null) {
       itemChangeMultiple(indecesToCheck: indecesToCheck);
     }
@@ -228,11 +188,8 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
                           color: Theme.of(context).textTheme.title.color,
                         ),
                         children: <TextSpan>[
-                      TextSpan(
-                          text: "Sind Sie sicher, dass Sie die Einkaufsliste "),
-                      TextSpan(
-                          text: "${list.name}",
-                          style: TextStyle(fontWeight: FontWeight.bold)),
+                      TextSpan(text: "Sind Sie sicher, dass Sie die Einkaufsliste "),
+                      TextSpan(text: "${list.name}", style: TextStyle(fontWeight: FontWeight.bold)),
                       TextSpan(text: " abschließen möchten?")
                     ]))
               ],
@@ -257,12 +214,10 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
                   items: list.items,
                 );
                 databaseService.completeList(uid, list).catchError((_) {
-                  InfoOverlay.showErrorSnackBar(
-                      "Fehler beim Abschließen der Einkaufsliste");
+                  InfoOverlay.showErrorSnackBar("Fehler beim Abschließen der Einkaufsliste");
                   useCache = false;
                 }).then((_) {
-                  InfoOverlay.showInfoSnackBar(
-                      "Einkaufsliste ${list.name} abgeschlossen");
+                  InfoOverlay.showInfoSnackBar("Einkaufsliste ${list.name} abgeschlossen");
                   Navigator.of(context).pop();
                   Navigator.of(this.context).pop();
                 });
@@ -290,11 +245,8 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
                           color: Theme.of(context).textTheme.title.color,
                         ),
                         children: <TextSpan>[
-                      TextSpan(
-                          text: "Sind Sie sicher, dass Sie die Einkaufsliste "),
-                      TextSpan(
-                          text: "${list.name}",
-                          style: TextStyle(fontWeight: FontWeight.bold)),
+                      TextSpan(text: "Sind Sie sicher, dass Sie die Einkaufsliste "),
+                      TextSpan(text: "${list.name}", style: TextStyle(fontWeight: FontWeight.bold)),
                       TextSpan(text: " löschen möchten?")
                     ]))
               ],
@@ -310,7 +262,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
             ),
             FlatButton(
               child: Text("Löschen"),
-              onPressed: () {
+              onPressed: () async{
                 useCache = true;
                 list = ShoppingList(
                   id: list.id,
@@ -318,16 +270,22 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
                   name: list.name,
                   items: list.items,
                 );
-                databaseService.deleteList(uid, list.id).catchError((_) {
-                  InfoOverlay.showErrorSnackBar(
-                      "Fehler beim Löschen der Einkaufsliste");
-                  useCache = false;
-                }).then((_) {
-                  InfoOverlay.showInfoSnackBar(
-                      "Einkaufsliste ${list.name} gelöscht");
-                  Navigator.of(context).pop();
-                  Navigator.of(this.context).pop();
-                });
+
+                bool connected = await connectivityService.testInternetConnection();
+                if (!connected) {
+                  //I am NOT connected to the Internet
+                  InfoOverlay.showErrorSnackBar("Kein Internetzugriff");
+                } else {
+                  //I am connected to the Internet
+                  databaseService.deleteList(uid, list.id).catchError((_) {
+                    InfoOverlay.showErrorSnackBar("Fehler beim Löschen der Einkaufsliste");
+                    useCache = false;
+                  }).then((_) {
+                    InfoOverlay.showInfoSnackBar("Einkaufsliste ${list.name} gelöscht");
+                    Navigator.of(context).pop();
+                    Navigator.of(this.context).pop();
+                  });
+                }
               },
             ),
           ],

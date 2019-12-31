@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:connectivity/connectivity.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,13 +9,13 @@ import 'package:image_picker/image_picker.dart';
 import 'package:listassist/models/User.dart';
 import 'package:listassist/services/auth.dart';
 import 'package:listassist/services/camera.dart';
+import 'package:listassist/services/connectivity.dart';
 import 'package:listassist/services/db.dart';
 import 'package:listassist/services/info_overlay.dart';
 import 'package:listassist/services/storage.dart';
 import 'package:listassist/widgets/settings/updateProfileDataDialog.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:provider/provider.dart';
-import 'package:shimmer/shimmer.dart';
 
 class ProfileSettingsView extends StatefulWidget {
   @override
@@ -58,14 +57,10 @@ class _ProfileSettingsView extends State<ProfileSettingsView> {
 
   _saveSettings() async {
     _pr.show();
-    var connectivityResult;
-    try {
-      connectivityResult = await Connectivity().checkConnectivity();
-    } on PlatformException catch (e) {
-      _pr.hide();
-      print(e.toString());
-    }
-    if (connectivityResult == ConnectivityResult.mobile || connectivityResult == ConnectivityResult.wifi) {
+
+    bool connected = await connectivityService.testInternetConnection();
+
+    if (connected) {
       // I am connected to a network.
       await databaseService.updateProfileName(_uid, _newName);
       _displayName = _newName;
@@ -75,7 +70,7 @@ class _ProfileSettingsView extends State<ProfileSettingsView> {
       InfoOverlay.showInfoSnackBar("Der Anzeigename wurde geändert");
     } else {
       // I am not connected to a network.
-      Future.delayed(Duration(seconds: 1)).then((value) async {
+      Future.delayed(Duration(milliseconds: 250)).then((value) async {
         _pr.hide();
         InfoOverlay.showErrorSnackBar("Kein Internetzugriff, versuche es erneut");
       });
@@ -123,7 +118,11 @@ class _ProfileSettingsView extends State<ProfileSettingsView> {
         progressDialog.style(
             message: "Rechnung wird hochgeladen..",
             borderRadius: 10.0,
-            backgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
+            backgroundColor: Theme
+                .of(context)
+                .brightness == Brightness.dark ? Theme
+                .of(context)
+                .primaryColor : Colors.white,
             progressWidget: SpinKitDoubleBounce(
               color: Colors.blue,
             ),
@@ -158,6 +157,30 @@ class _ProfileSettingsView extends State<ProfileSettingsView> {
     );
   }
 
+  bool userIsSignedInWithEmailAndPassword () {
+    print(_firebaseUser.providerData[1].providerId);
+    bool erg = false;
+    if (_firebaseUser.providerData[1].providerId == "facebook.com") {
+      print("User is signed in with Facebook");
+    } else if (_firebaseUser.providerData[1].providerId == "google.com") {
+      print("User is signed in with Google");
+    }else if (_firebaseUser.providerData[1].providerId == "twitter.com") {
+      print("User is signed in with Twitter");
+    } else {
+      erg = true;
+      print("User is signed in with Email and Password");
+    }
+    return erg;
+  }
+
+  String getAccountType() {
+    String erg = "";
+    _firebaseUser.providerData[1].providerId == "google.com" ? erg = "Google"
+        : _firebaseUser.providerData[1].providerId == "facebook.com" ? erg = "Facebook"
+        : erg = _firebaseUser.providerData[1].providerId;
+    return erg;
+  }
+
   @override
   Widget build(BuildContext context) {
     FirebaseUser firebaseUser = Provider.of<FirebaseUser>(context);
@@ -166,14 +189,17 @@ class _ProfileSettingsView extends State<ProfileSettingsView> {
     _user = user;
     _uid = user.uid;
     _displayName = user.displayName;
-
     _emailController.text = user.email;
 
     _pr = new ProgressDialog(context, type: ProgressDialogType.Normal, isDismissible: true);
     _pr.style(
         message: "Aktualisiere Benutzernamen...",
         borderRadius: 4.0,
-        backgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
+        backgroundColor: Theme
+            .of(context)
+            .brightness == Brightness.dark ? Theme
+            .of(context)
+            .primaryColor : Colors.white,
         progressWidget: SpinKitDoubleBounce(
           color: Colors.blue,
         ),
@@ -197,10 +223,10 @@ class _ProfileSettingsView extends State<ProfileSettingsView> {
           decoration: BoxDecoration(),
           child: Column(crossAxisAlignment: CrossAxisAlignment.center, mainAxisAlignment: MainAxisAlignment.start, children: [
             Container(
-              margin: const EdgeInsets.only(bottom: 10.0),
+              margin: EdgeInsets.only(bottom: 10.0),
               child: GestureDetector(
                   onTap: () {
-                    _showProfilePictureModal(user);
+                    userIsSignedInWithEmailAndPassword() ? _showProfilePictureModal(user) : print("");
                   },
                   child: Hero(
                     tag: "profilePicture",
@@ -210,8 +236,8 @@ class _ProfileSettingsView extends State<ProfileSettingsView> {
                     ),
                   )),
             ),
-            Container(
-                margin: const EdgeInsets.only(bottom: 50.0),
+            userIsSignedInWithEmailAndPassword() ? Container(
+                margin: EdgeInsets.only(bottom: 50.0),
                 child: GestureDetector(
                     onTap: () {
                       _showProfilePictureModal(user);
@@ -220,7 +246,7 @@ class _ProfileSettingsView extends State<ProfileSettingsView> {
                       "Foto ändern",
                       style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                       textAlign: TextAlign.center,
-                    ))),
+                    ))) : Container(height: 50, child: Text("Mit " + getAccountType() + " angemeldet"),),
             Container(
               margin: EdgeInsets.only(bottom: 20.0),
               child: TextFormField(
@@ -244,15 +270,15 @@ class _ProfileSettingsView extends State<ProfileSettingsView> {
                     enabled: false,
                   ),
                 ),
-                IconButton(
+                userIsSignedInWithEmailAndPassword() ? IconButton(
                   icon: Icon(Icons.edit),
                   onPressed: () async {
                     updateProfileDataDialog.showLoginDialog(context, firebaseUser, user, "email");
                   },
-                )
+                ) : Container()
               ]),
             ),
-            Row(children: <Widget>[
+            userIsSignedInWithEmailAndPassword() ? Row(children: <Widget>[
               Expanded(
                 child: TextFormField(
                   initialValue: "kekomat11",
@@ -270,14 +296,14 @@ class _ProfileSettingsView extends State<ProfileSettingsView> {
                   updateProfileDataDialog.showLoginDialog(context, firebaseUser, user, "password");
                 },
               )
-            ]),
+            ]) : Container(),
           ])),
 
       floatingActionButton: FloatingActionButton(
         onPressed: _nameChanged
             ? () {
-                _saveSettings();
-              }
+          _saveSettings();
+        }
             : null,
         child: Icon(Icons.save),
         backgroundColor: _nameChanged ? Colors.green : Colors.grey,

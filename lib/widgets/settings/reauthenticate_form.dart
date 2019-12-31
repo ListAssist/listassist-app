@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:listassist/models/User.dart';
 import 'package:listassist/services/auth.dart';
+import 'package:listassist/services/connectivity.dart';
 import 'package:listassist/services/info_overlay.dart';
 import 'package:listassist/widgets/settings/updateProfileDataDialog.dart';
 import 'package:progress_indicator_button/progress_button.dart';
@@ -92,15 +93,8 @@ class _ReauthenticateForm extends State<ReauthenticateForm> {
                   setState(() {});
                   return;
                 }
-
-                var connectivityResult;
-                try {
-                  connectivityResult = await Connectivity().checkConnectivity();
-                } on PlatformException catch (e) {
-                  print(e.toString());
-                }
-                if (!(connectivityResult == ConnectivityResult.mobile || connectivityResult == ConnectivityResult.wifi)) {
-
+                bool connected = await connectivityService.testInternetConnection();
+                if (connected) {
                   // I am not connected to a network
                   controller.forward();
                   Future.delayed(Duration(seconds: 1)).then((value) async{
@@ -112,7 +106,6 @@ class _ReauthenticateForm extends State<ReauthenticateForm> {
                     });
                   });
                 } else {
-
                   // I am connected to a network
                   controller.forward();
                   String erg = await authService.reauthenticateUser(widget.firebaseUser, _passwordControllerrrrr.text);

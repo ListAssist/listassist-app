@@ -3,6 +3,7 @@ import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:listassist/assets/custom_icons.dart';
 import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
+import 'package:listassist/services/connectivity.dart';
 import 'package:listassist/services/date_formatter.dart';
 import 'package:listassist/services/db.dart';
 import 'package:listassist/services/info_overlay.dart';
@@ -78,18 +79,23 @@ class _CompletedShoppingListDetailState extends State<CompletedShoppingListDetai
             label: "Kopieren",
             labelStyle: TextStyle(fontSize: 18.0),
             onTap: () async {
-              ShoppingList newList;
-              bool res = await _showCreateCopyDialog();
-              if(!res) return;
-              if(_newName != null && _newName != "" && _newName.trim() != "") {
-                newList = list.createNewCopy(_newName);
-              }else {
-                newList = list.createNewCopy();
-              }
+              bool connected = await connectivityService.testInternetConnection();
+              if(connected) {
+                ShoppingList newList;
+                bool res = await _showCreateCopyDialog();
+                if (!res) return;
+                if (_newName != null && _newName != "" && _newName.trim() != "") {
+                  newList = list.createNewCopy(_newName);
+                } else {
+                  newList = list.createNewCopy();
+                }
 
-              databaseService.createList(user.uid, newList).then((onComplete) {
-                InfoOverlay.showInfoSnackBar("Einkaufsliste wurde erfolgreich kopiert");
-              });
+                databaseService.createList(user.uid, newList).then((onComplete) {
+                  InfoOverlay.showInfoSnackBar("Einkaufsliste wurde erfolgreich kopiert");
+                });
+              } else {
+                InfoOverlay.showErrorSnackBar("Kein Internetzugriff");
+              }
             },
           ),
           SpeedDialChild(
