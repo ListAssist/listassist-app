@@ -54,13 +54,56 @@ class _GroupDetail extends State<GroupDetail> {
           ],
         ),
         floatingActionButton: FloatingActionButton(
-          onPressed: () {},
-          child: Icon(Icons.add),
+          onPressed: () {
+              _showInviteDialog();
+          },
+          child: Icon(Icons.person_add),
         ),
       ),
     );
   }
+
+  Future<void> _showInviteDialog() async {
+    TextEditingController _addressController = TextEditingController();
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Mitglieder hinzufügen"),
+          content: SingleChildScrollView(
+            child: TextField(
+              controller: _addressController,
+              decoration: InputDecoration(
+                border: UnderlineInputBorder(),
+                contentPadding: EdgeInsets.all(3),
+                labelText: "Email Adresse",
+              ),
+            )
+          ),
+          actions: <Widget>[
+            FlatButton(
+              textColor: Colors.red,
+              child: Text("Abbrechen"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            FlatButton(
+              child: Text("Einladen"),
+              onPressed: () {
+                //TODO: Invite member with cloudfunction
+                print(_addressController.text);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
 }
+
 
 class GroupMenu extends StatelessWidget {
   final Group group;
