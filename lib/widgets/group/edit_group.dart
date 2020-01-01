@@ -23,10 +23,9 @@ class _EditGroupState extends State<EditGroup> {
     Group group = Provider.of<Group>(context);
     if(firstLoad) {
       copyUsers = List.from(group.members);
+      _nameTextController = TextEditingController(text: group.title);
       firstLoad = false;
     }
-
-    _nameTextController = TextEditingController(text: group.title);
 
     return Scaffold(
       appBar: AppBar(
@@ -85,6 +84,7 @@ class _EditGroupState extends State<EditGroup> {
               InfoOverlay.showErrorSnackBar("Fehler beim Bearbeiten der Gruppe");
             }else {
               InfoOverlay.showInfoSnackBar("Gruppe ${group.title} bearbeitet");
+              Navigator.pop(context);
             }
           }catch (e) {
             print(e);
