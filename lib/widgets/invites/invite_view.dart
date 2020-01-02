@@ -4,6 +4,7 @@ import 'package:listassist/main.dart';
 import 'package:listassist/models/Invite.dart' as model;
 import 'package:listassist/models/User.dart';
 import 'package:listassist/services/db.dart';
+import 'package:listassist/widgets/shimmer/shoppy_shimmer.dart';
 import 'package:provider/provider.dart';
 import 'invite.dart';
 
@@ -41,6 +42,6 @@ class InviteItems extends StatelessWidget{
           itemBuilder: (BuildContext ctx, int index) {
             return Invite(invite: invites[index]);
           }
-      ) : SpinKitDoubleBounce(color: Colors.blueAccent);
+      ) : ShoppyShimmer();
   }
 }

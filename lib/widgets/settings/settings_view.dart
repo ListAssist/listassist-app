@@ -145,8 +145,8 @@ class Test extends StatelessWidget {
                     },
                   ),
                   ListTile(
-                    leading: Icon(Icons.view_agenda),
-                    title: Text('Ansicht'),
+                    leading: Icon(Icons.settings),
+                    title: Text('App Einstellungen'),
                     trailing: Icon(Icons.keyboard_arrow_right),
                     onTap: () => {
                       Navigator.push(

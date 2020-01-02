@@ -203,7 +203,7 @@ class CameraScannerState extends State<CameraScanner> with AfterInitMixin<Camera
           }
         }
       } else {
-        InfoOverlay.showErrorSnackBar("Leider konnten wir keine Produkte erkennen. Versuchen Sie es erneut!");
+        InfoOverlay.showErrorSnackBar("Leider konnten wir keine Produkte erkennen. Versuche es erneut!");
       }
     } on HttpException catch (e) {
       print(e);

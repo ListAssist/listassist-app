@@ -1,21 +1,18 @@
 import 'dart:async';
 
 import 'package:algolia/algolia.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:listassist/models/Item.dart';
 import 'package:listassist/models/Product.dart';
 import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
 import 'package:listassist/services/connectivity.dart';
 import 'package:listassist/services/db.dart';
+import 'package:listassist/services/info_overlay.dart';
 import 'package:listassist/widgets/shimmer/shoppy_shimmer.dart';
 import 'package:listassist/widgets/shoppinglist/item_counter.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:provider/provider.dart';
-import 'package:shimmer/shimmer.dart';
-
 import 'add_shopping_list.dart';
 
 class SearchItemsView extends StatefulWidget {
@@ -31,6 +28,7 @@ class _SearchItemsView extends State<SearchItemsView> {
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
   TextEditingController _searchController = TextEditingController();
   LocalStorage _storage = new LocalStorage("popular_products.json");
+  bool _initialized = false;
 
   User _user;
   ShoppingList _list;
@@ -50,18 +48,23 @@ class _SearchItemsView extends State<SearchItemsView> {
   _searchProducts(String search) async {
     if (_debounce?.isActive ?? false) _debounce.cancel();
     _debounce = Timer(Duration(milliseconds: 500), () async {
-      _products = [];
-      _searching = true;
-      setState(() {});
+      if(await connectivityService.testInternetConnection()) {
+        _products = [];
+        _searching = true;
+        setState(() {});
 
-      AlgoliaQuery query = algolia.instance.index('products').search(search);
-      AlgoliaQuerySnapshot snap = await query.getObjects();
-      List<dynamic> hits = List<dynamic>();
-      snap.hits.forEach((h) => {hits.add(h.data)});
+        AlgoliaQuery query = algolia.instance.index('products').search(search);
+        AlgoliaQuerySnapshot snap = await query.getObjects();
+        List<dynamic> hits = List<dynamic>();
+        snap.hits.forEach((h) => {hits.add(h.data)});
 
-      _products = hits;
-      _searching = false;
-      setState(() {});
+        _products = hits;
+        _searching = false;
+        setState(() {});
+      } else {
+        _products = [];
+        InfoOverlay.showErrorSnackBar("Kein Internetzugriff");
+      }
     });
   }
 
@@ -152,20 +155,11 @@ class _SearchItemsView extends State<SearchItemsView> {
                     height: 120.0,
                   ),
                   Positioned(
-                    top: 65,
-                    right: 25,
-                    child: Icon(
-                      Icons.report_problem,
-                      color: Colors.red,
-                      size: 30,
-                    ),
-                  ),
-                  Positioned(
                     top: 50.0,
                     left: 0.0,
                     right: 0.0,
                     child: Container(
-                      padding: EdgeInsets.only(left: 10.0, right: 70.0),
+                      padding: EdgeInsets.only(left: 10.0, right: 10.0),
                       child: DecoratedBox(
                         decoration: BoxDecoration(borderRadius: BorderRadius.circular(45.0), color: Colors.white),
                         child: Row(
@@ -323,10 +317,11 @@ class _SearchItemsView extends State<SearchItemsView> {
                         FutureBuilder(
                             future: databaseService.getPopularProducts(),
                             builder: (context, snapshot) {
-                              if (snapshot.connectionState == ConnectionState.waiting) {
+                              if (snapshot.connectionState == ConnectionState.waiting && !_initialized) {
                                 return ShoppyShimmer();
                               }
 
+                              _initialized = true;
                               return MediaQuery.removePadding(
                                   removeTop: true,
                                   context: context,
@@ -338,6 +333,9 @@ class _SearchItemsView extends State<SearchItemsView> {
                                       color: Colors.grey,
                                     ),
                                     itemBuilder: (context, index) {
+                                      _subtract() {
+                                        _subtractCount(snapshot.data[index].name);
+                                      }
                                       return Container(
                                         height: 65,
                                         child: ListTile(
@@ -347,6 +345,19 @@ class _SearchItemsView extends State<SearchItemsView> {
                                           ),
                                           title: Text(snapshot.data[index].name),
                                           subtitle: Text(snapshot.data[index].category),
+                                          trailing: _list.hasItem(snapshot.data[index].name)
+                                              ? ItemCounter(count: _list.items.firstWhere((i) => i.name == snapshot.data[index].name).count, subtractCount: _subtract)
+                                              : Container(
+                                            width: 0,
+                                            height: 0,
+                                          ),
+                                          onTap: () {
+                                            if (!_list.hasItem(snapshot.data[index].name)) {
+                                              _addItem(new Product(name: snapshot.data[index].name, category: snapshot.data[index].category));
+                                            } else {
+                                              _addCount(snapshot.data[index].name);
+                                            }
+                                          },
                                         ),
                                       );
                                     },
@@ -398,18 +409,15 @@ class _SearchItemsView extends State<SearchItemsView> {
                                           ),
                                           itemBuilder: (context, index) {
                                             _subtract() {
-                                              index > 0 ? _subtractCount(_products[index]["name"]) : _subtractCount(_searchController.text);
+                                              _subtractCount(_products[index]["name"]);
                                             }
 
-                                            int count;
-                                            if (index == 0) {
-                                              if (_list.hasItem(_searchController.text)) {
-                                                count = _list.items.firstWhere((i) => i.name == _searchController.text).count;
-                                              }
-                                            } else {
-                                              if (_list.hasItem(_products[index]["name"])) {
-                                                count = _list.items.firstWhere((i) => i.name == _products[index]["name"]).count;
-                                              }
+                                            int count = 0;
+
+                                            if (_list.hasItem(_products[index]["name"])) {
+                                              count = _list.items
+                                                  .firstWhere((i) => i.name == _products[index]["name"])
+                                                  .count;
                                             }
 
                                             return Container(

@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:listassist/main.dart';
@@ -18,6 +19,7 @@ class _ShoppingListView extends State<ShoppingListView> {
 
   @override
   Widget build(BuildContext context) {
+
     return DefaultTabController(
         length: 2,
         child: Scaffold(
