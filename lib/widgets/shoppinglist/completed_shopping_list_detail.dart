@@ -23,6 +23,9 @@ class _CompletedShoppingListDetailState extends State<CompletedShoppingListDetai
 
   String _newName = "";
 
+  //Spamschutz bei Buttons die länger brauchen
+  bool _buttonsDisabled = false;
+
   @override
   Widget build(BuildContext context) {
     CompletedShoppingList list = Provider.of<List<CompletedShoppingList>>(context)[this.widget.index];
@@ -79,22 +82,26 @@ class _CompletedShoppingListDetailState extends State<CompletedShoppingListDetai
             label: "Kopieren",
             labelStyle: TextStyle(fontSize: 18.0),
             onTap: () async {
-              bool connected = await connectivityService.testInternetConnection();
-              if(connected) {
-                ShoppingList newList;
-                bool res = await _showCreateCopyDialog();
-                if (!res) return;
-                if (_newName != null && _newName != "" && _newName.trim() != "") {
-                  newList = list.createNewCopy(_newName);
-                } else {
-                  newList = list.createNewCopy();
-                }
+              if(!_buttonsDisabled){
+                _buttonsDisabled = true;
+                bool connected = await connectivityService.testInternetConnection();
+                if(connected) {
+                  ShoppingList newList;
+                  bool res = await _showCreateCopyDialog();
+                  if (!res) return;
+                  if (_newName != null && _newName != "" && _newName.trim() != "") {
+                    newList = list.createNewCopy(_newName);
+                  } else {
+                    newList = list.createNewCopy();
+                  }
 
-                databaseService.createList(user.uid, newList).then((onComplete) {
-                  InfoOverlay.showInfoSnackBar("Einkaufsliste wurde erfolgreich kopiert");
-                });
-              } else {
-                InfoOverlay.showErrorSnackBar("Kein Internetzugriff");
+                  databaseService.createList(user.uid, newList).then((onComplete) {
+                    InfoOverlay.showInfoSnackBar("Einkaufsliste wurde erfolgreich kopiert");
+                  });
+                } else {
+                  InfoOverlay.showErrorSnackBar("Kein Internetzugriff");
+                  _buttonsDisabled = false;
+                }
               }
             },
           ),

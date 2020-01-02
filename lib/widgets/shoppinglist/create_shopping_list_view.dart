@@ -24,6 +24,8 @@ class _CreateShoppingListView extends State<CreateShoppingListView> {
   Color _backgroundColor = Colors.blueAccent[400];
   List<ScannedShoppingList> scannedLists = [];
 
+  bool buttonDisabled = false;
+
   @override
   Widget build(BuildContext context) {
     User _user = Provider.of<User>(context);
@@ -85,8 +87,9 @@ class _CreateShoppingListView extends State<CreateShoppingListView> {
                           //I am NOT connected
                           controller.reverse();
                           InfoOverlay.showErrorSnackBar("Keine Internetverbindung");
-                        } else {
+                        } else if(!buttonDisabled){
                           //I am connected to the Internet
+                          buttonDisabled = true;
                           ShoppingList _newShoppingList;
                           if (_nameController.text.length > 0) {
                             String name = _nameController.text;

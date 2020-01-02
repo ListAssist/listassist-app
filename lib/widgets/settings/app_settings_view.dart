@@ -21,7 +21,6 @@ class AppSettingsViewState extends State<AppSettingsView> {
   int _debounceTime = 2000;
 
   String _themeValue = "Light";
-  String _cameraScannerValue;
 
   void requestSettingsUpdate() {
     if (_debounce?.isActive ?? false) _debounce.cancel();
@@ -106,7 +105,7 @@ class AppSettingsViewState extends State<AppSettingsView> {
                   iconSize: 24,
                   onChanged: (String newValue) {
                     setState(() {
-                      newValue == "Manuell" ? _settings["scanner_manual"] = true : _settings["scanner_manual"] = false;
+                      _settings["scanner_manual"] = newValue == "Manuell";
                     });
                     requestSettingsUpdate();
                   },

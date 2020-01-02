@@ -1,6 +1,11 @@
+import 'dart:async';
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
+import 'package:listassist/models/User.dart';
+import 'package:listassist/services/db.dart';
+import 'package:listassist/widgets/shimmer/shoppy_shimmer.dart';
+import 'package:provider/provider.dart';
 
 class Keko extends StatefulWidget{
   NotificationsettingsView createState()=> NotificationsettingsView();
@@ -8,25 +13,33 @@ class Keko extends StatefulWidget{
 
 class NotificationsettingsView extends State<Keko> {
 
-  String img = "https://www.indiewire.com/wp-content/uploads/2019/05/shutterstock_8999492b.jpg?w=780";
+  User _user;
+  Map _settings;
 
-  Map<String, bool> _notificationsSettings = {
-    //Generell ob man Benachrichtigungen bekommen will
-    "master": true,
-    //Wenn ein Gruppenmitglied eine Einkaufsliste abschließt
-    "group_complete": true,
-    //Wenn ein Gruppenmitglied ein Item abhakt
-    "group_item_ticked": false
-  };
+  bool _initialized = false;
 
+  Timer _debounce;
+  int _debounceTime = 2000;
 
-  bool _notifications = true;
-  bool _group = true;
-  bool _autolist = true;
-  bool _offer = true;
+  void requestSettingsUpdate() {
+    if (_debounce?.isActive ?? false) _debounce.cancel();
+    _debounce = Timer(Duration(milliseconds: _debounceTime), () {
+      databaseService.updateUserSettings(_user.uid, _settings);
+    });
+  }
+
+  Future initializeSettings () async {
+    _settings = await databaseService.getUserSettings(_user.uid);
+    setState(() {
+      _initialized = true;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    _user = Provider.of<User>(context);
+    _initialized ? null : initializeSettings();
+
     return Scaffold(
       //backgroundColor: Colors.transparent,
         appBar: AppBar(
@@ -34,7 +47,7 @@ class NotificationsettingsView extends State<Keko> {
           iconTheme: IconThemeData(color: Colors.black),
           elevation: 0.0,
         ),
-        body: Container(
+        body: _initialized ? Container(
             width: MediaQuery
                 .of(context)
                 .size
@@ -52,11 +65,12 @@ class NotificationsettingsView extends State<Keko> {
                       children: <Widget>[
                         SwitchListTile(
                           title: const Text('Benachrichtigungen'),
-                          value: _notifications,
+                          value: _settings["msg_general"],
                           onChanged: (bool value) {
                             setState(() {
-                              _notifications = value;
+                              _settings["msg_general"] = value;
                             });
+                            requestSettingsUpdate();
                           },
                           secondary: const Icon(Icons.notifications),
                         ),
@@ -64,34 +78,37 @@ class NotificationsettingsView extends State<Keko> {
 
                         SwitchListTile(
                           title: const Text('Gruppeneinladungen'),
-                          value: _group,
-                          onChanged: (bool value) {
+                          value: _settings["msg_invite"] && _settings["msg_general"],
+                          onChanged: _settings["msg_general"] ? (bool value) {
                             setState(() {
-                              _group = value;
+                              _settings["msg_invite"] = value;
                             });
-                          },
+                            requestSettingsUpdate();
+                          } : null,
                           secondary: const Icon(Icons.mail),
                         ),
 
                         SwitchListTile(
                           title: const Text('Automatische Einkaufsliste'),
-                          value: _autolist,
-                          onChanged: (bool value) {
+                          value: _settings["msg_autolist"] && _settings["msg_general"],
+                          onChanged: _settings["msg_general"] ? (bool value) {
                             setState(() {
-                              _autolist = value;
+                              _settings["msg_autolist"] = value;
                             });
-                          },
+                            requestSettingsUpdate();
+                          } : null,
                           secondary: const Icon(Icons.autorenew),
                         ),
 
                         SwitchListTile(
                           title: const Text('Angebote'),
-                          value: _offer,
-                          onChanged: (bool value) {
+                          value: _settings["msg_offer"] && _settings["msg_general"],
+                          onChanged: _settings["msg_general"] ? (bool value) {
                             setState(() {
-                              _offer = value;
+                              _settings["msg_offer"] = value;
                             });
-                          },
+                            requestSettingsUpdate();
+                          } : null,
                           secondary: const Icon(Icons.local_offer),
                         ),
 
@@ -99,7 +116,7 @@ class NotificationsettingsView extends State<Keko> {
                       ]
                   )
                 ])
-        )
+        ) : ShoppyShimmer()
     );
   }
 }
