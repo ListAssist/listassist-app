@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:listassist/models/User.dart';
+import 'package:listassist/services/db.dart';
 import 'package:listassist/widgets/settings/notification_settings_view.dart';
 import 'package:listassist/services/auth.dart';
 import 'package:listassist/widgets/settings/profile_settings_view.dart';
-import 'package:listassist/widgets/settings/shopping_list_settings_view.dart';
+import 'package:listassist/widgets/settings/app_settings_view.dart';
 import 'package:listassist/widgets/shoppinglist/item_counter.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -46,6 +47,7 @@ class _SettingsViewState extends State<SettingsView> {
               ),
               onPressed: () {
                 authService.signOut();
+                Navigator.pop(context);
                 Navigator.pop(context);
               },
             ),
@@ -152,7 +154,7 @@ class Test extends StatelessWidget {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => ShoppinglistsettingsView()
+                              builder: (context) => AppSettingsView()
                           )
                       )
                     },
@@ -192,7 +194,6 @@ class Test extends StatelessWidget {
                       _launchURL("https://listassist.gq")
                     },
                   ),
-
                 ],
               )
           ),

@@ -1,17 +1,47 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:listassist/models/User.dart';
+import 'package:listassist/services/db.dart';
+import 'package:listassist/widgets/shimmer/shoppy_shimmer.dart';
+import 'package:provider/provider.dart';
 
-class ShoppinglistsettingsView extends StatefulWidget{
-  ShoppinglistsettingsViewState createState()=> ShoppinglistsettingsViewState();
+class AppSettingsView extends StatefulWidget{
+  AppSettingsViewState createState()=> AppSettingsViewState();
 }
 
-class ShoppinglistsettingsViewState extends State<ShoppinglistsettingsView> {
+class AppSettingsViewState extends State<AppSettingsView> {
 
-  String themeValue = "Light";
-  String cameraScannerValue = "Manuell";
+  User _user;
+  Map _settings;
+
+  bool _initialized = false;
+
+  Timer _debounce;
+  int _debounceTime = 2000;
+
+  String _themeValue = "Light";
+  String _cameraScannerValue;
+
+  void requestSettingsUpdate() {
+    if (_debounce?.isActive ?? false) _debounce.cancel();
+    _debounce = Timer(Duration(milliseconds: _debounceTime), () {
+      databaseService.updateUserSettings(_user.uid, _settings);
+    });
+  }
+
+  Future initializeSettings () async {
+    _settings = await databaseService.getUserSettings(_user.uid);
+    setState(() {
+      _initialized = true;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    _user = Provider.of<User>(context);
+    _initialized ? null : initializeSettings();
+
     return Scaffold(
       //backgroundColor: Colors.transparent,
         appBar: AppBar(
@@ -20,7 +50,7 @@ class ShoppinglistsettingsViewState extends State<ShoppinglistsettingsView> {
           elevation: 0.0,
         ),
         body:
-          ListView(
+          _initialized ? ListView(
             padding: EdgeInsets.only(top: 15),
             children: <Widget>[
               Container(
@@ -38,12 +68,12 @@ class ShoppinglistsettingsViewState extends State<ShoppinglistsettingsView> {
                 leading: Icon(Icons.aspect_ratio),
                 title: Text("Theme"),
                 trailing: DropdownButton<String>(
-                  value: themeValue,
+                  value: _themeValue,
                   icon: Icon(Icons.arrow_drop_down),
                   iconSize: 24,
                   onChanged: (String newValue) {
                     setState(() {
-                      themeValue = newValue;
+                      _themeValue = newValue;
                     });
                   },
                   items: <String>['Light', 'Dark']
@@ -71,13 +101,14 @@ class ShoppinglistsettingsViewState extends State<ShoppinglistsettingsView> {
                 leading: Icon(Icons.camera),
                 title: Text("Scanner"),
                 trailing: DropdownButton<String>(
-                  value: cameraScannerValue,
+                  value: _settings["scanner_manual"] ? "Manuell" : "Automatisch",
                   icon: Icon(Icons.arrow_drop_down),
                   iconSize: 24,
                   onChanged: (String newValue) {
                     setState(() {
-                      cameraScannerValue = newValue;
+                      newValue == "Manuell" ? _settings["scanner_manual"] = true : _settings["scanner_manual"] = false;
                     });
+                    requestSettingsUpdate();
                   },
                   items: <String>['Manuell', 'Automatisch']
                       .map<DropdownMenuItem<String>>((String value) {
@@ -90,7 +121,7 @@ class ShoppinglistsettingsViewState extends State<ShoppinglistsettingsView> {
                 ),
               ),
             ]
-          )
+          ) : ShoppyShimmer()
 
     );
   }
