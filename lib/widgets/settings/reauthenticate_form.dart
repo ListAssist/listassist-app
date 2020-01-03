@@ -94,7 +94,7 @@ class _ReauthenticateForm extends State<ReauthenticateForm> {
                   return;
                 }
                 bool connected = await connectivityService.testInternetConnection();
-                if (connected) {
+                if (!connected) {
                   // I am not connected to a network
                   controller.forward();
                   Future.delayed(Duration(seconds: 1)).then((value) async{

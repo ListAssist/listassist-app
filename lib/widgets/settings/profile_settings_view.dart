@@ -158,7 +158,6 @@ class _ProfileSettingsView extends State<ProfileSettingsView> {
   }
 
   bool userIsSignedInWithEmailAndPassword () {
-    print(_firebaseUser.providerData[1].providerId);
     bool erg = false;
     if (_firebaseUser.providerData[1].providerId == "facebook.com") {
       print("User is signed in with Facebook");
@@ -225,9 +224,9 @@ class _ProfileSettingsView extends State<ProfileSettingsView> {
             Container(
               margin: EdgeInsets.only(bottom: 10.0),
               child: GestureDetector(
-                  onTap: () {
-                    userIsSignedInWithEmailAndPassword() ? _showProfilePictureModal(user) : print("");
-                  },
+                  onTap: userIsSignedInWithEmailAndPassword() ? () {
+                    _showProfilePictureModal(user);
+                  } : null,
                   child: Hero(
                     tag: "profilePicture",
                     child: CircleAvatar(
