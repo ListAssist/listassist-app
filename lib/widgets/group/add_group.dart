@@ -50,7 +50,7 @@ class _AddGroup extends State<AddGroup> {
         );
         try {
           dynamic resp2 = await invite.call(<String, dynamic>{
-            "targetuids": _members,
+            "targetemails": _members,
             "groupid": resp.data["groupid"],
             "groupname": resp.data["groupname"],
             "from": resp.data["creator"],

@@ -24,6 +24,8 @@ export const leaveGroup = functions.region("europe-west1").https.onCall((data, c
                     if (!snapUser.exists) {
                         return null;
                     }
+                    //TODO: ArrayRemove not working with maps
+                    //TODO: if the owner leaves the group set a new member as owner, if the last person leaves a group delete the group
                     return db.collection("groups")
                         .doc(groupid)
                         .set({

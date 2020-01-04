@@ -19,21 +19,30 @@ class GroupDetail extends StatefulWidget {
 }
 enum GroupAction { edit, leave, delete}
 
+
+Group _group;
+bool _useCache = false;
+
 class _GroupDetail extends State<GroupDetail> {
+
+  String username;
 
   @override
   Widget build(BuildContext context) {
-    Group group = Provider.of<List<Group>>(context)[widget.index];
+    if (!_useCache) {
+      _group = Provider.of<List<Group>>(context)[widget.index];
+    }
     User user = Provider.of<User>(context);
+    username = user.displayName;
 
     return DefaultTabController(
       length: 3,
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.primary,
-          title: Text(group.title),
+          title: Text(_group.title),
           actions: <Widget>[
-            GroupMenu(uid: user.uid, group: group)
+            GroupMenu(uid: user.uid)
           ],
           bottom: TabBar(
             tabs: [
@@ -46,7 +55,7 @@ class _GroupDetail extends State<GroupDetail> {
         body: TabBarView(
           children: [
             StreamProvider<List<ShoppingList>>.value(
-              value: databaseService.streamListsFromGroup(group.id),
+              value: databaseService.streamListsFromGroup(_group.id),
               child: ShoppingLists(),
             ),
             Text("Statistiken der Gruppe"),
@@ -91,9 +100,26 @@ class _GroupDetail extends State<GroupDetail> {
             ),
             FlatButton(
               child: Text("Einladen"),
-              onPressed: () {
-                //TODO: Invite member with cloudfunction
-                print(_addressController.text);
+              onPressed: () async {
+                final HttpsCallable invite = cloudFunctionInstance.getHttpsCallable(
+                    functionName: "inviteUsers"
+                );
+                try {
+                  dynamic resp = await invite.call(<String, dynamic>{
+                    "targetemails": [_addressController.text],
+                    "groupid": _group.id,
+                    "groupname": _group.title,
+                    "from": username,
+                  });
+                  if (resp.data["status"] != "Successful") {
+                    InfoOverlay.showErrorSnackBar("Fehler beim Verschicken");
+                  } else {
+                    InfoOverlay.showInfoSnackBar("Einladungen verschickt");
+                    Navigator.pop(context);
+                  }
+                }catch(e) {
+                  InfoOverlay.showErrorSnackBar("Fehler: ${e.message}");
+                }
               },
             ),
           ],
@@ -106,9 +132,8 @@ class _GroupDetail extends State<GroupDetail> {
 
 
 class GroupMenu extends StatelessWidget {
-  final Group group;
   final String uid;
-  GroupMenu({this.uid, this.group});
+  GroupMenu({this.uid});
 
 
   @override
@@ -120,14 +145,23 @@ class GroupMenu extends StatelessWidget {
             final HttpsCallable leave = cloudFunctionInstance.getHttpsCallable(
                 functionName: "leaveGroup"
             );
+            _useCache = true;
+            _group = Group(
+              id: _group.id,
+              creator: _group.creator,
+              members: _group.members,
+              title: _group.title
+            );
             dynamic resp = await leave.call(<String, dynamic>{
-              "groupid": group.id
+              "groupid": _group.id
             });
             if (resp.data["status"] == "Failed") {
               InfoOverlay.showErrorSnackBar("Fehler beim Verlassen der Gruppe");
+              _useCache = false;
             } else {
               InfoOverlay.showInfoSnackBar("Gruppe verlassen");
               Navigator.pop(context);
+              _useCache = false;
             }
           }catch(e) {
             InfoOverlay.showErrorSnackBar("Fehler: ${e.message}");
@@ -136,7 +170,7 @@ class GroupMenu extends StatelessWidget {
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => Provider<Group>.value(
-                  value: group,
+                  value: _group,
                   child: EditGroup()),
             )
           );
@@ -146,7 +180,7 @@ class GroupMenu extends StatelessWidget {
                 functionName: "deleteGroup"
             );
             dynamic resp = await delete.call(<String, dynamic>{
-              "groupid": group.id
+              "groupid": _group.id
             });
             if (resp.data["status"] == "Failed") {
               InfoOverlay.showErrorSnackBar("Fehler beim Löschen der Gruppe");
@@ -162,12 +196,12 @@ class GroupMenu extends StatelessWidget {
       itemBuilder: (BuildContext context) => <PopupMenuEntry<GroupAction>>[
         PopupMenuItem<GroupAction>(
           value: GroupAction.edit,
-          enabled: group.creator.uid == uid,
+          enabled: _group.creator.uid == uid,
           child: Text('Gruppe bearbeiten'),
         ),
         PopupMenuItem<GroupAction>(
           value: GroupAction.delete,
-          enabled: group.creator.uid == uid,
+          enabled: _group.creator.uid == uid,
           child: Text('Gruppe löschen'),
         ),
         PopupMenuItem<GroupAction>(

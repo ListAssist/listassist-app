@@ -18,21 +18,22 @@ export const updateGroup = functions.region("europe-west1").https.onCall((data, 
         .then((snap) => {
             if(snap.data()["creator"]["uid"] !== uid) return { status: "Failed" };
             //@ts-ignore
-            const removedMembers = snap.data()["members"].filter(x => !group["members"].includes(x["uid"]));
+            const newMembers = snap.data()["members"].filter(m => group["members"].includes(m["uid"]));
+            //@ts-ignore
+            const removedMembers = snap.data()["members"].filter(m => !group["members"].includes(m["uid"]));
+            console.log(newMembers);
             return Promise.all([
                 //@ts-ignore
-                //TODO: Check if removing the group from the removed user is working
-                /*removedMembers.map((member) => {
+                removedMembers.map((member) => {
                     return db.collection("groups_user")
                         .doc(member.uid)
                         .set({ groups: FieldValue.arrayRemove(group.id) }, { merge: true })
-                }),*/
-                //FIXME: ArrayRemove doesnt work with maps? Upload all remaining members and overwrite the array
+                }),
                 db.collection("groups")
                 .doc(group["id"])
                 .set({
                     title: group["title"],
-                    members: FieldValue.arrayRemove(removedMembers)
+                    members: newMembers
                 }, { merge: true })
             ]).catch(e => {
                 return { status: "Failed"};

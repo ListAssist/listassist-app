@@ -53,13 +53,13 @@ class _EditGroupState extends State<EditGroup> {
                   children: copyUsers.map<Widget>((i) {
                     return Container(
                       child: ListTile(
-                        trailing: IconButton(
+                        trailing: group.creator.uid != i.uid ? IconButton(
                           icon: Icon(Icons.cancel),
                           onPressed: () {
                             setState(() {
                               copyUsers.remove(i);
                             });
-                          }),
+                          }) : null,
                         title: new Text("${i.displayName}"),
                       )
                     );
