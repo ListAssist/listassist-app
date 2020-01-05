@@ -11,8 +11,10 @@ import 'package:listassist/services/db.dart';
 import 'package:listassist/services/info_overlay.dart';
 import 'package:listassist/widgets/shimmer/shoppy_shimmer.dart';
 import 'package:listassist/widgets/shoppinglist/item_counter.dart';
+import 'package:listassist/widgets/shoppinglist/speech_dialog.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:provider/provider.dart';
+import 'package:speech_recognition/speech_recognition.dart';
 import 'add_shopping_list.dart';
 
 class SearchItemsView extends StatefulWidget {
@@ -36,6 +38,11 @@ class _SearchItemsView extends State<SearchItemsView> {
   Algolia algolia = Application.algolia;
   bool _searching = false;
 
+  SpeechRecognition _speechRecognition;
+  bool _isAvailable = false;
+  bool _isListening = false;
+  String resultText = "";
+
   Timer _debounce;
   int _debounceTime = 2000;
 
@@ -48,7 +55,7 @@ class _SearchItemsView extends State<SearchItemsView> {
   _searchProducts(String search) async {
     if (_debounce?.isActive ?? false) _debounce.cancel();
     _debounce = Timer(Duration(milliseconds: 500), () async {
-      if(await connectivityService.testInternetConnection()) {
+      if (await connectivityService.testInternetConnection()) {
         _products = [];
         _searching = true;
         setState(() {});
@@ -126,6 +133,33 @@ class _SearchItemsView extends State<SearchItemsView> {
         }).toList());
   }
 
+  Future<void> showSpeechRecognitionDialog() async {
+    print("CCCCCCCCCCCCCCCCCCCCCCCCCCCCCC");
+    resultText = await showDialog(
+        context: context,
+        builder: (BuildContext buildContext) {
+            return SpeechDialog();
+        });
+    setState(() {
+    });
+  }
+
+  void initSpeechRecognizer() {
+    _speechRecognition = SpeechRecognition();
+
+    _speechRecognition.setAvailabilityHandler((bool result) => setState(() => _isAvailable = result));
+    _speechRecognition.setRecognitionStartedHandler(() => setState(() => _isListening = true));
+    _speechRecognition.setRecognitionResultHandler((String speech) => setState(() => resultText = speech));
+    _speechRecognition.setRecognitionCompleteHandler(() => setState(() => _isListening = false));
+    _speechRecognition.activate().then((result) => setState(() => _isAvailable = result));
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    //initSpeechRecognizer();
+  }
+
   @override
   Widget build(BuildContext context) {
     _user = Provider.of<User>(context);
@@ -195,8 +229,20 @@ class _SearchItemsView extends State<SearchItemsView> {
                                 Icons.mic,
                                 color: Theme.of(context).primaryColor,
                               ),
-                              onPressed: () {
-                                print("your menu action here");
+                              onPressed: () async {
+
+                                await showSpeechRecognitionDialog();
+
+                                if (_isAvailable && !_isListening) {
+                                  print("hast mich");
+                                  //await showSpeechRecognitionDialog();
+
+                                  print("avail: $_isAvailable   listenting: $_isListening");
+                                } else {
+                                  print("avail: $_isAvailable   listenting: $_isListening");
+                                  //_speechRecognition.stop();
+                                  //showSpeechRecognitionDialog();
+                                }
                               },
                             ),
                           ],
@@ -336,6 +382,7 @@ class _SearchItemsView extends State<SearchItemsView> {
                                       _subtract() {
                                         _subtractCount(snapshot.data[index].name);
                                       }
+
                                       return Container(
                                         height: 65,
                                         child: ListTile(
@@ -348,9 +395,9 @@ class _SearchItemsView extends State<SearchItemsView> {
                                           trailing: _list.hasItem(snapshot.data[index].name)
                                               ? ItemCounter(count: _list.items.firstWhere((i) => i.name == snapshot.data[index].name).count, subtractCount: _subtract)
                                               : Container(
-                                            width: 0,
-                                            height: 0,
-                                          ),
+                                                  width: 0,
+                                                  height: 0,
+                                                ),
                                           onTap: () {
                                             if (!_list.hasItem(snapshot.data[index].name)) {
                                               _addItem(new Product(name: snapshot.data[index].name, category: snapshot.data[index].category));
@@ -363,7 +410,18 @@ class _SearchItemsView extends State<SearchItemsView> {
                                     },
                                   ));
                             }),
-                        Text("kek3")
+                        Column(
+                          children: <Widget>[
+                            Text(resultText),
+                            RaisedButton(
+                              child: Text("Stopppen"),
+                              onPressed: () {
+                                print("kekomat");
+                                _speechRecognition.stop().then((result) => setState(() => _isListening = result));
+                              },
+                            )
+                          ],
+                        )
                       ],
                     ),
                   )
@@ -415,9 +473,7 @@ class _SearchItemsView extends State<SearchItemsView> {
                                             int count = 0;
 
                                             if (_list.hasItem(_products[index]["name"])) {
-                                              count = _list.items
-                                                  .firstWhere((i) => i.name == _products[index]["name"])
-                                                  .count;
+                                              count = _list.items.firstWhere((i) => i.name == _products[index]["name"]).count;
                                             }
 
                                             return Container(
@@ -467,8 +523,7 @@ class _SearchItemsView extends State<SearchItemsView> {
                                       )
                                 : ShoppyShimmer(),
                           ],
-                        )
-                    ),
+                        )),
                   )
           ])),
     );

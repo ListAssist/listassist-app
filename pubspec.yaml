@@ -59,6 +59,7 @@ dependencies:
   algolia:
   flutter_typeahead:
   string_similarity:
+  speech_recognition: ^0.3.0+1
 
   # design
   fluttertoast:
