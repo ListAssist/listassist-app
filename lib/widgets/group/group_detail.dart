@@ -8,8 +8,8 @@ import 'package:listassist/services/db.dart';
 import 'package:listassist/services/info_overlay.dart';
 import 'package:listassist/widgets/group/edit_group.dart';
 import 'package:listassist/widgets/group/group_userlist.dart';
-import 'package:listassist/widgets/shoppinglist/shopping_list.dart' as w;
 import 'package:provider/provider.dart';
+import 'group_shopping_list.dart';
 
 class GroupDetail extends StatefulWidget {
   final index;
@@ -56,7 +56,7 @@ class _GroupDetail extends State<GroupDetail> {
           children: [
             StreamProvider<List<ShoppingList>>.value(
               value: databaseService.streamListsFromGroup(_group.id),
-              child: ShoppingLists(),
+              child:  ShoppingLists(index: widget.index),
             ),
             Text("Statistiken der Gruppe"),
             GroupUserList(index: widget.index)
@@ -216,6 +216,8 @@ class GroupMenu extends StatelessWidget {
 }
 
 class ShoppingLists extends StatelessWidget {
+  final int index;
+  ShoppingLists({this.index});
 
   @override
   Widget build(BuildContext context) {
@@ -228,8 +230,7 @@ class ShoppingLists extends StatelessWidget {
           color: Colors.grey,
         ),
         itemCount: lists.length,
-        //TODO: Provider not found
-        itemBuilder: (ctx, index) => w.ShoppingList(index: index)
+        itemBuilder: (ctx, index) => GroupShoppingList(index: this.index, id: lists[index].id)
     ) : SpinKitDoubleBounce(color: Colors.blueAccent,);
   }
 }

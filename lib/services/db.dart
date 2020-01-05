@@ -115,6 +115,16 @@ class DatabaseService {
         .map((snap) => snap.documents.map((d) => ShoppingList.fromFirestore(d)).toList());
   }
 
+  Stream<ShoppingList> streamListFromGroup(String groupid, String listid) {
+    return _db
+        .collection("groups")
+        .document(groupid)
+        .collection("lists")
+        .document(listid)
+        .snapshots()
+        .map((snap) => ShoppingList.fromFirestore(snap));
+  }
+
   Future<void> updateProfileName(String uid, String newName) {
     return _db
         .collection('users')
