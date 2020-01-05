@@ -22,7 +22,7 @@ export const declineInvite = functions.region("europe-west1").https.onCall((data
           if(snap.data()["to"] === uid){
             return db.collection("invites")
               .doc(inviteid)
-              .set({ type: "declined" }, { merge: true })
+              .delete()
               .then(() => {
                 return { status: "Successful" };
               });

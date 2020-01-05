@@ -83,6 +83,7 @@ class _GroupDetail extends State<GroupDetail> {
           content: SingleChildScrollView(
             child: TextField(
               controller: _addressController,
+              keyboardType: TextInputType.emailAddress,
               decoration: InputDecoration(
                 border: UnderlineInputBorder(),
                 contentPadding: EdgeInsets.all(3),
