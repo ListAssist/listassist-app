@@ -1,9 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:speech_recognition/speech_recognition.dart';
 
 
 class SpeechDialog extends StatefulWidget {
+  BuildContext dialogContext;
+
+  SpeechDialog({this.dialogContext});
+
   @override
   _SpeechDialog createState() => _SpeechDialog();
 }
@@ -15,6 +21,12 @@ class _SpeechDialog extends State<SpeechDialog> {
   bool _isListening = false;
   String resultText = "";
 
+  requestPop() {
+    Timer(Duration(milliseconds: 1000), () {
+      Navigator.of(widget.dialogContext).pop(resultText);
+    });
+  }
+
   void initSpeechRecognizer() {
     _speechRecognition = SpeechRecognition();
 
@@ -23,9 +35,15 @@ class _SpeechDialog extends State<SpeechDialog> {
     _speechRecognition.setRecognitionResultHandler((String speech) => setState(() => resultText = speech));
     _speechRecognition.setRecognitionCompleteHandler(() => setState(() {
       _isListening = false;
-      Navigator.pop(context, resultText);
+      requestPop();
     }));
     _speechRecognition.activate().then((result) => setState(() => _isAvailable = result));
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _speechRecognition.cancel();
   }
 
   @override
@@ -96,15 +114,7 @@ class _SpeechDialog extends State<SpeechDialog> {
                   ),
                 ),
                 SizedBox(height: 24.0),
-                Align(
-                  alignment: Alignment.bottomRight,
-                  child: FlatButton(
-                    onPressed: () {
-                      Navigator.of(context).pop(); // To close the dialog
-                    },
-                    child: Text("Fertig"),
-                  ),
-                ),
+
               ],
             ),
           ),

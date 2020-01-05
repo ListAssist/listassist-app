@@ -30,7 +30,6 @@ class _SearchItemsView extends State<SearchItemsView> {
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
   TextEditingController _searchController = TextEditingController();
   LocalStorage _storage = new LocalStorage("popular_products.json");
-  bool _initialized = false;
 
   User _user;
   ShoppingList _list;
@@ -134,30 +133,18 @@ class _SearchItemsView extends State<SearchItemsView> {
   }
 
   Future<void> showSpeechRecognitionDialog() async {
-    print("CCCCCCCCCCCCCCCCCCCCCCCCCCCCCC");
     resultText = await showDialog(
         context: context,
         builder: (BuildContext buildContext) {
-            return SpeechDialog();
-        });
+          return SpeechDialog(dialogContext: buildContext);
+    });
+    if(resultText == null) {
+      resultText = "";
+    } else {
+
+    }
     setState(() {
     });
-  }
-
-  void initSpeechRecognizer() {
-    _speechRecognition = SpeechRecognition();
-
-    _speechRecognition.setAvailabilityHandler((bool result) => setState(() => _isAvailable = result));
-    _speechRecognition.setRecognitionStartedHandler(() => setState(() => _isListening = true));
-    _speechRecognition.setRecognitionResultHandler((String speech) => setState(() => resultText = speech));
-    _speechRecognition.setRecognitionCompleteHandler(() => setState(() => _isListening = false));
-    _speechRecognition.activate().then((result) => setState(() => _isAvailable = result));
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    //initSpeechRecognizer();
   }
 
   @override
@@ -230,19 +217,7 @@ class _SearchItemsView extends State<SearchItemsView> {
                                 color: Theme.of(context).primaryColor,
                               ),
                               onPressed: () async {
-
                                 await showSpeechRecognitionDialog();
-
-                                if (_isAvailable && !_isListening) {
-                                  print("hast mich");
-                                  //await showSpeechRecognitionDialog();
-
-                                  print("avail: $_isAvailable   listenting: $_isListening");
-                                } else {
-                                  print("avail: $_isAvailable   listenting: $_isListening");
-                                  //_speechRecognition.stop();
-                                  //showSpeechRecognitionDialog();
-                                }
                               },
                             ),
                           ],
@@ -363,11 +338,10 @@ class _SearchItemsView extends State<SearchItemsView> {
                         FutureBuilder(
                             future: databaseService.getPopularProducts(),
                             builder: (context, snapshot) {
-                              if (snapshot.connectionState == ConnectionState.waiting && !_initialized) {
+                              if(snapshot.connectionState == ConnectionState.waiting) {
                                 return ShoppyShimmer();
                               }
 
-                              _initialized = true;
                               return MediaQuery.removePadding(
                                   removeTop: true,
                                   context: context,
@@ -413,13 +387,6 @@ class _SearchItemsView extends State<SearchItemsView> {
                         Column(
                           children: <Widget>[
                             Text(resultText),
-                            RaisedButton(
-                              child: Text("Stopppen"),
-                              onPressed: () {
-                                print("kekomat");
-                                _speechRecognition.stop().then((result) => setState(() => _isListening = result));
-                              },
-                            )
                           ],
                         )
                       ],
