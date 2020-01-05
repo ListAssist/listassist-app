@@ -17,24 +17,77 @@ export const leaveGroup = functions.region("europe-west1").https.onCall((data, c
         .doc(uid)
         .set({ groups: FieldValue.arrayRemove(groupid) }, { merge: true })
         .then(() => {
-            return db.collection("users")
-                .doc(uid)
+           return db.collection("groups")
+                .doc(groupid)
                 .get()
-                .then((snapUser) => {
-                    if (!snapUser.exists) {
-                        return null;
+                .then(snap => {
+                    if(snap.data()["members"].length === 1){
+                        return Promise.all([
+                            deleteCollection(snap.ref.path + "/lists", 5),
+                            deleteCollection(snap.ref.path + "/shopping_data", 5),
+                            db.collection("groups").doc(groupid).delete()
+                        ]).then(() => { return { status: "Successful" }});
                     }
-                    //TODO: ArrayRemove not working with maps
-                    //TODO: if the owner leaves the group set a new member as owner, if the last person leaves a group delete the group
+
+                    //@ts-ignore
+                    const newMembers = snap.data()["members"].filter(m => m["uid"] !== uid);
+
+                    let newCreator = snap.data()["creator"];
+
+                    if(snap.data()["creator"]["uid"] === uid) newCreator = newMembers[0];
+
                     return db.collection("groups")
                         .doc(groupid)
                         .set({
-                            members: FieldValue.arrayRemove({
-                                uid: uid,
-                                displayName: snapUser.data()["displayName"],
-                                photoURL: snapUser.data()["photoURL"] || "",
-                            })
-                        }, { merge: true });
+                            creator: newCreator,
+                            members: newMembers
+                        }, { merge: true }).then(() => { return { status: "Successful" }});
                 });
         });
 });
+
+//@ts-ignore
+function deleteCollection(collectionPath, batchSize) {
+    let collectionRef = db.collection(collectionPath);
+    let query = collectionRef.orderBy('__name__').limit(batchSize);
+
+    return new Promise((resolve, reject) => {
+        deleteQueryBatch(query, batchSize, resolve, reject);
+    });
+}
+
+//@ts-ignore
+function deleteQueryBatch(query, batchSize, resolve, reject) {
+    query.get()
+    //@ts-ignore
+        .then((snapshot) => {
+            // When there are no documents left, we are done
+            if (snapshot.size == 0) {
+                return 0;
+            }
+
+            // Delete documents in a batch
+            let batch = db.batch();
+            //@ts-ignore
+            snapshot.docs.forEach((doc) => {
+                batch.delete(doc.ref);
+            });
+
+            return batch.commit().then(() => {
+                return snapshot.size;
+            });
+            //@ts-ignore
+        }).then((numDeleted) => {
+        if (numDeleted === 0) {
+            resolve();
+            return;
+        }
+
+        // Recurse on the next process tick, to avoid
+        // exploding the stack.
+        process.nextTick(() => {
+            deleteQueryBatch(query, batchSize, resolve, reject);
+        });
+    })
+        .catch(reject);
+}

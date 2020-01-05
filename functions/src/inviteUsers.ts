@@ -31,13 +31,12 @@ export const inviteUsers = functions.region("europe-west1").https.onCall(async (
             if(!snap.data()["groups"].includes(groupid)) {
                 return { status: "Failed not in group" };
             }
+            //TODO: If User already has an invitation or is in group dont send another one
             return Promise.all(
                     targetemails.map((target: string) => db.collection("users")
                         .where("email", "==", target)
                         .get()
                         .then((sn) => {
-                            console.log(sn);
-                            console.log(sn.docs[0]);
                             if(!sn.docs && !sn.docs[0]) return null;
                             if(sn.docs[0].data()["uid"] === uid) return null;
                             return db.collection("invites")
