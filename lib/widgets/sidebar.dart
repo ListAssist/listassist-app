@@ -33,7 +33,7 @@ class _Sidebar extends State<Sidebar> {
             currentAccountPicture: Hero(
               tag: "profilePicture",
               child: CircleAvatar(
-                backgroundImage: NetworkImage(user.photoUrl),
+                backgroundImage: user.photoUrl.length > 0 ? NetworkImage(user.photoUrl) : AssetImage("assets/images/userpic.png")
               ),
             ),
           ),
