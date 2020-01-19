@@ -242,7 +242,20 @@ class DatabaseService {
         .document()
         .setData({'name': name});
   }
-
+//
+//  Future<void> addToUserList(ShoppingList list, String downloadURL) {
+//    return _db
+//        .collection("user")
+//        .document(list.id)
+//        .setData({"photoURLs": FieldValue.arrayUnion([downloadURL])}, merge: true);
+//  }
+//
+//  Future<void> addToGroupList(Group group, ShoppingList list, String downloadURL) {
+//    return _db
+//        .collection("groups")
+//        .document(list.id)
+//        .setData({"photoURLs": FieldValue.arrayUnion(["EMPTY"])}, merge: true);
+//  }
 }
 
 

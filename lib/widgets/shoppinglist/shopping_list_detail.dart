@@ -202,10 +202,8 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
   }
 
   /// Starts up the camera scanner and awaits the output
-  Future<void> _startCameraScanner(
-      BuildContext context, ImageSource imageSource, int index) async {
-    List<int> indecesToCheck = await cameraService
-        .getResultFromCameraScanner(context, imageSource, listIndex: index);
+  Future<void> _startCameraScanner(BuildContext context, ImageSource imageSource, int index) async {
+    List<int> indecesToCheck = await cameraService.getResultFromCameraScanner(context, imageSource, listIndex: index);
     if (indecesToCheck != null) {
       itemChangeMultiple(indecesToCheck: indecesToCheck);
     }

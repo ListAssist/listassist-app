@@ -162,7 +162,7 @@ class _CreateShoppingListView extends State<CreateShoppingListView> {
                           ),
                           IconButton(
                             icon: Icon(Icons.camera_alt),
-                            onPressed: () => InfoOverlay.showSourceSelectionSheet(context, callback: _startCameraScanner),
+                            onPressed: () => InfoOverlay.showSourceSelectionSheet(context, callback: _startCameraScanner, arg: null),
                           )
                         ],
                       ),
@@ -186,15 +186,13 @@ class _CreateShoppingListView extends State<CreateShoppingListView> {
   }
 
   /// Starts up the camera scanner and awaits output to process
-  Future<void> _startCameraScanner(BuildContext context, ImageSource imageSource) async {
-    ScannedShoppingList scannedShoppingList = await cameraService.getResultFromCameraScanner(context, imageSource);
+  Future<void> _startCameraScanner(BuildContext context, ImageSource imageSource, ShoppingList list) async {
+    ScannedShoppingList scannedShoppingList = await cameraService.getResultFromCameraScanner(context, imageSource, addToList: list);
     if (scannedShoppingList != null) {
       setState(() {
         scannedLists.add(scannedShoppingList);
-
       });
     }
-
     Navigator.pop(context);
   }
 }
