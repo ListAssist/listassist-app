@@ -8,34 +8,36 @@ import 'package:provider/provider.dart';
 
 
 class GroupShoppingList extends StatelessWidget {
-  final String id;
   final int index;
-  GroupShoppingList({this.id, this.index});
+  final int groupindex;
+  GroupShoppingList({this.index, this.groupindex});
 
   @override
   Widget build(BuildContext context) {
-    return _GroupShoppingList(index: this.index);
+    return _GroupShoppingList(index: this.index, groupindex: this.groupindex);
   }
 }
 
 class _GroupShoppingList extends StatelessWidget {
   final int index;
-  _GroupShoppingList({this.index});
+  final int groupindex;
+  _GroupShoppingList({this.index, this.groupindex});
 
   @override
   Widget build(BuildContext context) {
     ShoppingList list = Provider.of<List<ShoppingList>>(context)[this.index];
-    Group group = Provider.of<List<Group>>(context)[this.index];
+    Group group = Provider.of<List<Group>>(context)[this.groupindex];
+    print(group.id);
+    print(list.id);
 
     return list == null ? SpinKitDoubleBounce(color: Colors.blue) : GestureDetector(
         behavior: HitTestBehavior.translucent,
-        //FIXME: Invalid Arguments
         onTap: () => Navigator.push(
           context,
           MaterialPageRoute(builder: (context) {
             return StreamProvider<ShoppingList>.value(
                 value: databaseService.streamListFromGroup(group.id, list.id),
-                child: GroupShoppingListDetail()
+                child: GroupShoppingListDetail(index: groupindex)
             );
           }),
         ),

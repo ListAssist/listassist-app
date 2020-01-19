@@ -56,7 +56,7 @@ class _GroupDetail extends State<GroupDetail> {
           children: [
             StreamProvider<List<ShoppingList>>.value(
               value: databaseService.streamListsFromGroup(_group.id),
-              child:  ShoppingLists(index: widget.index),
+              child:  ShoppingLists(groupindex: widget.index),
             ),
             Text("Statistiken der Gruppe"),
             GroupUserList(index: widget.index)
@@ -216,8 +216,8 @@ class GroupMenu extends StatelessWidget {
 }
 
 class ShoppingLists extends StatelessWidget {
-  final int index;
-  ShoppingLists({this.index});
+  final int groupindex;
+  ShoppingLists({this.groupindex});
 
   @override
   Widget build(BuildContext context) {
@@ -230,7 +230,7 @@ class ShoppingLists extends StatelessWidget {
           color: Colors.grey,
         ),
         itemCount: lists.length,
-        itemBuilder: (ctx, index) => GroupShoppingList(index: this.index, id: lists[index].id)
+        itemBuilder: (ctx, index) => GroupShoppingList(groupindex: this.groupindex, index: index)
     ) : SpinKitDoubleBounce(color: Colors.blueAccent,);
   }
 }
