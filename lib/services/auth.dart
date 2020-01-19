@@ -125,7 +125,7 @@ class AuthService {
           break;
       }
     } catch (e) {
-      InfoOverlay.showInfoSnackBar("There was an error with the Sign-in method you used. Try again or use another one.");
+      InfoOverlay.showInfoSnackBar("Es ist ein Fehler aufgetreten bei der Anmeldemethode die du gewählt hast. Versuche es erneut oder versuche eine andere Anmeldemethode aus.");
       loading.add(false);
       return null;
     }
@@ -161,11 +161,9 @@ class AuthService {
     }, merge: true);
   }
 
-  Future<String> reauthenticateUser(FirebaseUser firebaseUser, String password) async{
-    String currentEmail;
-    await _auth.currentUser().then((u) => {
-      currentEmail = u.email
-    });
+  Future<String> reauthenticateUser(FirebaseUser firebaseUser, String password) async {
+    String currentEmail = (await _auth.currentUser()).email;
+
     print("currentEmail: " + currentEmail);
     try{
       AuthCredential credential = EmailAuthProvider.getCredential(email: currentEmail, password: password);

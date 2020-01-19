@@ -5,6 +5,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/widgets/camera-scanner/camera_scanner.dart';
 
 class CameraService {
@@ -33,14 +34,14 @@ class CameraService {
   }
 
   /// Gets response from Camera Scanne
-  Future<dynamic> getResultFromCameraScanner(BuildContext context, ImageSource imageSource, { int listIndex }) async {
+  Future<dynamic> getResultFromCameraScanner(BuildContext context, ImageSource imageSource, { int listIndex, ShoppingList addToList }) async {
     try {
       Map<String, dynamic> imageFormats = await cameraService.pickImage(imageSource);
       var _imageFile = imageFormats["imageFile"];
       var _image = imageFormats["lowLevelImage"];
 
       /// get result from camera scanner
-      return await Navigator.push(context, MaterialPageRoute(builder: (context) => CameraScanner(image: _image, imageFile: _imageFile, listIndex: listIndex,)));
+      return await Navigator.push(context, MaterialPageRoute(builder: (context) => CameraScanner(image: _image, imageFile: _imageFile, newlyCreatedList: addToList, listIndex: listIndex,)));
     } catch(e)  {
       print(e.toString());
     }
