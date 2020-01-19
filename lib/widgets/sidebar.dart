@@ -33,7 +33,8 @@ class _Sidebar extends State<Sidebar> {
             currentAccountPicture: Hero(
               tag: "profilePicture",
               child: CircleAvatar(
-                backgroundImage: NetworkImage(user.photoUrl),
+                //backgroundImage: NetworkImage(user.photoUrl),
+                child: ClipRRect(borderRadius: BorderRadius.circular(45),child: FadeInImage(width: 80, height: 80, image: NetworkImage(user.photoUrl), placeholder: AssetImage("assets/images/avatar.png"))),
               ),
             ),
           ),

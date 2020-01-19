@@ -1,6 +1,5 @@
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:listassist/models/Group.dart';
 import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
@@ -8,6 +7,7 @@ import 'package:listassist/services/db.dart';
 import 'package:listassist/services/info_overlay.dart';
 import 'package:listassist/widgets/group/edit_group.dart';
 import 'package:listassist/widgets/group/group_userlist.dart';
+import 'package:listassist/widgets/shimmer/shoppy_shimmer.dart';
 import 'package:listassist/widgets/shoppinglist/shopping_list.dart' as w;
 import 'package:provider/provider.dart';
 
@@ -53,9 +53,32 @@ class _GroupDetail extends State<GroupDetail> {
             GroupUserList(index: widget.index)
           ],
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {},
-          child: Icon(Icons.add),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+        floatingActionButton: Stack(
+          children: <Widget>[
+            Align(
+              alignment: Alignment.bottomRight,
+              child: Padding(
+                padding: EdgeInsets.only(bottom: 60),
+                child: Transform.scale(
+                  scale: 0.75,
+                  child: FloatingActionButton(
+                    onPressed: () {},
+                    backgroundColor: Colors.white,
+                    child: Icon(Icons.person_add, color: Colors.grey,),
+                  ),
+                ),
+              ),
+            ),
+            Align(
+              alignment: Alignment.bottomRight,
+              child: FloatingActionButton(
+                onPressed: () {},
+                backgroundColor: Colors.green,
+                child: Icon(Icons.add),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -152,6 +175,6 @@ class ShoppingLists extends StatelessWidget {
         itemCount: lists.length,
         //TODO: Provider not found
         itemBuilder: (ctx, index) => w.ShoppingList(index: index)
-    ) : SpinKitDoubleBounce(color: Colors.blueAccent,);
+    ) : ShoppyShimmer();
   }
 }

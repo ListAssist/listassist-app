@@ -20,6 +20,7 @@ import 'package:listassist/models/ScannedShoppinglist.dart';
 import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
 import 'package:listassist/services/camera.dart';
+import 'package:listassist/services/db.dart';
 import 'package:listassist/services/http.dart';
 import 'package:listassist/services/calc.dart';
 import 'package:listassist/services/info_overlay.dart';
@@ -198,7 +199,7 @@ class CameraScannerState extends State<CameraScanner> with AfterInitMixin<Camera
           await createFromScratch(context, detectedItems, user, dialog);
         }
       } else {
-        InfoOverlay.showErrorSnackBar("Leider konnten wir keine Produkte erkennen. Versuchen Sie es erneut!");
+        InfoOverlay.showErrorSnackBar("Leider konnten wir keine Produkte erkennen. Versuche es erneut!");
       }
     } on HttpException catch (e) {
       print(e);

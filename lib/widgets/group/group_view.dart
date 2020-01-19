@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:listassist/main.dart';
 import 'package:listassist/models/Group.dart';
 import 'package:listassist/widgets/group/add_group.dart';
 import 'package:listassist/widgets/group/group_item.dart';
+import 'package:listassist/widgets/shimmer/shoppy_shimmer.dart';
 import 'package:provider/provider.dart';
 
 class GroupView extends StatelessWidget {
@@ -31,7 +31,7 @@ class GroupView extends StatelessWidget {
         ),
         itemCount: groups.length,
         itemBuilder: (BuildContext ctx, int index) => GroupItem(index: index)
-      ) : SpinKitDoubleBounce(color: Colors.blueAccent),
+      ) : ShoppyShimmer(),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
         tooltip: "Neue Gruppe erstellen",

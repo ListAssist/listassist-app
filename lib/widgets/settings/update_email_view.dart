@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:listassist/services/auth.dart';
+import 'package:listassist/services/connectivity.dart';
 import 'package:listassist/services/db.dart';
 import 'package:listassist/services/info_overlay.dart';
 import 'package:listassist/validators/email.dart';
@@ -117,7 +118,7 @@ class _UpdateEmailView extends State<UpdateEmailView> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: EdgeInsets.all(8.0),
               child: Container(
                 width: 120,
                 height: 40,
@@ -138,15 +139,10 @@ class _UpdateEmailView extends State<UpdateEmailView> {
                     if (_formKey.currentState.validate()) {
                       if (_emailController.text == _repeatEmailController.text) {
                         controller.forward();
-                        var connectivityResult;
-                        try {
-                          connectivityResult = await Connectivity().checkConnectivity();
-                        } on PlatformException catch (e) {
-                          print(e.toString());
-                        }
-                        if (!(connectivityResult == ConnectivityResult.mobile || connectivityResult == ConnectivityResult.wifi)) {
+                        bool connected = await connectivityService.testInternetConnection();
+                        if (!connected) {
                           // I am NOT connected to a network.
-                          Future.delayed(Duration(seconds: 1)).then((value) async {
+                          Future.delayed(Duration(milliseconds: 250)).then((value) async {
                             //Navigator.of(context).pop();
                             InfoOverlay.showErrorSnackBar("Kein Internetzugriff, versuche es erneut");
                             setState(() {
@@ -154,20 +150,19 @@ class _UpdateEmailView extends State<UpdateEmailView> {
                             });
                             controller.reverse();
                           });
-                          return;
-                        }
-
-                        // I am connected to a network.
-                        authService.updateEmail(widget.firebaseUser, _emailController.text).catchError((_) {
-                          InfoOverlay.showErrorSnackBar("Fehler beim Ändern der Email-Adresse");
-                        }).then((_) {
-                          databaseService.updateEmail(widget.firebaseUser.uid, _emailController.text).catchError((_) {
+                        } else {
+                          // I am connected to a network.
+                          authService.updateEmail(widget.firebaseUser, _emailController.text).catchError((_) {
                             InfoOverlay.showErrorSnackBar("Fehler beim Ändern der Email-Adresse");
                           }).then((_) {
-                            InfoOverlay.showInfoSnackBar("Die Email-Adresse wurde geändert");
-                            Navigator.of(context).pop();
+                            databaseService.updateEmail(widget.firebaseUser.uid, _emailController.text).catchError((_) {
+                              InfoOverlay.showErrorSnackBar("Fehler beim Ändern der Email-Adresse");
+                            }).then((_) {
+                              InfoOverlay.showInfoSnackBar("Die Email-Adresse wurde geändert");
+                              Navigator.of(context).pop();
+                            });
                           });
-                        });
+                        }
                       } else {
                         setState(() {
                           _errorText2 = "Die Email-Adressen sind nicht gleich";

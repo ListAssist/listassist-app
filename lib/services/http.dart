@@ -6,7 +6,7 @@ import 'package:listassist/models/DetectionResponse.dart';
 class HttpService {
   /// adb reverse tcp:5000 tcp:5000
   final Dio _dio = Dio()
-    ..options.baseUrl = "http://127.0.0.1:5000/";
+    ..options.baseUrl = "http://80.109.29.47:5000/";
 
   /// Send coordinates of box to api to evaluate image
   Future<DetectionResponse> getDetectionWithCoords(File imageFile, List<Map<String, double>> exportedPoints, {Function onProgress}) async {

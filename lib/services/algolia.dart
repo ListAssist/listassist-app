@@ -1,5 +1,4 @@
 import 'package:algolia/algolia.dart';
-import 'package:listassist/widgets/shoppinglist/add_shopping_list.dart';
 
 class AlgoliaService {
   final Algolia algolia = Algolia.init(
