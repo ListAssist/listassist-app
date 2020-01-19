@@ -21,7 +21,7 @@ class _Sidebar extends State<Sidebar> {
   @override
   Widget build(BuildContext context) {
     User user = Provider.of<User>(context);
-    return Drawer(
+    return user == null ? Drawer() : Drawer(
       child: Column(
         children: <Widget>[
           UserAccountsDrawerHeader(

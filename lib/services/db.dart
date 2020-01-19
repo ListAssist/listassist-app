@@ -106,6 +106,7 @@ class DatabaseService {
   }
 
   Stream<List<ShoppingList>> streamListsFromGroup(String groupid) {
+    print("----- READ GROUP LISTS -----");
     return _db
         .collection("groups")
         .document(groupid)
@@ -116,6 +117,7 @@ class DatabaseService {
   }
 
   Stream<ShoppingList> streamListFromGroup(String groupid, String listid) {
+    print("----- READ GROUP LIST ${listid} -----");
     return _db
         .collection("groups")
         .document(groupid)
@@ -138,6 +140,17 @@ class DatabaseService {
     return _db
         .collection("users")
         .document(uid)
+        .collection("lists")
+        .document(list.id)
+        .setData({"name": list.name, "items" : items}, merge: true);
+  }
+
+  Future<void> updateGroupList(String groupid, ShoppingList list) async {
+    var items = list.items.map((e) => e.toJson()).toList();
+
+    return _db
+        .collection("groups")
+        .document(groupid)
         .collection("lists")
         .document(list.id)
         .setData({"name": list.name, "items" : items}, merge: true);

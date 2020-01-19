@@ -3,6 +3,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:listassist/models/Group.dart';
 import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/services/db.dart';
+import 'package:listassist/widgets/group/group_shopping_list_detail.dart';
 import 'package:provider/provider.dart';
 
 
@@ -13,26 +14,31 @@ class GroupShoppingList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Group group = Provider.of<List<Group>>(context)[this.index];
-    return StreamProvider<ShoppingList>.value(
-      value: databaseService.streamListFromGroup(group.id, this.id),
-      child: _GroupShoppingList(),
-    );
+    return _GroupShoppingList(index: this.index);
   }
 }
 
 class _GroupShoppingList extends StatelessWidget {
+  final int index;
+  _GroupShoppingList({this.index});
+
   @override
   Widget build(BuildContext context) {
-    ShoppingList list = Provider.of<ShoppingList>(context);
+    ShoppingList list = Provider.of<List<ShoppingList>>(context)[this.index];
+    Group group = Provider.of<List<Group>>(context)[this.index];
 
     return list == null ? SpinKitDoubleBounce(color: Colors.blue) : GestureDetector(
         behavior: HitTestBehavior.translucent,
-        //TODO: Add Detail view for group lists
-//        onTap: () => Navigator.push(
-//          context,
-//          MaterialPageRoute(builder: (context) => ShoppingListDetail(index: this.index)),
-//        ),
+        //FIXME: Invalid Arguments
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) {
+            return StreamProvider<ShoppingList>.value(
+                value: databaseService.streamListFromGroup(group.id, list.id),
+                child: GroupShoppingListDetail()
+            );
+          }),
+        ),
         onLongPressStart: (details) async {
           RenderBox overlay = Overlay.of(context).context.findRenderObject();
           dynamic picked = await showMenu(
