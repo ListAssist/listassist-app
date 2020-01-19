@@ -196,12 +196,7 @@ class CameraScannerState extends State<CameraScanner> with AfterInitMixin<Camera
         } else {
           /// TODO: Implement Logic for creating new shopping lists from scanning an existing one
           /// Check if user wants to make sure and compare with DB or create own list with own Strings
-          if ((await databaseService.getScannerSetting(user.uid)) == false) {
-            /// TODO: algolia search
-          } else {
-            /// let user choose what is corrrect of our detections
-            await createFromScratch(context, detectedItems);
-          }
+          await createFromScratch(context, detectedItems, user);
         }
       } else {
         InfoOverlay.showErrorSnackBar("Leider konnten wir keine Produkte erkennen. Versuche es erneut!");
@@ -214,9 +209,9 @@ class CameraScannerState extends State<CameraScanner> with AfterInitMixin<Camera
     }
   }
 
-  Future createFromScratch(BuildContext context, List<PossibleItem> detectedItems) async {
+  Future createFromScratch(BuildContext context, List<PossibleItem> detectedItems, User user) async {
     /// let user choose what is corrrect of our detections
-    if ("Settings" == "are okay with this" || false) {
+    if ((await databaseService.getScannerSetting(user.uid)) == false) {
       var selectedProducts = await showSelectDialog(context, detectedItems);
       if (selectedProducts != null) {
         detectedItems = selectedProducts;

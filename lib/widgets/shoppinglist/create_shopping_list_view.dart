@@ -21,13 +21,14 @@ class CreateShoppingListView extends StatefulWidget {
 }
 
 class _CreateShoppingListView extends State<CreateShoppingListView> {
-  Color _backgroundColor = Colors.blueAccent[400];
   List<ScannedShoppingList> scannedLists = [];
 
   bool buttonDisabled = false;
 
   @override
   Widget build(BuildContext context) {
+    Color _backgroundColor = /*Colors.blueAccent[400];*/ Theme.of(context).primaryColor;
+
     User _user = Provider.of<User>(context);
     List<ShoppingList> lists = Provider.of<List<ShoppingList>>(context);
 
@@ -77,7 +78,7 @@ class _CreateShoppingListView extends State<CreateShoppingListView> {
                         style: TextStyle(color: Colors.white),
                       ),
                       borderRadius: BorderRadius.all(Radius.circular(4)),
-                      color: Colors.blueAccent[400],
+                      color: Theme.of(context).primaryColor,
                       progressIndicatorColor: Colors.white,
                       progressIndicatorSize: 20,
                       onPressed: (AnimationController controller) async {
@@ -182,7 +183,7 @@ class _CreateShoppingListView extends State<CreateShoppingListView> {
   }
 
   /// Starts up the camera scanner and awaits output to process
-  Future<void> _startCameraScanner(BuildContext context, ImageSource imageSource) async {
+  Future<void> _startCameraScanner(BuildContext context, ImageSource imageSource, dynamic _) async {
     ScannedShoppingList scannedShoppingList = await cameraService.getResultFromCameraScanner(context, imageSource);
     if (scannedShoppingList != null) {
       setState(() {

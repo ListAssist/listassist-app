@@ -141,7 +141,15 @@ class _SearchItemsView extends State<SearchItemsView> {
     if(resultText == null) {
       resultText = "";
     } else {
+      var resultProducts = resultText.trim().split(" und ");
+      resultProducts.forEach((p) {
+        if(_list.hasItem(p)){
+          _addCount(p);
+        } else {
+          _addItem(new Product(name: p, category: "Spracherkennung"));
+        }
 
+      });
     }
     setState(() {
     });
@@ -158,13 +166,34 @@ class _SearchItemsView extends State<SearchItemsView> {
       length: 3,
       child: Scaffold(
           key: _scaffoldKey,
-          floatingActionButton: FloatingActionButton(
-            child: Icon(Icons.check),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            backgroundColor: Colors.green,
+          floatingActionButton:
+
+          Stack(
+            children: [
+              Align(
+                alignment: Alignment.bottomRight,
+                child: FloatingActionButton(
+                  child: Icon(Icons.check),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  backgroundColor: Colors.green,
+                ),
+              ),
+
+              Align(
+                alignment: Alignment.bottomRight,
+                child: FloatingActionButton(
+                  child: Icon(Icons.check),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  backgroundColor: Colors.green,
+                ),
+              ),
+            ]
           ),
+
           body: Column(children: <Widget>[
             Container(
               height: 120.0,
