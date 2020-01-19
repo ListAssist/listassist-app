@@ -72,7 +72,6 @@ class _EditGroupState extends State<EditGroup> {
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.save),
         onPressed: () async {
-          //TODO: create update cloud function to remove removed members and invite newly added ones
           final HttpsCallable update = cloudFunctionInstance.getHttpsCallable(
               functionName: "updateGroup"
           );

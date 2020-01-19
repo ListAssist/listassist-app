@@ -1,5 +1,6 @@
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:listassist/models/Group.dart';
 import 'package:listassist/models/ShoppingList.dart';
@@ -24,7 +25,6 @@ Group _group;
 bool _useCache = false;
 
 class _GroupDetail extends State<GroupDetail> {
-
   String username;
 
   @override
@@ -36,7 +36,7 @@ class _GroupDetail extends State<GroupDetail> {
     username = user.displayName;
 
     return DefaultTabController(
-      length: 3,
+      length: 4,
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.primary,
@@ -47,6 +47,7 @@ class _GroupDetail extends State<GroupDetail> {
           bottom: TabBar(
             tabs: [
               Tab(icon: Icon(Icons.list)),
+              Tab(icon: Icon(Icons.playlist_add_check)),
               Tab(icon: Icon(Icons.insert_chart)),
               Tab(icon: Icon(Icons.group))
             ],
@@ -58,15 +59,36 @@ class _GroupDetail extends State<GroupDetail> {
               value: databaseService.streamListsFromGroup(_group.id),
               child:  ShoppingLists(groupindex: widget.index),
             ),
+            Text("Verlauf"),
             Text("Statistiken der Gruppe"),
             GroupUserList(index: widget.index)
           ],
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-              _showInviteDialog();
-          },
-          child: Icon(Icons.person_add),
+        floatingActionButton: SpeedDial(
+          animatedIcon: AnimatedIcons.menu_close,
+          animatedIconTheme: IconThemeData(size: 22.0),
+          closeManually: false,
+          curve: Curves.easeIn,
+          overlayOpacity: 0.35,
+          backgroundColor: Theme.of(context).primaryColor,
+          elevation: 8.0,
+          shape: CircleBorder(),
+          children: [
+            SpeedDialChild(
+              onTap: () {
+                _showInviteDialog();
+              },
+              child: Icon(Icons.person_add),
+            ),
+            SpeedDialChild(
+              onTap: () {
+                //TODO: Change CreateShoppingListView to reuse it for groups or make a copy for groups
+
+                //Navigator.of(context).push(MaterialPageRoute(builder: (ctx) => CreateShoppingListView()));
+              },
+              child: Icon(Icons.add)
+            )
+          ],
         ),
       ),
     );
