@@ -183,12 +183,18 @@ class _SearchItemsView extends State<SearchItemsView> {
 
               Align(
                 alignment: Alignment.bottomRight,
-                child: FloatingActionButton(
-                  child: Icon(Icons.check),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  backgroundColor: Colors.green,
+                child: Padding(
+                  padding: EdgeInsets.only(bottom: 60.0),
+                  child: Transform.scale(
+                    scale: 0.75,
+                    child: FloatingActionButton(
+                      child: Icon(Icons.camera_alt, color: Colors.black,),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      backgroundColor: Colors.white,
+                    ),
+                  ),
                 ),
               ),
             ]

@@ -9,6 +9,7 @@ import 'package:listassist/services/auth.dart';
 import 'package:listassist/widgets/settings/settings_view.dart';
 import 'package:listassist/widgets/invites/invite_view.dart';
 import 'package:listassist/widgets/shoppinglist/shopping_list_view.dart';
+import 'package:listassist/widgets/statistics/statistics_view.dart';
 import 'package:provider/provider.dart';
 
 
@@ -59,6 +60,16 @@ class _Sidebar extends State<Sidebar> {
             leading: Icon(Icons.insert_chart),
             title: Text("Statistiken"),
             onTap: () {
+              ScreenModel.of(context).setScreen(MultiProvider(
+                  providers: [
+                    StreamProvider.value(value: databaseService.streamLists(user.uid)),
+                    StreamProvider.value(value: databaseService.streamListsHistory(user.uid))
+                  ],
+                  child: CustomNavigator(
+                    home: StatisticsView(),
+                    pageRoute: PageRoutes.materialPageRoute,
+                  )
+              ));
               Navigator.pop(context);
             },
           ),

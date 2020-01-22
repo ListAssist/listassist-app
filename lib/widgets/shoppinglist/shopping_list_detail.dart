@@ -104,6 +104,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
                             child: CheckboxListTile(
                                 value: list.items[index].bought,
                                 title: Text("${list.items[index].name}", style: list.items[index].bought ? TextStyle(decoration: TextDecoration.lineThrough, decorationThickness: 3) : null),
+                                secondary: ,
                                 controlAffinity: ListTileControlAffinity.leading,
                                 onChanged: (bool val) {
                                   itemChange(val, index);
