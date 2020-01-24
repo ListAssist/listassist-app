@@ -2,15 +2,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Item {
   final String name;
+  String category;
   int count;
   bool bought;
   double prize;
 
-  Item({this.name, this.count, this.bought, this.prize});
+  Item({this.name, this.category, this.count, this.bought, this.prize});
 
-  Map<String, dynamic> toJson() =>
-      {
+  Map<String, dynamic> toJson() => {
         'name': name,
+        'category': category,
         'count': count,
         'bought': bought,
         'prize': prize,
@@ -21,6 +22,7 @@ class Item {
 
     return Item(
       name: data["name"],
+      category: data["category"],
       count: data["count"],
       bought: data["bought"],
       prize: data["prize"],
@@ -28,13 +30,14 @@ class Item {
   }
 
   factory Item.fromMap(Map data) {
-    data = data ?? { };
+    data = data ?? {};
 
     return Item(
-        name: data["name"],
-        count: data["count"],
-        bought: data["bought"],
-        prize: data["prize"],
+      name: data["name"],
+      category: data["category"],
+      count: data["count"],
+      bought: data["bought"],
+      prize: data["prize"],
     );
   }
 

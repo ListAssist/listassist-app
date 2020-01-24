@@ -75,7 +75,7 @@ class _SearchItemsView extends State<SearchItemsView> {
   }
 
   _addItem(Product product) {
-    _list.addItem(product.name);
+    _list.addItem(product.name, product.category);
     _addToRecentProducts(product);
     setState(() {});
     _requestListUpdate();
