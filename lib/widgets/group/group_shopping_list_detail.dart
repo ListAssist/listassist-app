@@ -35,7 +35,7 @@ class _GroupShoppingListDetail extends State<GroupShoppingListDetail> {
     if (_debounce?.isActive ?? false) _debounce.cancel();
     _debounce = Timer(Duration(milliseconds: _debounceTime), () {
       if (list != null && groupid != null || groupid.length > 0) {
-        databaseService.updateGroupList(groupid, list).then((onUpdate) {
+        databaseService.updateList(groupid, list, true).then((onUpdate) {
           print("Saved items");
         }).catchError((onError) {
           InfoOverlay.showErrorSnackBar("Fehler beim aktualisieren der Einkaufsliste");
@@ -52,7 +52,7 @@ class _GroupShoppingListDetail extends State<GroupShoppingListDetail> {
     });
 
     try {
-      await databaseService.updateList(groupid, list);
+      await databaseService.updateList(groupid, list, true);
     } catch (e) {
       InfoOverlay.showErrorSnackBar(
           "Fehler beim aktualisieren der Einkaufsliste");
@@ -248,13 +248,11 @@ class _GroupShoppingListDetail extends State<GroupShoppingListDetail> {
                   name: list.name,
                   items: list.items,
                 );
-                databaseService.completeList(groupid, list).catchError((_) {
-                  InfoOverlay.showErrorSnackBar(
-                      "Fehler beim Abschließen der Einkaufsliste");
+                databaseService.completeList(groupid, list, true).catchError((_) {
+                  InfoOverlay.showErrorSnackBar("Fehler beim Abschließen der Einkaufsliste");
                   useCache = false;
                 }).then((_) {
-                  InfoOverlay.showInfoSnackBar(
-                      "Einkaufsliste ${list.name} abgeschlossen");
+                  InfoOverlay.showInfoSnackBar("Einkaufsliste ${list.name} abgeschlossen");
                   Navigator.of(context).pop();
                   Navigator.of(this.context).pop();
                 });
@@ -310,7 +308,8 @@ class _GroupShoppingListDetail extends State<GroupShoppingListDetail> {
                   name: list.name,
                   items: list.items,
                 );
-                databaseService.deleteList(groupid, list.id).catchError((_) {
+                //FIXME: Error when deleting a list
+                databaseService.deleteList(groupid, list.id, true).catchError((_) {
                   InfoOverlay.showErrorSnackBar(
                       "Fehler beim Löschen der Einkaufsliste");
                   useCache = false;

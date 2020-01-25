@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/material.dart';
 import 'package:listassist/models/CompletedShoppingList.dart';
 import 'package:listassist/models/Group.dart';
 import 'package:listassist/models/Invite.dart';
@@ -75,19 +74,19 @@ class DatabaseService {
         .map((snap) => snap.documents.map((d) => CompletedShoppingList.fromFirestore(d)).toList());
   }
 
-  Future<void> completeList(String uid, ShoppingList list) {
+  Future<void> completeList(String uid, ShoppingList list, [isGroup = false]) {
     Timestamp now = Timestamp.now();
     List<Item> completedItems = List.from(list.items);
     completedItems.removeWhere((item) => !item.bought);
     return Future.wait([
       _db
-        .collection("users")
+        .collection(isGroup ? "groups" : "users")
         .document(uid)
         .collection("lists")
         .document(list.id)
         .setData({"type": "completed", "completed": now}, merge: true),
       _db
-        .collection("users")
+        .collection(isGroup ? "groups" : "users")
         .document(uid)
         .collection("shopping_data")
         .document("data")
@@ -95,11 +94,11 @@ class DatabaseService {
     ]);
   }
 
-  Future<DocumentReference> createList(String uid, ShoppingList list) {
+  Future<DocumentReference> createList(String uid, ShoppingList list, [isGroup = false]) {
     var items = list.items.map((e) => e.toJson()).toList();
 
     return _db
-        .collection("users")
+        .collection(isGroup ? "groups" : "users")
         .document(uid)
         .collection("lists")
         .add({"name": list.name , "type": list.type, "items" : items, "created": list.created});
@@ -134,23 +133,12 @@ class DatabaseService {
         .updateData({'displayName': newName});
   }
   
-  Future<void> updateList(String uid, ShoppingList list) async {
+  Future<void> updateList(String uid, ShoppingList list, [isGroup = false]) async {
     var items = list.items.map((e) => e.toJson()).toList();
 
     return _db
-        .collection("users")
+        .collection(isGroup ? "groups" : "users")
         .document(uid)
-        .collection("lists")
-        .document(list.id)
-        .setData({"name": list.name, "items" : items}, merge: true);
-  }
-
-  Future<void> updateGroupList(String groupid, ShoppingList list) async {
-    var items = list.items.map((e) => e.toJson()).toList();
-
-    return _db
-        .collection("groups")
-        .document(groupid)
         .collection("lists")
         .document(list.id)
         .setData({"name": list.name, "items" : items}, merge: true);
@@ -243,13 +231,13 @@ class DatabaseService {
     return products;
   }
 
-  Future<void> deleteList(String uid, String listid) {
+  Future<void> deleteList(String uid, String listid, [isGroup = false]) {
     return _db
-        .collection("users")
+        .collection(isGroup ? "groups" : "users")
         .document(uid)
         .collection("lists")
         .document(listid)
-        .setData({"type": "deleted", "deleted": Timestamp.now()}, merge: true);
+        .delete();
   }
 
   Future<void> updateEmail(String uid, String newEmail) {

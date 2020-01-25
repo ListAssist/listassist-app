@@ -27,8 +27,6 @@ class _GroupShoppingList extends StatelessWidget {
   Widget build(BuildContext context) {
     ShoppingList list = Provider.of<List<ShoppingList>>(context)[this.index];
     Group group = Provider.of<List<Group>>(context)[this.groupindex];
-    print(group.id);
-    print(list.id);
 
     return list == null ? SpinKitDoubleBounce(color: Colors.blue) : GestureDetector(
         behavior: HitTestBehavior.translucent,

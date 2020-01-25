@@ -8,6 +8,7 @@ import 'package:listassist/models/User.dart';
 import 'package:listassist/services/db.dart';
 import 'package:listassist/services/info_overlay.dart';
 import 'package:listassist/widgets/group/edit_group.dart';
+import 'package:listassist/widgets/group/group_create_shopping_list.dart';
 import 'package:listassist/widgets/group/group_userlist.dart';
 import 'package:provider/provider.dart';
 import 'group_shopping_list.dart';
@@ -82,8 +83,12 @@ class _GroupDetail extends State<GroupDetail> {
             ),
             SpeedDialChild(
               onTap: () {
-                //TODO: Change CreateShoppingListView to reuse it for groups or make a copy for groups
-
+                Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
+                  return StreamProvider<List<ShoppingList>>.value(
+                    value: databaseService.streamListsFromGroup(_group.id),
+                    child:  GroupCreateShoppingList(gid: _group.id),
+                  );
+                }));
                 //Navigator.of(context).push(MaterialPageRoute(builder: (ctx) => CreateShoppingListView()));
               },
               child: Icon(Icons.add)
