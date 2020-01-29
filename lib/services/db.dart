@@ -90,7 +90,7 @@ class DatabaseService {
         .document(uid)
         .collection("shopping_data")
         .document("data")
-        .setData({"last": FieldValue.arrayUnion([{ "completed": now, "items": completedItems.map((item) => item.name).toList(), "count": completedItems.map((item) => item.count).toList() }])}, merge: true)
+        .setData({"last": FieldValue.arrayUnion([{ "completed": now, "items": completedItems.map((item) => item.getNameAndCount()).toList()}])}, merge: true)
     ]);
   }
 
