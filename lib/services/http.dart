@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:listassist/models/Achievement.dart';
 import 'package:listassist/models/DetectionResponse.dart';
 
 class HttpService {
@@ -40,6 +41,5 @@ class HttpService {
 
     return formData;
   }
-
 }
 final HttpService httpService = HttpService();

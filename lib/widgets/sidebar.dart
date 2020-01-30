@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:listassist/models/Group.dart';
 import 'package:listassist/models/User.dart';
 import 'package:listassist/services/db.dart';
+import 'package:listassist/widgets/achievements/achievements_view.dart';
 import 'package:listassist/widgets/group/group_view.dart';
 import 'package:listassist/models/current-screen.dart';
 import 'package:listassist/services/auth.dart';
+import 'package:listassist/widgets/intro-slider/intro_slider.dart';
 import 'package:listassist/widgets/settings/settings_view.dart';
 import 'package:listassist/widgets/invites/invite_view.dart';
 import 'package:listassist/widgets/shoppinglist/shopping_list_view.dart';
@@ -80,6 +82,20 @@ class _Sidebar extends State<Sidebar> {
               Navigator.pop(context);
             },
           ),
+          user.hasUnlockedAchievements ? ListTile(
+            leading: Icon(Icons.star_border),
+            title: Text("Erfolge"),
+            onTap: () {
+              ScreenModel.of(context).setScreen(MultiProvider(
+                  providers: [],
+                  child: CustomNavigator(
+                    home: AchievementsView(),
+                    pageRoute: PageRoutes.materialPageRoute,
+                  )
+              ));
+              Navigator.pop(context);
+            },
+          ) : Container(height: 0, width: 0,),
           Divider(),
           ListTile(
             leading: Icon(Icons.group),

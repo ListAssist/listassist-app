@@ -4,6 +4,7 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:listassist/models/Achievement.dart';
 import 'package:listassist/models/CompletedShoppingList.dart';
 import 'package:listassist/models/Group.dart';
 import 'package:listassist/models/Invite.dart';
@@ -272,6 +273,19 @@ class DatabaseService {
         .document()
         .setData({'name': name});
   }
+
+  Future<List<Achievement>> getUsersUnlockedAchievements(String uid) async{
+    List<Achievement> achievements;
+
+    var document = _db
+        .collection("users")
+        .document(uid);
+    await document.get().then((value) => {
+      achievements = new List.from(value.data["achievements"].map((p) => Achievement.fromMap(p)).toList()),
+    });
+    return achievements;
+  }
+
 //
 //  Future<void> addToUserList(ShoppingList list, String downloadURL) {
 //    return _db
