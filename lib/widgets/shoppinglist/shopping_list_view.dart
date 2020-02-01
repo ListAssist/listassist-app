@@ -1,9 +1,11 @@
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:listassist/main.dart';
 import 'package:listassist/models/CompletedShoppingList.dart' as model2;
 import 'package:listassist/models/ShoppingList.dart' as model;
-import 'package:listassist/widgets/shimmer/shoppy_shimmer.dart';
+import 'package:listassist/services/db.dart';
+import 'package:listassist/services/info_overlay.dart';
 import 'package:listassist/widgets/shoppinglist/completed_shopping_list.dart';
 import 'package:listassist/widgets/shoppinglist/create_shopping_list_view.dart';
 import 'package:listassist/widgets/shoppinglist/shopping_list.dart';
@@ -24,7 +26,23 @@ class _ShoppingListView extends State<ShoppingListView> {
           floatingActionButton: FloatingActionButton(
             child: Icon(Icons.add),
             backgroundColor: Theme.of(context).colorScheme.primary,
-            onPressed: () {
+            onPressed: () async {
+             /*
+              // Testing automatic lists
+              final HttpsCallable autoList = cloudFunctionInstance.getHttpsCallable(
+                  functionName: "createAutomaticList"
+              );
+              try {
+                dynamic resp = await autoList.call();
+                if (resp.data["status"] != "Successful") {
+                  InfoOverlay.showErrorSnackBar("Fehler beim Verschicken");
+                } else {
+                  InfoOverlay.showInfoSnackBar("Einladungen verschickt");
+                }
+              }catch(e) {
+                InfoOverlay.showErrorSnackBar("Fehler: ${e.message}");
+                print(e);
+              }*/
               Navigator.push(
                 context,
                 PageRouteBuilder(
@@ -50,9 +68,7 @@ class _ShoppingListView extends State<ShoppingListView> {
             title: Text("Einkaufslisten"),
             bottom: TabBar(
               tabs: [
-                Tab(
-                  text: "Zu erledigen",
-                ),
+                Tab(text: "Zu erledigen"),
                 Tab(text: "Erledigt")
               ],
             ),
