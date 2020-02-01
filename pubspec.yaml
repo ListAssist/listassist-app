@@ -79,6 +79,7 @@ dependencies:
   auto_size_text: ^2.1.0
   percent_indicator: ^2.1.1
   intro_slider:
+  numberpicker: ^1.1.0
 
 flutter_icons:
   android: "launcher_icon"

@@ -76,8 +76,8 @@ class _Sidebar extends State<Sidebar> {
             },
           ),
           ListTile(
-            leading: Icon(Icons.local_offer),
-            title: Text("Angebote"),
+            leading: Icon(Icons.local_dining),
+            title: Text("Rezepte"),
             onTap: () {
               Navigator.pop(context);
             },
