@@ -11,15 +11,18 @@ export const createAutomaticList = functions.region("europe-west1").https.onCall
 
     //TODO: If necessary also save and add category of products
 
-    //TODO: Create settings field to read data
-    //const userDoc = await db.collection("users").doc(uid).get();
-    //const days = userDoc.data()["settings"]["INSERT NAME"];
-    //const last = userDoc.data()["settings"]["last_generated"];
+    const userDoc = await db.collection("users").doc(uid).get();
+    const days = userDoc.data()["settings"]["ai_interval"];
+    const last = userDoc.data()["last_automatically_generated"] ?
+        userDoc.data()["last_automatically_generated"].toDate() :
+        null;
 
-    // if (days) {
-    //     // Not enough days since the last automatic list have passed.
-    //     if(days - last > 0) return { status: "Failed" };
-    // }
+    if (days && last) {
+        // Not enough days since the last automatic list have passed.
+        //@ts-ignore
+        const daysPassed = Math.ceil(Math.abs(new Date(Date.now()) - last) / (1000 * 60 * 60 * 24));
+        if(daysPassed < days) return { status: "Failed" };
+    }
 
     //TODO: Increase from 5 to 10 Lists
     const lists = await loadLists(uid, 5);
@@ -42,7 +45,10 @@ export const createAutomaticList = functions.region("europe-west1").https.onCall
         return { status: "Failed" };
     }
 
-    return db.collection("users").doc(uid).collection("lists").add(newList).catch(() => {
+    return Promise.all([
+        db.collection("users").doc(uid).collection("lists").add(newList),
+        db.collection("users").doc(uid).set({last_automatically_generated: Timestamp.now()}, { merge: true })
+    ]).catch(() => {
         return { status: "Failed" };
     }).then(() => {
         //TODO: Delete every list older/other than the latest 10
