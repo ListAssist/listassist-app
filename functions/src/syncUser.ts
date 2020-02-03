@@ -28,8 +28,8 @@ export const syncUser = functions.region("europe-west1").firestore
                     delete newGroup["title"];
                     delete newGroup["created"];
                     if(newGroup["creator"]["uid"] === uid){
-                        newGroup["creator"]["displayName"] = newName;
-                        newGroup["creator"]["photoURL"] = newPic;
+                        newGroup["creator"]["displayName"] = newName || "";
+                        newGroup["creator"]["photoURL"] = newPic || null;
                     }else {
                         delete newGroup["creator"];
                     }
@@ -37,8 +37,8 @@ export const syncUser = functions.region("europe-west1").firestore
                     //@ts-ignore
                     newGroup["members"].forEach(e => {
                         if(e["uid"] === uid){
-                            e["displayName"] = newName;
-                            e["photoURL"] = newPic;
+                            e["displayName"] = newName || "";
+                            e["photoURL"] = newPic || null;
                         }
                     });
                     await db.collection("groups").doc(group).set(newGroup, { merge: true });
