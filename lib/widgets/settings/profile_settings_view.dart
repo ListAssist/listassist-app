@@ -72,7 +72,7 @@ class _ProfileSettingsView extends State<ProfileSettingsView> {
       _nameChanged = false;
       setState(() {});
       _pr.hide();
-      InfoOverlay.showInfoSnackBar("Der Anzeigenae wurde geändert");
+      InfoOverlay.showInfoSnackBar("Der Anzeigename wurde geändert");
     } else {
       // I am not connected to a network.
       Future.delayed(Duration(seconds: 1)).then((value) async {
