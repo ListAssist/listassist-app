@@ -8,6 +8,7 @@ import 'package:listassist/widgets/group/group_view.dart';
 import 'package:listassist/models/current-screen.dart';
 import 'package:listassist/services/auth.dart';
 import 'package:listassist/widgets/intro-slider/intro_slider.dart';
+import 'package:listassist/widgets/recipe/recipe_view.dart';
 import 'package:listassist/widgets/settings/settings_view.dart';
 import 'package:listassist/widgets/invites/invite_view.dart';
 import 'package:listassist/widgets/shoppinglist/shopping_list_view.dart';
@@ -79,8 +80,14 @@ class _Sidebar extends State<Sidebar> {
             leading: Icon(Icons.local_dining),
             title: Text("Rezepte"),
             onTap: () {
-              Navigator.pop(context);
-            },
+              ScreenModel.of(context).setScreen(MultiProvider(
+                  providers: [],
+                  child: CustomNavigator(
+                    home: RecipeView(),
+                    pageRoute: PageRoutes.materialPageRoute,
+                  )
+              ));
+              Navigator.pop(context);            },
           ),
           user.hasUnlockedAchievements ? ListTile(
             leading: Icon(Icons.star_border),
