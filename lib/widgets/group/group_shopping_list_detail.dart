@@ -6,6 +6,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:listassist/models/Group.dart';
 import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/services/db.dart';
+import 'package:listassist/widgets/shoppinglist/edit_shopping_list.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:listassist/services/camera.dart';
@@ -73,11 +74,15 @@ class _GroupShoppingListDetail extends State<GroupShoppingListDetail> {
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.edit),
-//            onPressed: () => Navigator.push(
-//              context,
-//              MaterialPageRoute(
-//                  builder: (context) => EditShoppingList(index: widget.index)),
-//            ),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>
+                  StreamProvider<ShoppingList>.value(
+                    value: databaseService.streamListFromGroup(groupid, list.id),
+                    child: EditShoppingList(index: widget.index, groupListId: list.id,))
+                  ),
+            ),
           )
         ],
       ),
