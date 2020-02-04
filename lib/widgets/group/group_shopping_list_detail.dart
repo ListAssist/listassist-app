@@ -80,7 +80,7 @@ class _GroupShoppingListDetail extends State<GroupShoppingListDetail> {
                   builder: (context) =>
                   StreamProvider<ShoppingList>.value(
                     value: databaseService.streamListFromGroup(groupid, list.id),
-                    child: EditShoppingList(index: widget.index, groupListId: list.id,))
+                    child: EditShoppingList(index: widget.index, isGroup: true))
                   ),
             ),
           )

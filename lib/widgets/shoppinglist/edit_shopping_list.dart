@@ -10,8 +10,8 @@ import 'package:provider/provider.dart';
 
 class EditShoppingList extends StatefulWidget {
   final int index;
-  final String groupListId;
-  EditShoppingList({this.index, this.groupListId});
+  final bool isGroup;
+  EditShoppingList({this.index, this.isGroup = false});
 
   @override
   _EditShoppingListState createState() => _EditShoppingListState();
@@ -31,7 +31,7 @@ class _EditShoppingListState extends State<EditShoppingList> {
 
   @override
   Widget build(BuildContext context) {
-    if(widget.groupListId != null) {
+    if(widget.isGroup) {
       uid = Provider.of<List<Group>>(context)[widget.index].id;
       list = Provider.of<ShoppingList>(context);
     }else {
@@ -92,7 +92,7 @@ class _EditShoppingListState extends State<EditShoppingList> {
           databaseService.updateList(uid, ShoppingList(
             id: list.id,
             name: _nameTextController.text,
-            items: copyItems), (widget.groupListId != null) ? true : false)
+            items: copyItems), widget.isGroup)
           .then((onSaved) {
             InfoOverlay.showInfoSnackBar("Einkaufsliste bearbeitet");
             Navigator.of(context).pop();
