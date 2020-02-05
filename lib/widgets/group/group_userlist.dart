@@ -23,7 +23,7 @@ class GroupUserList extends StatelessWidget {
           alignment: Alignment.centerLeft,
           child: Row(
             children: <Widget>[
-              CircleAvatar(backgroundImage: NetworkImage(member.photoUrl)),
+              CircleAvatar(backgroundImage: member.photoUrl.length > 0 ? NetworkImage(member.photoUrl) : AssetImage("assets/images/userpic.png")),
               Expanded(
                 child: Padding(
                   padding: EdgeInsets.fromLTRB(10, 0, 10, 0),

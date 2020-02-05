@@ -1,10 +1,13 @@
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:listassist/main.dart';
 import 'package:listassist/models/CompletedShoppingList.dart' as model2;
 import 'package:listassist/models/ShoppingList.dart' as model;
-import 'package:listassist/widgets/shimmer/shoppy_shimmer.dart';
+import 'package:listassist/models/User.dart';
+import 'package:listassist/services/db.dart';
+import 'package:listassist/services/info_overlay.dart';
 import 'package:listassist/widgets/shoppinglist/completed_shopping_list.dart';
 import 'package:listassist/widgets/shoppinglist/create_shopping_list_view.dart';
 import 'package:listassist/widgets/shoppinglist/shopping_list.dart';
@@ -17,16 +20,29 @@ class ShoppingListView extends StatefulWidget {
 
 class _ShoppingListView extends State<ShoppingListView> {
 
+  bool first = true;
+
   @override
   Widget build(BuildContext context) {
-
+    if(first) {
+      User user = Provider.of<User>(context);
+      if(user.settings["ai_enabled"]) {
+        if(user.settings["ai_interval"] != null) {
+          DateTime nextList = user.lastAutomaticallyGenerated.toDate().add(Duration(days: user.settings["ai_interval"]));
+          if(DateTime.now().isAfter(nextList)) {
+            _createAutomaticList();
+          }
+        }
+      }
+      first = false;
+    }
     return DefaultTabController(
         length: 2,
         child: Scaffold(
           floatingActionButton: FloatingActionButton(
             child: Icon(Icons.add),
             backgroundColor: Theme.of(context).colorScheme.primary,
-            onPressed: () {
+            onPressed: () async {
               Navigator.push(
                 context,
                 PageRouteBuilder(
@@ -52,9 +68,7 @@ class _ShoppingListView extends State<ShoppingListView> {
             title: Text("Einkaufslisten"),
             bottom: TabBar(
               tabs: [
-                Tab(
-                  text: "Zu erledigen",
-                ),
+                Tab(text: "Zu erledigen"),
                 Tab(text: "Erledigt")
               ],
             ),
@@ -72,6 +86,23 @@ class _ShoppingListView extends State<ShoppingListView> {
           ),
         ));
   }
+
+  _createAutomaticList() async {
+    final HttpsCallable autoList = cloudFunctionInstance.getHttpsCallable(
+        functionName: "createAutomaticList"
+    );
+    try {
+      dynamic resp = await autoList.call();
+      if (resp.data["status"] != "Successful") {
+        InfoOverlay.showErrorSnackBar("Fehler beim Erstellen der Automatischen Einkaufsliste");
+      } else {
+        InfoOverlay.showInfoSnackBar("Automatische Einkaufsliste wurde erstellt");
+      }
+    }catch(e) {
+      InfoOverlay.showErrorSnackBar("Fehler: ${e.message}");
+    }
+  }
+
 }
 
 class ShoppingLists extends StatelessWidget {

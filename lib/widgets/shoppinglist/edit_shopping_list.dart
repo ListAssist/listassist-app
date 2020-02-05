@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:listassist/models/Group.dart';
 import 'package:listassist/models/Item.dart';
 import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
@@ -9,7 +10,8 @@ import 'package:provider/provider.dart';
 
 class EditShoppingList extends StatefulWidget {
   final int index;
-  EditShoppingList({this.index});
+  final bool isGroup;
+  EditShoppingList({this.index, this.isGroup = false});
 
   @override
   _EditShoppingListState createState() => _EditShoppingListState();
@@ -22,10 +24,20 @@ class _EditShoppingListState extends State<EditShoppingList> {
   bool firstLoad = true;
   List<Item> copyItems;
 
+  String uid;
+  ShoppingList list;
+
+  //TODO: Change all widgets to work for groups and single users
+
   @override
   Widget build(BuildContext context) {
-    ShoppingList list = Provider.of<List<ShoppingList>>(context)[widget.index];
-    String uid = Provider.of<User>(context).uid;
+    if(widget.isGroup) {
+      uid = Provider.of<List<Group>>(context)[widget.index].id;
+      list = Provider.of<ShoppingList>(context);
+    }else {
+      list = Provider.of<List<ShoppingList>>(context)[widget.index];
+      uid = Provider.of<User>(context).uid;
+    }
     if(firstLoad) {
       copyItems = List.from(list.items);
       firstLoad = false;
@@ -80,7 +92,7 @@ class _EditShoppingListState extends State<EditShoppingList> {
           databaseService.updateList(uid, ShoppingList(
             id: list.id,
             name: _nameTextController.text,
-            items: copyItems))
+            items: copyItems), widget.isGroup)
           .then((onSaved) {
             InfoOverlay.showInfoSnackBar("Einkaufsliste bearbeitet");
             Navigator.of(context).pop();

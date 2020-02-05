@@ -17,6 +17,13 @@ class Item {
         'prize': prize,
       };
 
+  Map<String, dynamic> getNameAndCount() {
+    return {
+      "name": name,
+      "count": count
+    };
+  }
+
   factory Item.fromFirestore(DocumentSnapshot doc) {
     Map data = doc.data;
 

@@ -1,23 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:listassist/models/User.dart';
+import 'package:listassist/services/db.dart';
+import 'package:listassist/services/info_overlay.dart';
 import 'package:listassist/widgets/shoppinglist/shopping_list_detail.dart';
 import 'package:listassist/models/ShoppingList.dart' as model;
 import 'package:provider/provider.dart';
+import 'edit_shopping_list.dart';
 
 
-class ShoppingList extends StatelessWidget {
+class ShoppingList extends StatefulWidget {
   final int index;
   ShoppingList({this.index});
 
   @override
+  _ShoppingListState createState() => _ShoppingListState();
+}
+
+class _ShoppingListState extends State<ShoppingList> {
+
+  model.ShoppingList list;
+
+  @override
   Widget build(BuildContext context) {
-    model.ShoppingList list = Provider.of<List<model.ShoppingList>>(context)[this.index];
+    list = Provider.of<List<model.ShoppingList>>(context)[widget.index];
     //print(list);
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () => Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => ShoppingListDetail(index: this.index)),
+        MaterialPageRoute(builder: (context) => ShoppingListDetail(index: widget.index)),
       ),
       onLongPressStart: (details) async {
         RenderBox overlay = Overlay.of(context).context.findRenderObject();
@@ -48,7 +60,17 @@ class ShoppingList extends StatelessWidget {
             )
           ]
         );
-        print(picked);
+        // Edit
+        if(picked == 0){
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => EditShoppingList(index: widget.index)),
+          );
+        // Delete
+        }else if(picked == 1) {
+          _showDeleteDialog();
+        }
       },
       child: Container(
         padding: EdgeInsets.all(20),
@@ -63,6 +85,58 @@ class ShoppingList extends StatelessWidget {
           ),
         ),
       )
+    );
+  }
+
+  Future<void> _showDeleteDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Einkaufsliste löschen"),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                RichText(
+                    text: TextSpan(
+                        style: new TextStyle(
+                          color: Theme.of(context).textTheme.title.color,
+                        ),
+                        children: <TextSpan>[
+                          TextSpan(
+                              text: "Sind Sie sicher, dass Sie die Einkaufsliste "),
+                          TextSpan(
+                              text: "${list.name}",
+                              style: TextStyle(fontWeight: FontWeight.bold)),
+                          TextSpan(text: " löschen möchten?")
+                        ]))
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              textColor: Colors.red,
+              child: Text("Abbrechen"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            FlatButton(
+              child: Text("Löschen"),
+              onPressed: () {
+                String name = list.name;
+                databaseService.deleteList(Provider.of<User>(context).uid, list.id).catchError((_) {
+                  InfoOverlay.showErrorSnackBar("Fehler beim Löschen der Einkaufsliste");
+                }).then((_) {
+                  InfoOverlay.showInfoSnackBar("Einkaufsliste $name gelöscht");
+                  Navigator.of(context).pop();
+                });
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }

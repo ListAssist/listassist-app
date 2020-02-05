@@ -23,10 +23,9 @@ class _EditGroupState extends State<EditGroup> {
     Group group = Provider.of<Group>(context);
     if(firstLoad) {
       copyUsers = List.from(group.members);
+      _nameTextController = TextEditingController(text: group.title);
       firstLoad = false;
     }
-
-    _nameTextController = TextEditingController(text: group.title);
 
     return Scaffold(
       appBar: AppBar(
@@ -43,7 +42,7 @@ class _EditGroupState extends State<EditGroup> {
                     decoration: InputDecoration(
                       border: UnderlineInputBorder(),
                       contentPadding: EdgeInsets.all(3),
-                      labelText: 'Name der Gruppe',
+                      labelText: "Name der Gruppe",
                     ),
                   )
               ),
@@ -54,13 +53,13 @@ class _EditGroupState extends State<EditGroup> {
                   children: copyUsers.map<Widget>((i) {
                     return Container(
                       child: ListTile(
-                        trailing: IconButton(
+                        trailing: group.creator.uid != i.uid ? IconButton(
                           icon: Icon(Icons.cancel),
                           onPressed: () {
                             setState(() {
                               copyUsers.remove(i);
                             });
-                          }),
+                          }) : null,
                         title: new Text("${i.displayName}"),
                       )
                     );
@@ -73,23 +72,21 @@ class _EditGroupState extends State<EditGroup> {
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.save),
         onPressed: () async {
-          //TODO: create update cloud function to remove removed members and invite newly added ones
-          return;
           final HttpsCallable update = cloudFunctionInstance.getHttpsCallable(
               functionName: "updateGroup"
           );
           try {
             dynamic resp = await update.call(<String, dynamic>{
-              "title": _nameTextController.text,
-              "groupid": group.id,
-              "members": group.members
+              "group": { "title": _nameTextController.text, "id": group.id, "creator": group.creator.uid, "members": copyUsers.map((user) => user.uid).toList() }
             });
-            if(resp.data["status"] == "Failed"){
+            if(resp.data["status"] != "Successful"){
               InfoOverlay.showErrorSnackBar("Fehler beim Bearbeiten der Gruppe");
             }else {
-              InfoOverlay.showInfoSnackBar("Gruppe ${_nameTextController.text} bearbeitet");
+              InfoOverlay.showInfoSnackBar("Gruppe ${group.title} bearbeitet");
+              Navigator.pop(context);
             }
           }catch (e) {
+            print(e);
             InfoOverlay.showErrorSnackBar("Fehler: ${e.message}");
           }
         },

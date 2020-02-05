@@ -87,31 +87,31 @@ class DatabaseService {
         .map((snap) => snap.documents.map((d) => CompletedShoppingList.fromFirestore(d)).toList());
   }
 
-  Future<void> completeList(String uid, ShoppingList list) {
+  Future<void> completeList(String uid, ShoppingList list, [isGroup = false]) {
     Timestamp now = Timestamp.now();
     List<Item> completedItems = List.from(list.items);
     completedItems.removeWhere((item) => !item.bought);
     return Future.wait([
       _db
-        .collection("users")
+        .collection(isGroup ? "groups" : "users")
         .document(uid)
         .collection("lists")
         .document(list.id)
         .setData({"type": "completed", "completed": now}, merge: true),
       _db
-        .collection("users")
+        .collection(isGroup ? "groups" : "users")
         .document(uid)
         .collection("shopping_data")
         .document("data")
-        .setData({"last": FieldValue.arrayUnion([{ "completed": now, "items": completedItems.map((item) => item.name).toList() }])}, merge: true)
+        .setData({"last": FieldValue.arrayUnion([{ "completed": now, "items": completedItems.map((item) => item.getNameAndCount()).toList()}])}, merge: true)
     ]);
   }
 
-  Future<DocumentReference> createList(String uid, ShoppingList list) {
+  Future<DocumentReference> createList(String uid, ShoppingList list, [isGroup = false]) {
     var items = list.items.map((e) => e.toJson()).toList();
 
     return _db
-        .collection("users")
+        .collection(isGroup ? "groups" : "users")
         .document(uid)
         .collection("lists")
         .add({"name": list.name , "type": list.type, "items" : items, "created": list.created});
@@ -128,6 +128,7 @@ class DatabaseService {
   }
 
   Stream<List<ShoppingList>> streamListsFromGroup(String groupid) {
+    print("----- READ GROUP LISTS -----");
     return _db
         .collection("groups")
         .document(groupid)
@@ -137,6 +138,17 @@ class DatabaseService {
         .map((snap) => snap.documents.map((d) => ShoppingList.fromFirestore(d)).toList());
   }
 
+  Stream<ShoppingList> streamListFromGroup(String groupid, String listid) {
+    print("----- READ GROUP LIST ${listid} -----");
+    return _db
+        .collection("groups")
+        .document(groupid)
+        .collection("lists")
+        .document(listid)
+        .snapshots()
+        .map((snap) => ShoppingList.fromFirestore(snap));
+  }
+
   Future<void> updateProfileName(String uid, String newName) {
     return _db
         .collection('users')
@@ -144,11 +156,11 @@ class DatabaseService {
         .updateData({'displayName': newName});
   }
   
-  Future<void> updateList(String uid, ShoppingList list) async {
+  Future<void> updateList(String uid, ShoppingList list, [isGroup = false]) async {
     var items = list.items.map((e) => e.toJson()).toList();
 
     return _db
-        .collection("users")
+        .collection(isGroup ? "groups" : "users")
         .document(uid)
         .collection("lists")
         .document(list.id)
@@ -274,11 +286,11 @@ class DatabaseService {
 
   Future<void> deleteList(String uid, String listid) {
     return _db
-        .collection("users")
+        .collection(isGroup ? "groups" : "users")
         .document(uid)
         .collection("lists")
         .document(listid)
-        .setData({"type": "deleted", "deleted": Timestamp.now()}, merge: true);
+        .delete();
   }
 
   Future<void> updateEmail(String uid, String newEmail) {

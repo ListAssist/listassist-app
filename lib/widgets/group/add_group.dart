@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:listassist/services/db.dart';
 import 'package:listassist/services/info_overlay.dart';
+import 'package:listassist/validators/email.dart';
 
 class AddGroup extends StatefulWidget {
   @override
@@ -13,11 +14,22 @@ class _AddGroup extends State<AddGroup> {
 
   final _memberTextController = TextEditingController();
   final _nameTextController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
   List<String> _members = [];
 
   bool _isCreating = false;
 
   _addMember(email) {
+    if (!_formKey.currentState.validate()) {
+      return;
+    }
+    if(_members.contains(email)){
+      InfoOverlay.showErrorSnackBar("User wird bereits eingeladen");
+      setState(() {
+        _memberTextController.clear();
+      });
+      return;
+    }
     setState(() {
       _memberTextController.clear();
       _members.add(email);
@@ -28,8 +40,6 @@ class _AddGroup extends State<AddGroup> {
     setState(() {
       _isCreating = true;
     });
-    print(_members);
-    print(_nameTextController.text);
     final HttpsCallable create = cloudFunctionInstance.getHttpsCallable(
         functionName: "createGroup"
     );
@@ -50,7 +60,7 @@ class _AddGroup extends State<AddGroup> {
         );
         try {
           dynamic resp2 = await invite.call(<String, dynamic>{
-            "targetuids": _members,
+            "targetemails": _members,
             "groupid": resp.data["groupid"],
             "groupname": resp.data["groupname"],
             "from": resp.data["creator"],
@@ -107,15 +117,19 @@ class _AddGroup extends State<AddGroup> {
                 Row(
                   children: <Widget>[
                     Expanded(
-                      child: TextField(
-                        controller: _memberTextController,
-                        keyboardType: TextInputType.emailAddress,
-                        decoration: InputDecoration(
-                          border: UnderlineInputBorder(),
-                          contentPadding: EdgeInsets.all(3),
-                          labelText: 'Email Adresse eingeben',
+                      child: Form(
+                        key: _formKey,
+                        child: TextFormField(
+                          controller: _memberTextController,
+                          validator: EmailValidator(),
+                          keyboardType: TextInputType.emailAddress,
+                          decoration: InputDecoration(
+                            border: UnderlineInputBorder(),
+                            contentPadding: EdgeInsets.all(3),
+                            labelText: 'Email Adresse eingeben',
+                          ),
                         ),
-                      ),
+                      )
                     ),
                     IconButton(
                       icon: Icon(Icons.add),
@@ -123,10 +137,27 @@ class _AddGroup extends State<AddGroup> {
                     ),
                   ],
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: _members.map((x) => Text(x)).toList(),
-                ),
+                Padding(
+                  padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: _members.map<Widget>((i) {
+                      return Container(
+                        child: ListTile(
+                          trailing: IconButton(
+                            icon: Icon(Icons.cancel),
+                            onPressed: () {
+                              setState(() {
+                                _members.remove(i);
+                                print(_members);
+                              });
+                            }),
+                          title: Text("$i"),
+                        )
+                      );
+                    }).toList(),
+                  ),
+                )
               ],
             )
           ),
@@ -134,8 +165,8 @@ class _AddGroup extends State<AddGroup> {
       ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.check),
-        backgroundColor: !_isCreating ? Colors.green : Colors.grey,
-        onPressed: () => !_isCreating ? _createGroup() : null,
+        backgroundColor: !_isCreating && _members != null && _members.isNotEmpty ? Colors.green : Colors.grey,
+        onPressed: () => !_isCreating && _members != null && _members.isNotEmpty ? _createGroup() : null,
       ),
     );
   }

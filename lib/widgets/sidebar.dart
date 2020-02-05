@@ -24,24 +24,63 @@ class _Sidebar extends State<Sidebar> {
   @override
   Widget build(BuildContext context) {
     User user = Provider.of<User>(context);
-    return Drawer(
-        child: Column(
-      children: <Widget>[
-        UserAccountsDrawerHeader(
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primary,
-          ),
-          accountName: Text(user.displayName),
-          accountEmail: Text(user.email),
-          currentAccountPicture: Hero(
-            tag: "profilePicture",
-            child: CircleAvatar(
-              //backgroundImage: NetworkImage(user.photoUrl),
-              child: ClipRRect(
-                  borderRadius: BorderRadius.circular(45), child: FadeInImage(width: 80, height: 80, image: NetworkImage(user.photoUrl), placeholder: AssetImage("assets/images/avatar.png"))),
+    return user == null ? Drawer() : Drawer(
+      child: Column(
+        children: <Widget>[
+          UserAccountsDrawerHeader(
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            accountName: Text(user.displayName),
+            accountEmail: Text(user.email),
+            currentAccountPicture: Hero(
+              tag: "profilePicture",
+              child: CircleAvatar(
+                backgroundImage: user.photoUrl.length > 0 ? NetworkImage(user.photoUrl) : AssetImage("assets/images/userpic.png")
+              ),
             ),
           ),
-        ),
+          ListTile(
+            leading: Icon(Icons.list),
+            title: Text("Einkaufslisten"),
+            onTap: () {
+              ScreenModel.of(context).setScreen(MultiProvider(
+                  providers: [
+                    StreamProvider.value(value: databaseService.streamLists(user.uid)),
+                    StreamProvider.value(value: databaseService.streamListsHistory(user.uid))
+                  ],
+                  child: CustomNavigator(
+                    home: ShoppingListView(),
+                    pageRoute: PageRoutes.materialPageRoute,
+                  )
+              ));
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.insert_chart),
+            title: Text("Statistiken"),
+            onTap: () {
+              Navigator.pop(context);
+            },
+   /* return Drawer(
+       // child: Column(
+      //children: <Widget>[
+       // UserAccountsDrawerHeader(
+       //   decoration: BoxDecoration(
+        //    color: Theme.of(context).colorScheme.primary,
+          ),
+         // accountName: Text(user.displayName),
+         // accountEmail: Text(user.email),
+         // currentAccountPicture: Hero(
+         //   tag: "profilePicture",
+         //   child: CircleAvatar(
+         //     //backgroundImage: NetworkImage(user.photoUrl),
+         //     child: ClipRRect(
+         //         borderRadius: BorderRadius.circular(45), child: FadeInImage(width: 80, height: 80, image: NetworkImage(user.photoUrl), placeholder: AssetImage("assets/images/avatar.png"))),
+         //   ),
+         // ),
+        //),
         ListTile(
           leading: Icon(Icons.list),
           title: Text("Einkaufslisten"),
@@ -67,7 +106,7 @@ class _Sidebar extends State<Sidebar> {
                 )));
             Navigator.pop(context);
           },
-        ),
+        ),*/
         ListTile(
           leading: Icon(Icons.local_dining),
           title: Text("Rezepte"),
