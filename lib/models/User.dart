@@ -7,9 +7,11 @@ class User {
   final String photoUrl;
   final String uid;
   final String type;
+  final Map settings;
+  final Timestamp lastAutomaticallyGenerated;
   final Timestamp lastLogin;
 
-  User({this.lastLogin, this.email, this.displayName, this.photoUrl, this.uid, this.type});
+  User({this.lastLogin, this.email, this.displayName, this.photoUrl, this.uid, this.type, this.settings, this.lastAutomaticallyGenerated});
 
   factory User.fromFirestore(DocumentSnapshot doc) {
     Map data = doc.data;
@@ -21,6 +23,8 @@ class User {
       displayName: data["displayName"] ?? '',
       lastLogin: data["lastLogin"] ?? null,
       type: data["type"] ?? null,
+      settings: data["settings"] ?? null,
+      lastAutomaticallyGenerated: data["last_automatically_generated"] ?? null
     );
   }
 
@@ -33,6 +37,8 @@ class User {
       displayName: data["displayName"] ?? "",
       lastLogin: data["lastLogin"] ?? null,
       type: data["type"] ?? null,
+      settings: data["settings"] ?? null,
+      lastAutomaticallyGenerated: data["last_automatically_generated"] ?? null
     );
   }
 }

@@ -7,8 +7,6 @@ const db = admin.firestore();
 export const createAutomaticList = functions.region("europe-west1").https.onCall(async (data, context) => {
     const uid = context.auth.uid;
 
-    //TODO: Call Method at times that make sense (every start?)
-
     //TODO: If necessary also save and add category of products
 
     const userDoc = await db.collection("users").doc(uid).get();
