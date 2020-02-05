@@ -44,6 +44,7 @@ dependencies:
   shimmer: ^1.0.1
   connectivity:
   localstorage: ^3.0.0
+  firebase_messaging: ^5.1.5
 
   # addons
   url_launcher:
@@ -58,6 +59,8 @@ dependencies:
   algolia:
   flutter_typeahead:
   string_similarity:
+  speech_recognition: ^0.3.0+1
+  shared_preferences:
 
   # design
   fluttertoast:
@@ -71,7 +74,17 @@ dependencies:
   after_init:
   carousel_slider:
   photo_view:
+  flutter_launcher_icons: ^0.7.2+1
+  charts_flutter: ^0.8.1
+  auto_size_text: ^2.1.0
+  percent_indicator: ^2.1.1
+  intro_slider:
+  numberpicker: ^1.1.0
 
+flutter_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icon/icon.png"
 
 dev_dependencies:
   flutter_test:
@@ -93,9 +106,11 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
-  # To add assets to your application, add an assets section, like this:
-  # assets:
-  #  - images/a_dot_burr.jpeg
+  assets:
+    - assets/images/avatar.png
+    - assets/images/liste.png
+    - assets/images/group.png
+    - assets/images/scan.png
   #  - images/a_dot_ham.jpeg
 
   assets:

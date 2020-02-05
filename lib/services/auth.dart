@@ -57,6 +57,7 @@ class AuthService {
         "email": user.email,
         "displayName": displayName,
         "lastLogin": DateTime.now(),
+
       }, merge: true);
 
       return user;

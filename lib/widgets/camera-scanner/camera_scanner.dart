@@ -20,6 +20,7 @@ import 'package:listassist/models/ScannedShoppinglist.dart';
 import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
 import 'package:listassist/services/camera.dart';
+import 'package:listassist/services/db.dart';
 import 'package:listassist/services/http.dart';
 import 'package:listassist/services/calc.dart';
 import 'package:listassist/services/info_overlay.dart';
@@ -37,8 +38,9 @@ class CameraScanner extends StatefulWidget {
   final ui.Image image;
   final File imageFile;
   final int listIndex;
+  final ShoppingList newlyCreatedList;
 
-  const CameraScanner({Key key, @required this.image, @required this.imageFile, this.listIndex}) : super(key: key);
+  const CameraScanner({Key key, @required this.image, @required this.imageFile, this.listIndex, this.newlyCreatedList}) : super(key: key);
 
   @override
   CameraScannerState createState() => CameraScannerState();
@@ -190,20 +192,14 @@ class CameraScannerState extends State<CameraScanner> with AfterInitMixin<Camera
       if (detectedItems.isNotEmpty) {
         /// Check if the camera scanner should check shopping lists or create a new one
         if (widget.listIndex != null) {
-          /// Clone shopping list
+          /// Check off items from shopping list
           await checkShoppingList(context, detectedItems, user, dialog);
         } else {
-          /// TODO: Implement Logic for creating new shopping lists from scanning an existing one
-          /// Check if user wants to make sure and compare with DB or create own list with own Strings
-          if ("settings" == "synced" || true) {
-            /// TODO: algolia search
-          } else {
-            /// let user choose what is corrrect of our detections
-            await createFromScratch(context, detectedItems);
-          }
+          /// Create a new shopping list
+          await createFromScratch(context, detectedItems, user, dialog);
         }
       } else {
-        InfoOverlay.showErrorSnackBar("Leider konnten wir keine Produkte erkennen. Versuchen Sie es erneut!");
+        InfoOverlay.showErrorSnackBar("Leider konnten wir keine Produkte erkennen. Versuche es erneut!");
       }
     } on HttpException catch (e) {
       print(e);
@@ -213,18 +209,26 @@ class CameraScannerState extends State<CameraScanner> with AfterInitMixin<Camera
     }
   }
 
-  Future createFromScratch(BuildContext context, List<PossibleItem> detectedItems) async {
+  Future createFromScratch(BuildContext context, List<PossibleItem> detectedItems, User user, ProgressDialog dialog) async {
     /// let user choose what is corrrect of our detections
-    if ("Settings" == "are okay with this" || false) {
+    if ((await databaseService.getScannerSetting(user.uid)) == false) {
       var selectedProducts = await showSelectDialog(context, detectedItems);
       if (selectedProducts != null) {
         detectedItems = selectedProducts;
       }
     }
-    var scannedList = ScannedShoppingList.fromScannedItems(items: ScannedItem.fromPossibleItems(detectedItems));
-    scannedList.imageFile = _imageFile;
 
-    Navigator.pop<ScannedShoppingList>(context, scannedList);
+    if (detectedItems.isEmpty) {
+      InfoOverlay.showErrorSnackBar("Keine Produkte erkannt.");
+    } else {
+      /// Create metadata so data can be read later
+      var scannedList = ScannedShoppingList.fromScannedItems(items: ScannedItem.fromPossibleItems(detectedItems));
+      scannedList.imageFile = _imageFile;
+      await uploadListImage(scannedList, user, widget.newlyCreatedList, dialog);
+      Navigator.pop<ScannedShoppingList>(context, scannedList);
+    }
+
+    Navigator.pop(context);
   }
 
   /// Method for using detected items to check shopping list items
@@ -256,36 +260,39 @@ class CameraScannerState extends State<CameraScanner> with AfterInitMixin<Camera
     } else {
       /// Create metadata so data can be read later
       var scannedList = ScannedShoppingList.fromScannedItems(items: ScannedItem.itemsFromMapping(finalMappings));
-      StorageMetadata metadata = StorageMetadata(customMetadata: {
-        "quadliteral_coordinates": _currentEditorType ==
-            EditorType.Trainer ? jsonEncode(calcService
-            .exportPoints(
-            [_points[0], _points[2], _points[4], _points[6]],
-            _image, boundingBox)) : null,
-        "list": scannedList.toJSON()
-      });
-
-      /// Upload to firestore
-      var task = storageService.upload(
-          _imageFile,
-          "users/${user.uid}/lists/${shoppingList.id}/",
-          concatString: "",
-          includeTimestamp: true,
-          metadata: metadata);
-
-      /// execute task to upload and display current progress
-      task.events.listen((event) async {
-        if (task.isInProgress) {
-          double percentage = (event.snapshot.bytesTransferred * 100 / event.snapshot.totalByteCount).roundToDouble();
-          dialog.update(progress: 50 + percentage / 2, message: percentage / 2 > 50 ? "Fast fertig.." : null);
-        }
-      });
-      /// wait for task to finish to proceed going back
-      await task.onComplete;
-
+      await uploadListImage(scannedList, user, shoppingList, dialog);
     }
     /// Send calculated data back to the screen
     Navigator.pop(context, indicesToCheck);
+  }
+
+  Future uploadListImage(ScannedShoppingList scannedList, User user, ShoppingList shoppingList, ProgressDialog dialog) async {
+     StorageMetadata metadata = StorageMetadata(customMetadata: {
+      "quadliteral_coordinates": _currentEditorType ==
+          EditorType.Trainer ? jsonEncode(calcService
+          .exportPoints(
+          [_points[0], _points[2], _points[4], _points[6]],
+          _image, boundingBox)) : null,
+      "list": scannedList.toJSON()
+    });
+
+    /// Upload to firestore
+    var task = storageService.upload(
+        _imageFile,
+        "users/${user.uid}/lists/${shoppingList.id}/",
+        concatString: "",
+        includeTimestamp: true,
+        metadata: metadata);
+
+    /// execute task to upload and display current progress
+    task.events.listen((event) async {
+      if (task.isInProgress) {
+        double percentage = (event.snapshot.bytesTransferred * 100 / event.snapshot.totalByteCount).roundToDouble();
+        dialog.update(progress: 50 + percentage / 2, message: percentage / 2 > 50 ? "Fast fertig.." : null);
+      }
+    });
+    /// wait for task to finish to proceed going back
+    await task.onComplete;
   }
 
   /// Gets http resonse for specific editor type

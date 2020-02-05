@@ -1,4 +1,5 @@
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:listassist/main.dart';
@@ -117,7 +118,7 @@ class ShoppingLists extends StatelessWidget {
         physics: BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
         itemCount: lists.length,
         itemBuilder: (ctx, index) => ShoppingList(index: index)
-    ) : SpinKitDoubleBounce(color: Colors.blueAccent,);
+    ) : ShoppyShimmer();
   }
 }
 
@@ -134,6 +135,6 @@ class ShoppingListsHistory extends StatelessWidget {
         physics: BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
         itemCount: lists.length,
         itemBuilder: (ctx, index) => CompletedShoppingList(index: index)
-    ) : SpinKitDoubleBounce(color: Colors.blueAccent,);
+    ) : ShoppyShimmer();
   }
 }

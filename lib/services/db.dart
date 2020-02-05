@@ -3,6 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
+import 'package:listassist/models/Achievement.dart';
 import 'package:listassist/models/CompletedShoppingList.dart';
 import 'package:listassist/models/Group.dart';
 import 'package:listassist/models/Invite.dart';
@@ -10,6 +12,7 @@ import 'package:listassist/models/Item.dart';
 import 'package:listassist/models/Product.dart';
 import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
+import 'package:listassist/models/Recipe.dart';
 import 'package:rxdart/rxdart.dart';
 
 class DatabaseService {
@@ -62,6 +65,16 @@ class DatabaseService {
         .map((snap) => snap.documents.map((d) => ShoppingList.fromFirestore(d)).toList());
   }
 
+  Stream<List<Recipe>> streamRecipes(String uid) {
+    print("----- READ RECIPES -----");
+    return _db
+        .collection("users")
+        .document(uid)
+        .collection("recipes")
+        .snapshots()
+        .map((snap) => snap.documents.map((d) => Recipe.fromFirestore(d)).toList());
+  }
+
   Stream<List<CompletedShoppingList>> streamListsHistory(String uid) {
     print("----- READ COMPLETED LISTS -----");
     return _db
@@ -102,6 +115,16 @@ class DatabaseService {
         .document(uid)
         .collection("lists")
         .add({"name": list.name , "type": list.type, "items" : items, "created": list.created});
+  }
+
+  Future<DocumentReference> createRecipe(String uid, Recipe recipe) {
+    var items = recipe.items.map((e) => e.toJson()).toList();
+
+    return _db
+        .collection("users")
+        .document(uid)
+        .collection("recipes")
+        .add({"name": recipe.name, "description" : recipe.description, "items": items});
   }
 
   Stream<List<ShoppingList>> streamListsFromGroup(String groupid) {
@@ -231,7 +254,37 @@ class DatabaseService {
     return products;
   }
 
-  Future<void> deleteList(String uid, String listid, [isGroup = false]) {
+  Future<bool> getScannerSetting(String uid) async{
+    Map settings;
+    var document = _db
+        .collection("users")
+        .document(uid);
+    await document.get().then((value) => {
+      settings = value["settings"]
+    });
+    return settings["scanner_manual"];
+  }
+
+  Future<Map> getUserSettings(String uid) async{
+    Map settings;
+    var document = _db
+        .collection("users")
+        .document(uid);
+    await document.get().then((value) => {
+      settings = value["settings"]
+    });
+    return settings;
+  }
+
+  Future<void> updateUserSettings(String uid, Map settings) async{
+    _db
+        .collection("users")
+        .document(uid)
+        .setData({"settings": settings}, merge: true);
+
+  }
+
+  Future<void> deleteList(String uid, String listid) {
     return _db
         .collection(isGroup ? "groups" : "users")
         .document(uid)
@@ -254,6 +307,32 @@ class DatabaseService {
         .setData({'name': name});
   }
 
+  Future<List<Achievement>> getUsersUnlockedAchievements(String uid) async{
+    List<Achievement> achievements;
+
+    var document = _db
+        .collection("users")
+        .document(uid);
+    await document.get().then((value) => {
+      achievements = new List.from(value.data["achievements"].map((p) => Achievement.fromMap(p)).toList()),
+    });
+    return achievements;
+  }
+
+//
+//  Future<void> addToUserList(ShoppingList list, String downloadURL) {
+//    return _db
+//        .collection("user")
+//        .document(list.id)
+//        .setData({"photoURLs": FieldValue.arrayUnion([downloadURL])}, merge: true);
+//  }
+//
+//  Future<void> addToGroupList(Group group, ShoppingList list, String downloadURL) {
+//    return _db
+//        .collection("groups")
+//        .document(list.id)
+//        .setData({"photoURLs": FieldValue.arrayUnion(["EMPTY"])}, merge: true);
+//  }
 }
 
 

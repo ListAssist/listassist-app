@@ -10,8 +10,9 @@ class User {
   final Map settings;
   final Timestamp lastAutomaticallyGenerated;
   final Timestamp lastLogin;
+  bool hasUnlockedAchievements;
 
-  User({this.lastLogin, this.email, this.displayName, this.photoUrl, this.uid, this.type, this.settings, this.lastAutomaticallyGenerated});
+  User({this.lastLogin, this.email, this.displayName, this.photoUrl, this.uid, this.type, this.settings, this.lastAutomaticallyGenerated, this.hasUnlockedAchievements});
 
   factory User.fromFirestore(DocumentSnapshot doc) {
     Map data = doc.data;
@@ -24,7 +25,8 @@ class User {
       lastLogin: data["lastLogin"] ?? null,
       type: data["type"] ?? null,
       settings: data["settings"] ?? null,
-      lastAutomaticallyGenerated: data["last_automatically_generated"] ?? null
+      lastAutomaticallyGenerated: data["last_automatically_generated"] ?? null,
+      hasUnlockedAchievements: data["hasUnlockedAchievements"] ?? false,
     );
   }
 
@@ -38,7 +40,8 @@ class User {
       lastLogin: data["lastLogin"] ?? null,
       type: data["type"] ?? null,
       settings: data["settings"] ?? null,
-      lastAutomaticallyGenerated: data["last_automatically_generated"] ?? null
+      lastAutomaticallyGenerated: data["last_automatically_generated"] ?? null,
+      hasUnlockedAchievements: data["hasUnlockedAchievements"] ?? false,
     );
   }
 }

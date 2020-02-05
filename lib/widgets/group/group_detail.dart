@@ -10,6 +10,8 @@ import 'package:listassist/services/info_overlay.dart';
 import 'package:listassist/widgets/group/edit_group.dart';
 import 'package:listassist/widgets/group/group_create_shopping_list.dart';
 import 'package:listassist/widgets/group/group_userlist.dart';
+import 'package:listassist/widgets/shimmer/shoppy_shimmer.dart';
+import 'package:listassist/widgets/shoppinglist/shopping_list.dart' as w;
 import 'package:provider/provider.dart';
 import 'group_shopping_list.dart';
 
@@ -65,34 +67,40 @@ class _GroupDetail extends State<GroupDetail> {
             GroupUserList(index: widget.index)
           ],
         ),
-        floatingActionButton: SpeedDial(
-          animatedIcon: AnimatedIcons.menu_close,
-          animatedIconTheme: IconThemeData(size: 22.0),
-          closeManually: false,
-          curve: Curves.easeIn,
-          overlayOpacity: 0.35,
-          backgroundColor: Theme.of(context).primaryColor,
-          elevation: 8.0,
-          shape: CircleBorder(),
-          children: [
-            SpeedDialChild(
-              onTap: () {
-                _showInviteDialog();
-              },
-              child: Icon(Icons.person_add),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+        floatingActionButton: Stack(
+          children: <Widget>[
+            Align(
+              alignment: Alignment.bottomRight,
+              child: Padding(
+                padding: EdgeInsets.only(bottom: 60),
+                child: Transform.scale(
+                  scale: 0.75,
+                  child: FloatingActionButton(
+                    onPressed: () {
+                      _showInviteDialog();
+                    },
+                    backgroundColor: Colors.white,
+                    child: Icon(Icons.person_add, color: Colors.grey,),
+                  ),
+                ),
+              ),
             ),
-            SpeedDialChild(
-              onTap: () {
-                Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
-                  return StreamProvider<List<ShoppingList>>.value(
-                    value: databaseService.streamListsFromGroup(_group.id),
-                    child:  GroupCreateShoppingList(gid: _group.id),
-                  );
-                }));
-                //Navigator.of(context).push(MaterialPageRoute(builder: (ctx) => CreateShoppingListView()));
-              },
-              child: Icon(Icons.add)
-            )
+            Align(
+              alignment: Alignment.bottomRight,
+              child: FloatingActionButton(
+                onPressed: () {
+                   Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
+                    return StreamProvider<List<ShoppingList>>.value(
+                      value: databaseService.streamListsFromGroup(_group.id),
+                      child:  GroupCreateShoppingList(gid: _group.id),
+                    );
+                  }));
+                },
+                backgroundColor: Colors.green,
+                child: Icon(Icons.add),
+              ),
+            ),
           ],
         ),
       ),

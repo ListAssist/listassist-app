@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:listassist/models/User.dart';
+import 'package:listassist/services/db.dart';
 import 'package:listassist/widgets/settings/notification_settings_view.dart';
 import 'package:listassist/services/auth.dart';
 import 'package:listassist/widgets/settings/profile_settings_view.dart';
-import 'package:listassist/widgets/settings/shopping_list_settings_view.dart';
+import 'package:listassist/widgets/settings/app_settings_view.dart';
 import 'package:listassist/widgets/shoppinglist/item_counter.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -46,6 +47,7 @@ class _SettingsViewState extends State<SettingsView> {
               ),
               onPressed: () {
                 authService.signOut();
+                Navigator.pop(context);
                 Navigator.pop(context);
               },
             ),
@@ -145,14 +147,14 @@ class Test extends StatelessWidget {
                     },
                   ),
                   ListTile(
-                    leading: Icon(Icons.view_agenda),
-                    title: Text('Ansicht'),
+                    leading: Icon(Icons.settings),
+                    title: Text('App Einstellungen'),
                     trailing: Icon(Icons.keyboard_arrow_right),
                     onTap: () => {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => ShoppinglistsettingsView()
+                              builder: (context) => AppSettingsView()
                           )
                       )
                     },
@@ -182,7 +184,9 @@ class Test extends StatelessWidget {
                     leading: Icon(Icons.bug_report),
                     title: Text('Fehler melden'),
                     trailing: Icon(Icons.keyboard_arrow_right),
-                    onTap: () => {},
+                    onTap: () => {
+                      _launchURL("https://github.com/ListAssist/listassist-app")
+                    },
                   ),
                   ListTile(
                     leading: Icon(Icons.info),
@@ -192,7 +196,6 @@ class Test extends StatelessWidget {
                       _launchURL("https://listassist.gq")
                     },
                   ),
-
                 ],
               )
           ),
