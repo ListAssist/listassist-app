@@ -75,7 +75,7 @@ class _SearchItemsView extends State<SearchItemsView> {
   }
 
   _addItem(Product product) {
-    _list.addItem(product.name);
+    _list.addItem(product.name, product.category);
     _addToRecentProducts(product);
     setState(() {});
     _requestListUpdate();
@@ -141,7 +141,15 @@ class _SearchItemsView extends State<SearchItemsView> {
     if(resultText == null) {
       resultText = "";
     } else {
+      var resultProducts = resultText.trim().split(" und ");
+      resultProducts.forEach((p) {
+        if(_list.hasItem(p)){
+          _addCount(p);
+        } else {
+          _addItem(new Product(name: p, category: "Spracherkennung"));
+        }
 
+      });
     }
     setState(() {
     });
@@ -158,13 +166,40 @@ class _SearchItemsView extends State<SearchItemsView> {
       length: 3,
       child: Scaffold(
           key: _scaffoldKey,
-          floatingActionButton: FloatingActionButton(
-            child: Icon(Icons.check),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            backgroundColor: Colors.green,
+          floatingActionButton:
+
+          Stack(
+            children: [
+              Align(
+                alignment: Alignment.bottomRight,
+                child: FloatingActionButton(
+                  child: Icon(Icons.check),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  backgroundColor: Colors.green,
+                ),
+              ),
+
+              Align(
+                alignment: Alignment.bottomRight,
+                child: Padding(
+                  padding: EdgeInsets.only(bottom: 60.0),
+                  child: Transform.scale(
+                    scale: 0.75,
+                    child: FloatingActionButton(
+                      child: Icon(Icons.camera_alt, color: Colors.black,),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      backgroundColor: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ]
           ),
+
           body: Column(children: <Widget>[
             Container(
               height: 120.0,

@@ -41,8 +41,8 @@ class ShoppingList {
     return items.where((i) => i.name == itemName).toList()[0].count;
   }
 
-  void addItem(String productName){
-    items.add(new Item(name: productName, count: 1, bought: false));
+  void addItem(String productName, String category){
+    items.add(new Item(name: productName, category: category, count: 1, bought: false, prize: 0));
   }
 
   void changeItemCount(String itemName, int value) {

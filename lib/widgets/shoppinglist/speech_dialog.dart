@@ -6,7 +6,7 @@ import 'package:speech_recognition/speech_recognition.dart';
 
 
 class SpeechDialog extends StatefulWidget {
-  BuildContext dialogContext;
+  final BuildContext dialogContext;
 
   SpeechDialog({this.dialogContext});
 
@@ -23,7 +23,7 @@ class _SpeechDialog extends State<SpeechDialog> {
 
   requestPop() {
     Timer(Duration(milliseconds: 1000), () {
-      Navigator.of(widget.dialogContext).pop(resultText);
+      Navigator.of(widget.dialogContext, rootNavigator: true).pop(resultText);
     });
   }
 

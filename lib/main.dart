@@ -1,15 +1,15 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:listassist/models/current-screen.dart';
-import 'package:listassist/widgets/invites/invite_view.dart';
+import 'package:listassist/widgets/intro-slider/intro_slider.dart';
 import 'package:provider/provider.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:listassist/services/auth.dart';
 import 'package:listassist/widgets/sidebar.dart';
 import 'package:listassist/widgets/authentication/authentication.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'models/User.dart';
 
 void main() => runApp(MyApp());
@@ -80,6 +80,29 @@ class _MainAppState extends State<MainApp> {
 
   }*/
 
+  bool firstLaunch = false;
+  var prefs;
+
+  initSharedPreferences() async{
+    prefs = await SharedPreferences.getInstance();
+    firstLaunch = prefs.getBool("firstLaunch");
+    //mach ich so weils mit ?? kurz angezeigt wird beim Starten der App wenns eigentlich false ist
+    if(firstLaunch == null) firstLaunch = true;
+  }
+
+  onIntroSliderExit() {
+    setState(() {
+      firstLaunch = false;
+    });
+    prefs.setBool("firstLaunch", false);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    initSharedPreferences();
+  }
+
   @override
   Widget build(BuildContext context) {
     FirebaseUser user = Provider.of<FirebaseUser>(context);
@@ -91,7 +114,7 @@ class _MainAppState extends State<MainApp> {
         child: user != null
             ? Scaffold(
                 key: mainScaffoldKey,
-                body: docUser != null ? Body() : null,
+                body: docUser != null ? firstLaunch ? IntroSliderView(onExit: onIntroSliderExit,) : Body() : null,
                 drawer: docUser != null ? Sidebar() : null,
               )
             : Scaffold(

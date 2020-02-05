@@ -184,7 +184,9 @@ class Test extends StatelessWidget {
                     leading: Icon(Icons.bug_report),
                     title: Text('Fehler melden'),
                     trailing: Icon(Icons.keyboard_arrow_right),
-                    onTap: () => {},
+                    onTap: () => {
+                      _launchURL("https://github.com/ListAssist/listassist-app")
+                    },
                   ),
                   ListTile(
                     leading: Icon(Icons.info),

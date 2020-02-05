@@ -8,8 +8,9 @@ class User {
   final String uid;
   final String type;
   final Timestamp lastLogin;
+  bool hasUnlockedAchievements;
 
-  User({this.lastLogin, this.email, this.displayName, this.photoUrl, this.uid, this.type});
+  User({this.lastLogin, this.email, this.displayName, this.photoUrl, this.uid, this.type, this.hasUnlockedAchievements});
 
   factory User.fromFirestore(DocumentSnapshot doc) {
     Map data = doc.data;
@@ -21,6 +22,7 @@ class User {
       displayName: data["displayName"] ?? '',
       lastLogin: data["lastLogin"] ?? null,
       type: data["type"] ?? null,
+      hasUnlockedAchievements: data["hasUnlockedAchievements"] ?? false,
     );
   }
 
@@ -33,6 +35,7 @@ class User {
       displayName: data["displayName"] ?? "",
       lastLogin: data["lastLogin"] ?? null,
       type: data["type"] ?? null,
+      hasUnlockedAchievements: data["hasUnlockedAchievements"] ?? false,
     );
   }
 }

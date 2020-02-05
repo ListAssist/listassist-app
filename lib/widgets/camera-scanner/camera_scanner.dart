@@ -211,7 +211,7 @@ class CameraScannerState extends State<CameraScanner> with AfterInitMixin<Camera
 
   Future createFromScratch(BuildContext context, List<PossibleItem> detectedItems, User user, ProgressDialog dialog) async {
     /// let user choose what is corrrect of our detections
-    if ("Settings" == "are okay with this" || false) {
+    if ((await databaseService.getScannerSetting(user.uid)) == false) {
       var selectedProducts = await showSelectDialog(context, detectedItems);
       if (selectedProducts != null) {
         detectedItems = selectedProducts;
