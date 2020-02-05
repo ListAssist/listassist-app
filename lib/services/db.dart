@@ -12,6 +12,7 @@ import 'package:listassist/models/Item.dart';
 import 'package:listassist/models/Product.dart';
 import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
+import 'package:listassist/models/Recipe.dart';
 import 'package:rxdart/rxdart.dart';
 
 class DatabaseService {
@@ -64,6 +65,16 @@ class DatabaseService {
         .map((snap) => snap.documents.map((d) => ShoppingList.fromFirestore(d)).toList());
   }
 
+  Stream<List<Recipe>> streamRecipes(String uid) {
+    print("----- READ RECIPES -----");
+    return _db
+        .collection("users")
+        .document(uid)
+        .collection("recipes")
+        .snapshots()
+        .map((snap) => snap.documents.map((d) => Recipe.fromFirestore(d)).toList());
+  }
+
   Stream<List<CompletedShoppingList>> streamListsHistory(String uid) {
     print("----- READ COMPLETED LISTS -----");
     return _db
@@ -104,6 +115,16 @@ class DatabaseService {
         .document(uid)
         .collection("lists")
         .add({"name": list.name , "type": list.type, "items" : items, "created": list.created});
+  }
+
+  Future<DocumentReference> createRecipe(String uid, Recipe recipe) {
+    var items = recipe.items.map((e) => e.toJson()).toList();
+
+    return _db
+        .collection("users")
+        .document(uid)
+        .collection("recipes")
+        .add({"name": recipe.name, "description" : recipe.description, "items": items});
   }
 
   Stream<List<ShoppingList>> streamListsFromGroup(String groupid) {
