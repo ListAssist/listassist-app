@@ -284,7 +284,7 @@ class DatabaseService {
 
   }
 
-  Future<void> deleteList(String uid, String listid) {
+  Future<void> deleteList(String uid, String listid, [isGroup = false]) {
     return _db
         .collection(isGroup ? "groups" : "users")
         .document(uid)

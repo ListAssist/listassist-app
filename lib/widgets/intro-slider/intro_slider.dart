@@ -68,6 +68,10 @@ class _IntroSliderViewState extends State<IntroSliderView> {
       slides: this.slides,
       onDonePress: this.onDonePress,
       onSkipPress: this.onSkipPress,
+      nameNextBtn: "WEITER",
+      namePrevBtn: "ZURÜCK",
+      //nameSkipBtn: "Überspringen",
+      nameDoneBtn: "FERTIG",
     );
   }
 }

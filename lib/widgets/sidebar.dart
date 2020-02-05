@@ -24,46 +24,52 @@ class _Sidebar extends State<Sidebar> {
   @override
   Widget build(BuildContext context) {
     User user = Provider.of<User>(context);
-    return user == null ? Drawer() : Drawer(
-      child: Column(
-        children: <Widget>[
-          UserAccountsDrawerHeader(
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            accountName: Text(user.displayName),
-            accountEmail: Text(user.email),
-            currentAccountPicture: Hero(
-              tag: "profilePicture",
-              child: CircleAvatar(
-                backgroundImage: user.photoUrl.length > 0 ? NetworkImage(user.photoUrl) : AssetImage("assets/images/userpic.png")
+    return user == null
+        ? Drawer()
+        : Drawer(
+            child: Column(
+            children: <Widget>[
+              UserAccountsDrawerHeader(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  accountName: Text(user.displayName),
+                  accountEmail: Text(user.email),
+                  currentAccountPicture: Hero(
+                    tag: "profilePicture",
+                    child: CircleAvatar(
+                      backgroundImage: NetworkImage(user.photoUrl),
+                      child: ClipRRect(
+                          borderRadius: BorderRadius.circular(45), child: FadeInImage(width: 80, height: 80, image: NetworkImage(user.photoUrl), placeholder: AssetImage("assets/images/userpic.png"))),
+                    ),
+                  )),
+              ListTile(
+                leading: Icon(Icons.list),
+                title: Text("Einkaufslisten"),
+                onTap: () {
+                  ScreenModel.of(context).setScreen(MultiProvider(
+                      providers: [StreamProvider.value(value: databaseService.streamLists(user.uid)), StreamProvider.value(value: databaseService.streamListsHistory(user.uid))],
+                      child: CustomNavigator(
+                        home: ShoppingListView(),
+                        pageRoute: PageRoutes.materialPageRoute,
+                      )));
+                  Navigator.pop(context);
+                },
               ),
-            ),
-          ),
-          ListTile(
-            leading: Icon(Icons.list),
-            title: Text("Einkaufslisten"),
-            onTap: () {
-              ScreenModel.of(context).setScreen(MultiProvider(
-                  providers: [
-                    StreamProvider.value(value: databaseService.streamLists(user.uid)),
-                    StreamProvider.value(value: databaseService.streamListsHistory(user.uid))
-                  ],
-                  child: CustomNavigator(
-                    home: ShoppingListView(),
-                    pageRoute: PageRoutes.materialPageRoute,
-                  )
-              ));
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.insert_chart),
-            title: Text("Statistiken"),
-            onTap: () {
-              Navigator.pop(context);
-            },
-   /* return Drawer(
+              ListTile(
+                leading: Icon(Icons.insert_chart),
+                title: Text("Statistiken"),
+                onTap: () {
+                  ScreenModel.of(context).setScreen(MultiProvider(
+                      providers: [StreamProvider.value(value: databaseService.streamLists(user.uid)), StreamProvider.value(value: databaseService.streamListsHistory(user.uid))],
+                      child: CustomNavigator(
+                        home: StatisticsView(),
+                        pageRoute: PageRoutes.materialPageRoute,
+                      )));
+                  Navigator.pop(context);
+                },
+              ),
+              /*return Drawer(
        // child: Column(
       //children: <Widget>[
        // UserAccountsDrawerHeader(
@@ -93,93 +99,93 @@ class _Sidebar extends State<Sidebar> {
                 )));
             Navigator.pop(context);
           },
-        ),
-        ListTile(
-          leading: Icon(Icons.insert_chart),
-          title: Text("Statistiken"),
-          onTap: () {
-            ScreenModel.of(context).setScreen(MultiProvider(
-                providers: [StreamProvider.value(value: databaseService.streamLists(user.uid)), StreamProvider.value(value: databaseService.streamListsHistory(user.uid))],
-                child: CustomNavigator(
-                  home: StatisticsView(),
-                  pageRoute: PageRoutes.materialPageRoute,
-                )));
-            Navigator.pop(context);
-          },
         ),*/
-        ListTile(
-          leading: Icon(Icons.local_dining),
-          title: Text("Rezepte"),
-          onTap: () {
-            ScreenModel.of(context).setScreen(MultiProvider(
-                providers: [
-                  StreamProvider.value(value: databaseService.streamRecipes(user.uid)),
-                ],
-                child: CustomNavigator(
-                  home: RecipeView(),
-                  pageRoute: PageRoutes.materialPageRoute,
-                )));
-            Navigator.pop(context);
-          },
-        ),
-        user.hasUnlockedAchievements
-            ? ListTile(
-                leading: Icon(Icons.star_border),
-                title: Text("Erfolge"),
+              ListTile(
+                leading: Icon(Icons.insert_chart),
+                title: Text("Statistiken"),
                 onTap: () {
                   ScreenModel.of(context).setScreen(MultiProvider(
-                      providers: [],
+                      providers: [StreamProvider.value(value: databaseService.streamLists(user.uid)), StreamProvider.value(value: databaseService.streamListsHistory(user.uid))],
                       child: CustomNavigator(
-                        home: AchievementsView(),
+                        home: StatisticsView(),
                         pageRoute: PageRoutes.materialPageRoute,
                       )));
                   Navigator.pop(context);
                 },
-              )
-            : Container(
-                height: 0,
-                width: 0,
               ),
-        Divider(),
-        ListTile(
-          leading: Icon(Icons.group),
-          title: Text("Gruppen"),
-          onTap: () {
-            ScreenModel.of(context).setScreen(StreamProvider<List<Group>>.value(
-                value: databaseService.streamGroupsFromUser(user.uid),
-                child: CustomNavigator(
-                  home: GroupView(),
-                  pageRoute: PageRoutes.materialPageRoute,
-                )));
-            Navigator.pop(context);
-          },
-        ),
-        ListTile(
-          leading: Icon(Icons.mail),
-          title: Text("Einladungen"),
-          onTap: () {
-            ScreenModel.of(context).setScreen(InviteView());
-            Navigator.pop(context);
-          },
-        ),
-        Divider(),
-        ListTile(
-          leading: Icon(Icons.settings),
-          title: Text("Einstellungen"),
-          onTap: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => SettingsView()));
-          },
-        ),
-        Spacer(),
-        ListTile(
-          leading: Icon(Icons.arrow_back),
-          title: Text("Logout"),
-          onTap: () {
-            authService.signOut();
-            Navigator.pop(context);
-          },
-        ),
-      ],
-    ));
+              ListTile(
+                leading: Icon(Icons.local_dining),
+                title: Text("Rezepte"),
+                onTap: () {
+                  ScreenModel.of(context).setScreen(MultiProvider(
+                      providers: [
+                        StreamProvider.value(value: databaseService.streamRecipes(user.uid)),
+                      ],
+                      child: CustomNavigator(
+                        home: RecipeView(),
+                        pageRoute: PageRoutes.materialPageRoute,
+                      )));
+                  Navigator.pop(context);
+                },
+              ),
+              user.hasUnlockedAchievements
+                  ? ListTile(
+                      leading: Icon(Icons.star_border),
+                      title: Text("Erfolge"),
+                      onTap: () {
+                        ScreenModel.of(context).setScreen(MultiProvider(
+                            providers: [],
+                            child: CustomNavigator(
+                              home: AchievementsView(),
+                              pageRoute: PageRoutes.materialPageRoute,
+                            )));
+                        Navigator.pop(context);
+                      },
+                    )
+                  : Container(
+                      height: 0,
+                      width: 0,
+                    ),
+              Divider(),
+              ListTile(
+                leading: Icon(Icons.group),
+                title: Text("Gruppen"),
+                onTap: () {
+                  ScreenModel.of(context).setScreen(StreamProvider<List<Group>>.value(
+                      value: databaseService.streamGroupsFromUser(user.uid),
+                      child: CustomNavigator(
+                        home: GroupView(),
+                        pageRoute: PageRoutes.materialPageRoute,
+                      )));
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.mail),
+                title: Text("Einladungen"),
+                onTap: () {
+                  ScreenModel.of(context).setScreen(InviteView());
+                  Navigator.pop(context);
+                },
+              ),
+              Divider(),
+              ListTile(
+                leading: Icon(Icons.settings),
+                title: Text("Einstellungen"),
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => SettingsView()));
+                },
+              ),
+              Spacer(),
+              ListTile(
+                leading: Icon(Icons.arrow_back),
+                title: Text("Logout"),
+                onTap: () {
+                  authService.signOut();
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ));
   }
 }
