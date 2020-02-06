@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
@@ -12,6 +14,7 @@ import 'package:listassist/widgets/group/group_create_shopping_list.dart';
 import 'package:listassist/widgets/group/group_userlist.dart';
 import 'package:listassist/widgets/shimmer/shoppy_shimmer.dart';
 import 'package:listassist/widgets/shoppinglist/shopping_list.dart' as w;
+import 'package:progress_indicator_button/progress_button.dart';
 import 'package:provider/provider.dart';
 import 'group_shopping_list.dart';
 
@@ -29,6 +32,7 @@ bool _useCache = false;
 
 class _GroupDetail extends State<GroupDetail> {
   String username;
+  bool _isInviting = false;
 
   @override
   Widget build(BuildContext context) {
@@ -134,29 +138,42 @@ class _GroupDetail extends State<GroupDetail> {
                 Navigator.of(context).pop();
               },
             ),
-            FlatButton(
-              child: Text("Einladen"),
-              onPressed: () async {
-                final HttpsCallable invite = cloudFunctionInstance.getHttpsCallable(
-                    functionName: "inviteUsers"
-                );
-                try {
-                  dynamic resp = await invite.call(<String, dynamic>{
-                    "targetemails": [_addressController.text],
-                    "groupid": _group.id,
-                    "groupname": _group.title,
-                    "from": username,
-                  });
-                  if (resp.data["status"] != "Successful") {
-                    InfoOverlay.showErrorSnackBar("Fehler beim Verschicken");
-                  } else {
-                    InfoOverlay.showInfoSnackBar("Einladungen verschickt");
-                    Navigator.pop(context);
+            Container(
+              width: 100,
+              height: 40,
+              child: ProgressButton(
+                child: Text("Einladen", style: TextStyle(color: Theme.of(context).colorScheme.primary)),
+                onPressed: _isInviting ? () {} : (AnimationController controller) async {
+                  controller.forward();
+                  _isInviting = true;
+                  final HttpsCallable invite = cloudFunctionInstance.getHttpsCallable(
+                      functionName: "inviteUsers"
+                  );
+                  try {
+                    dynamic resp = await invite.call(<String, dynamic>{
+                      "targetemails": [_addressController.text],
+                      "groupid": _group.id,
+                      "groupname": _group.title,
+                      "from": username,
+                    });
+                    if (resp.data["status"] != "Successful") {
+                      InfoOverlay.showErrorSnackBar("Fehler beim Verschicken");
+                    } else {
+                      InfoOverlay.showInfoSnackBar("Einladungen verschickt");
+                      Navigator.pop(context);
+                    }
+                  } catch(e) {
+                    InfoOverlay.showErrorSnackBar("Fehler: ${e.message}");
+                  } finally {
+                    _isInviting = false;
+                    controller.reverse();
                   }
-                }catch(e) {
-                  InfoOverlay.showErrorSnackBar("Fehler: ${e.message}");
-                }
-              },
+                },
+                borderRadius: BorderRadius.all(Radius.circular(4)),
+                color: Colors.white,
+                progressIndicatorColor: Theme.of(context).colorScheme.primary,
+                progressIndicatorSize: 20,
+              ),
             ),
           ],
         );

@@ -23,7 +23,18 @@ class GroupUserList extends StatelessWidget {
           alignment: Alignment.centerLeft,
           child: Row(
             children: <Widget>[
-              CircleAvatar(backgroundImage: member.photoUrl.length > 0 ? NetworkImage(member.photoUrl) : AssetImage("assets/images/userpic.png")),
+              CircleAvatar(
+                backgroundImage: AssetImage("assets/images/userpic.png"),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(45),
+                  child: FadeInImage(
+                    width: 80,
+                    height: 80,
+                    image: NetworkImage(member.photoUrl),
+                    placeholder: AssetImage("assets/images/userpic.png")
+                  )
+                ),
+              ),
               Expanded(
                 child: Padding(
                   padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
@@ -45,7 +56,18 @@ class GroupUserList extends StatelessWidget {
         alignment: Alignment.centerLeft,
         child: Row(
           children: <Widget>[
-            CircleAvatar(backgroundImage: NetworkImage(group.creator.photoUrl)),
+            CircleAvatar(
+              backgroundImage: AssetImage("assets/images/userpic.png"),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(45),
+                child: FadeInImage(
+                  width: 80,
+                  height: 80,
+                  image: NetworkImage(group.creator.photoUrl),
+                  placeholder: AssetImage("assets/images/userpic.png")
+                )
+              ),
+            ),
             Expanded(
               child: Padding(
                 padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
@@ -67,16 +89,3 @@ class GroupUserList extends StatelessWidget {
     );
   }
 }
-
-
-/*
-ListView.separated(
-        separatorBuilder: (context, index) => Divider(
-          color: Colors.grey,
-          endIndent: 10,
-          indent: 10,
-        ),
-        itemCount: members.length,
-        itemBuilder: (context, index) => members[index]
-    );
- */
