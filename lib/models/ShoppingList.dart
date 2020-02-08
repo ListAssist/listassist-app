@@ -11,7 +11,7 @@ class ShoppingList {
   ShoppingList({this.id, this.created, this.name, this.type, this.items});
 
   factory ShoppingList.fromFirestore(DocumentSnapshot doc) {
-    Map data = doc.data;
+    Map data = doc.data ?? { };
 
     return ShoppingList(
       id: doc.documentID,

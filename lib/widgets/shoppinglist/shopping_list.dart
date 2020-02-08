@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:listassist/models/Group.dart';
 import 'package:listassist/models/User.dart';
 import 'package:listassist/services/db.dart';
 import 'package:listassist/services/info_overlay.dart';
@@ -11,7 +12,9 @@ import 'edit_shopping_list.dart';
 
 class ShoppingList extends StatefulWidget {
   final int index;
-  ShoppingList({this.index});
+  final bool isGroup;
+  final int groupIndex;
+  ShoppingList({this.index, this.isGroup = false, this.groupIndex = 0});
 
   @override
   _ShoppingListState createState() => _ShoppingListState();
@@ -20,15 +23,29 @@ class ShoppingList extends StatefulWidget {
 class _ShoppingListState extends State<ShoppingList> {
 
   model.ShoppingList list;
+  String uid;
 
   @override
   Widget build(BuildContext context) {
-    list = Provider.of<List<model.ShoppingList>>(context)[widget.index];
-    //print(list);
-    return GestureDetector(
+    if(widget.isGroup) {
+      uid = Provider.of<List<Group>>(context)[widget.groupIndex].id;
+      list = Provider.of<List<model.ShoppingList>>(context)[widget.index];
+    }else {
+      list = Provider.of<List<model.ShoppingList>>(context)[widget.index];
+      uid = Provider.of<User>(context).uid;
+    }
+
+    return list == null ? Container() : GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () => Navigator.push(
         context,
+        widget.isGroup ?
+        MaterialPageRoute(builder: (context) {
+          return StreamProvider<model.ShoppingList>.value(
+              value: databaseService.streamListFromGroup(uid, list.id),
+              child: ShoppingListDetail(index: widget.groupIndex, isGroup: true)
+          );
+        }) :
         MaterialPageRoute(builder: (context) => ShoppingListDetail(index: widget.index)),
       ),
       onLongPressStart: (details) async {
@@ -65,7 +82,13 @@ class _ShoppingListState extends State<ShoppingList> {
           Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) => EditShoppingList(index: widget.index)),
+              builder: (context) =>
+              widget.isGroup ? StreamProvider<model.ShoppingList>.value(
+                value: databaseService.streamListFromGroup(uid, list.id),
+                child: EditShoppingList(index: widget.groupIndex, isGroup: true)
+              )
+              : EditShoppingList(index: widget.index)
+            )
           );
         // Delete
         }else if(picked == 1) {
@@ -126,7 +149,7 @@ class _ShoppingListState extends State<ShoppingList> {
               child: Text("Löschen"),
               onPressed: () {
                 String name = list.name;
-                databaseService.deleteList(Provider.of<User>(context).uid, list.id).catchError((_) {
+                databaseService.deleteList(uid, list.id, widget.isGroup).catchError((_) {
                   InfoOverlay.showErrorSnackBar("Fehler beim Löschen der Einkaufsliste");
                 }).then((_) {
                   InfoOverlay.showInfoSnackBar("Einkaufsliste $name gelöscht");

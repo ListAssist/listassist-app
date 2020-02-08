@@ -1,12 +1,13 @@
 import 'dart:async';
-import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:listassist/models/Group.dart';
 import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
 import 'package:listassist/services/connectivity.dart';
 import 'package:listassist/services/db.dart';
+import 'package:listassist/widgets/shimmer/shoppy_shimmer.dart';
 import 'package:listassist/widgets/shoppinglist/edit_shopping_list.dart';
 import 'package:listassist/widgets/shoppinglist/prize_dialog.dart';
 import 'package:listassist/widgets/shoppinglist/search_items_view.dart';
@@ -17,8 +18,8 @@ import 'package:listassist/services/info_overlay.dart';
 
 class ShoppingListDetail extends StatefulWidget {
   final int index;
-
-  ShoppingListDetail({this.index});
+  final bool isGroup;
+  ShoppingListDetail({this.index, this.isGroup = false});
 
   @override
   _ShoppingListDetail createState() => _ShoppingListDetail();
@@ -42,7 +43,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
     if (_debounce?.isActive ?? false) _debounce.cancel();
     _debounce = Timer(Duration(milliseconds: _debounceTime), () {
       if (list != null && uid != null || uid.length > 0) {
-        databaseService.updateList(uid, list).then((onUpdate) {
+        databaseService.updateList(uid, list, widget.isGroup).then((onUpdate) {
           print("Saved items");
         }).catchError((onError) {
           InfoOverlay.showErrorSnackBar("Fehler beim aktualisieren der Einkaufsliste");
@@ -59,7 +60,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
     });
 
     try {
-      await databaseService.updateList(uid, list);
+      await databaseService.updateList(uid, list, widget.isGroup);
     } catch (e) {
       InfoOverlay.showErrorSnackBar("Fehler beim aktualisieren der Einkaufsliste");
     }
@@ -67,27 +68,42 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
 
   @override
   Widget build(BuildContext context) {
-    List<ShoppingList> lists = Provider.of<List<ShoppingList>>(context);
+    //List<ShoppingList> lists = Provider.of<List<ShoppingList>>(context);
     if (!useCache) {
-      list = Provider.of<List<ShoppingList>>(context)[widget.index];
+      if(widget.isGroup){
+        list = Provider.of<ShoppingList>(context);
+      }else {
+        list = Provider.of<List<ShoppingList>>(context)[widget.index];
+      }
     }
-    uid = Provider.of<User>(context).uid;
+    if(widget.isGroup){
+      uid = Provider.of<List<Group>>(context)[widget.index].id;
+    }else {
+      uid = Provider.of<User>(context).uid;
+    }
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.primary,
-        title: Text(list.name),
+        title: Text(list == null ? "" : list.name),
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.edit),
             onPressed: () => Navigator.push(
               context,
+              widget.isGroup ?
+              MaterialPageRoute(builder: (context) {
+                return StreamProvider<ShoppingList>.value(
+                    value: databaseService.streamListFromGroup(uid, list.id),
+                    child: EditShoppingList(index: widget.index, isGroup: true)
+                );
+              }) :
               MaterialPageRoute(builder: (context) => EditShoppingList(index: widget.index)),
             ),
           )
         ],
       ),
-      body: Column(
+      body: list == null ? ShoppyShimmer() : Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Container(
@@ -118,7 +134,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
                                         //hier wird bisschen getrickst HAHAH XD SRY SECZER WAR ZU FAUL
                                         itemChange(list.items[index].bought, index);
                                         setState(() {});
-                                        databaseService.updateList(uid, list).then((onUpdate) {
+                                        databaseService.updateList(uid, list, widget.isGroup).then((onUpdate) {
                                           print("Saved items");
                                         }).catchError((onError) {
                                           InfoOverlay.showErrorSnackBar("Fehler beim aktualisieren der Einkaufsliste");
@@ -147,7 +163,14 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
               child: Icon(Icons.add),
               backgroundColor: Colors.green,
               onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => SearchItemsView(lists.elementAt(widget.index).id)));
+                Navigator.push(context,
+                    widget.isGroup ?
+                    MaterialPageRoute(builder: (context) =>
+                      StreamProvider<ShoppingList>.value(
+                        value: databaseService.streamListFromGroup(uid, list.id),
+                        child: SearchItemsView(uid, true)
+                      ))
+                    : MaterialPageRoute(builder: (context) => SearchItemsView(list.id)));
               },
             ),
           ),
@@ -261,7 +284,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
                       name: list.name,
                       items: list.items,
                     );
-                    databaseService.completeList(uid, list).catchError((_) {
+                    databaseService.completeList(uid, list, widget.isGroup).catchError((_) {
                       InfoOverlay.showErrorSnackBar("Fehler beim Abschließen der Einkaufsliste");
                       useCache = false;
                       _buttonsDisabled = false;
@@ -331,7 +354,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
                     _buttonsDisabled = false;
                   } else {
                     //I am connected to the Internet
-                    databaseService.deleteList(uid, list.id).catchError((_) {
+                    databaseService.deleteList(uid, list.id, widget.isGroup).catchError((_) {
                       InfoOverlay.showErrorSnackBar("Fehler beim Löschen der Einkaufsliste");
                       useCache = false;
                       _buttonsDisabled = false;

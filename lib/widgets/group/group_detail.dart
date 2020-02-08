@@ -1,9 +1,5 @@
-import 'dart:io';
-
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:listassist/models/Group.dart';
 import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
@@ -16,7 +12,6 @@ import 'package:listassist/widgets/shimmer/shoppy_shimmer.dart';
 import 'package:listassist/widgets/shoppinglist/shopping_list.dart' as w;
 import 'package:progress_indicator_button/progress_button.dart';
 import 'package:provider/provider.dart';
-import 'group_shopping_list.dart';
 
 class GroupDetail extends StatefulWidget {
   final index;
@@ -63,8 +58,8 @@ class _GroupDetail extends State<GroupDetail> {
         body: TabBarView(
           children: [
             StreamProvider<List<ShoppingList>>.value(
-              value: databaseService.streamListsFromGroup(_group.id),
-              child:  ShoppingLists(groupindex: widget.index),
+              value: databaseService.streamLists(_group.id, true),
+              child: ShoppingLists(groupindex: widget.index),
             ),
             Text("Verlauf"),
             Text("Statistiken der Gruppe"),
@@ -96,8 +91,8 @@ class _GroupDetail extends State<GroupDetail> {
                 onPressed: () {
                    Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
                     return StreamProvider<List<ShoppingList>>.value(
-                      value: databaseService.streamListsFromGroup(_group.id),
-                      child:  GroupCreateShoppingList(gid: _group.id),
+                      value: databaseService.streamLists(_group.id, true),
+                      child: GroupCreateShoppingList(gid: _group.id),
                     );
                   }));
                 },
@@ -282,7 +277,7 @@ class ShoppingLists extends StatelessWidget {
           color: Colors.grey,
         ),
         itemCount: lists.length,
-        itemBuilder: (ctx, index) => GroupShoppingList(groupindex: this.groupindex, index: index)
-    ) : SpinKitDoubleBounce(color: Colors.blueAccent,);
+        itemBuilder: (ctx, index) => w.ShoppingList(index: index, groupIndex: this.groupindex, isGroup: true)
+    ) : ShoppyShimmer();
   }
 }

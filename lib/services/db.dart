@@ -54,10 +54,10 @@ class DatabaseService {
         .map((snap) => snap.documents.map((d) => Invite.fromFirestore(d)).toList());
   }
 
-  Stream<List<ShoppingList>> streamLists(String uid) {
-    print("----- READ LISTS -----");
+  Stream<List<ShoppingList>> streamLists(String uid, [isGroup = false]) {
+    print("----- READ ${isGroup ? "GROUP" : "USER"} LISTS -----");
     return _db
-        .collection("users")
+        .collection(isGroup ? "groups" : "users")
         .document(uid)
         .collection("lists")
         .where("type", isEqualTo: "pending")
@@ -75,10 +75,10 @@ class DatabaseService {
         .map((snap) => snap.documents.map((d) => Recipe.fromFirestore(d)).toList());
   }
 
-  Stream<List<CompletedShoppingList>> streamListsHistory(String uid) {
-    print("----- READ COMPLETED LISTS -----");
+  Stream<List<CompletedShoppingList>> streamListsHistory(String uid, [isGroup = false]) {
+    print("----- READ ${isGroup ? "GROUP" : "USER"} COMPLETED LISTS -----");
     return _db
-        .collection("users")
+        .collection(isGroup ? "groups" : "users")
         .document(uid)
         .collection("lists")
         .where("type", isEqualTo: "completed")
@@ -125,17 +125,6 @@ class DatabaseService {
         .document(uid)
         .collection("recipes")
         .add({"name": recipe.name, "description" : recipe.description, "items": items});
-  }
-
-  Stream<List<ShoppingList>> streamListsFromGroup(String groupid) {
-    print("----- READ GROUP LISTS -----");
-    return _db
-        .collection("groups")
-        .document(groupid)
-        .collection("lists")
-        .where("type", isEqualTo: "pending")
-        .snapshots()
-        .map((snap) => snap.documents.map((d) => ShoppingList.fromFirestore(d)).toList());
   }
 
   Stream<ShoppingList> streamListFromGroup(String groupid, String listid) {
