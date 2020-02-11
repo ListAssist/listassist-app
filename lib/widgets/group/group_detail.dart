@@ -1,5 +1,6 @@
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
+import 'package:listassist/models/CompletedShoppingList.dart';
 import 'package:listassist/models/Group.dart';
 import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
@@ -10,6 +11,7 @@ import 'package:listassist/widgets/group/group_create_shopping_list.dart';
 import 'package:listassist/widgets/group/group_userlist.dart';
 import 'package:listassist/widgets/shimmer/shoppy_shimmer.dart';
 import 'package:listassist/widgets/shoppinglist/shopping_list.dart' as w;
+import 'package:listassist/widgets/shoppinglist/completed_shopping_list.dart' as w2;
 import 'package:progress_indicator_button/progress_button.dart';
 import 'package:provider/provider.dart';
 
@@ -61,7 +63,10 @@ class _GroupDetail extends State<GroupDetail> {
               value: databaseService.streamLists(_group.id, true),
               child: ShoppingLists(groupindex: widget.index),
             ),
-            Text("Verlauf"),
+            StreamProvider<List<CompletedShoppingList>>.value(
+              value: databaseService.streamListsHistory(_group.id, true),
+              child: ShoppingListsHistory(groupindex: widget.index),
+            ),
             Text("Statistiken der Gruppe"),
             GroupUserList(index: widget.index)
           ],
@@ -269,15 +274,37 @@ class ShoppingLists extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     List<ShoppingList> lists = Provider.of<List<ShoppingList>>(context);
-    print("BUILDING LISTS");
     return lists != null ? lists.length == 0 ? Center(child: Text("Noch keine Einkaufslisten erstellt", style: Theme.of(context).textTheme.title,)) : ListView.separated(
         separatorBuilder: (ctx, i) => Divider(
           indent: 10,
           endIndent: 10,
           color: Colors.grey,
         ),
+        physics: BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
         itemCount: lists.length,
         itemBuilder: (ctx, index) => w.ShoppingList(index: index, groupIndex: this.groupindex, isGroup: true)
+    ) : ShoppyShimmer();
+  }
+}
+
+
+class ShoppingListsHistory extends StatelessWidget {
+  final int groupindex;
+  ShoppingListsHistory({this.groupindex});
+
+  @override
+  Widget build(BuildContext context) {
+    List<CompletedShoppingList> lists = Provider.of<List<CompletedShoppingList>>(context);
+    return lists != null ? lists.length == 0 ? Center(child: Text("Noch keine Einkäufe abgeschlossen", style: Theme.of(context).textTheme.title,)) : ListView.separated(
+      separatorBuilder: (ctx, i) => Divider(
+        indent: 10,
+        endIndent: 10,
+        color: Colors.grey,
+      ),
+      physics: BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+      itemCount: lists.length,
+      //TODO: Add isGroup setting to completed shopping list views
+      itemBuilder: (ctx, index) => w2.CompletedShoppingList(index: index)
     ) : ShoppyShimmer();
   }
 }
