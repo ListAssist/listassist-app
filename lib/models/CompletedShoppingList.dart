@@ -54,7 +54,14 @@ class CompletedShoppingList {
         created: Timestamp.now(),
         name: newName ?? this.name,
         type: "pending",
-        items: this.completedItems.map((item) => Item(name: item.name, bought: item.bought = false)).toList());
+        items: this.completedItems.map((item) =>
+            Item(
+                name: item.name,
+                bought: false,
+                prize: item.prize,
+                count: item.count,
+                category: item.category
+            )).toList());
   }
 
 }
