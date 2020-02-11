@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/material.dart';
 import 'package:listassist/models/Achievement.dart';
 import 'package:listassist/models/CompletedShoppingList.dart';
 import 'package:listassist/models/Group.dart';
@@ -322,6 +321,16 @@ class DatabaseService {
 //        .document(list.id)
 //        .setData({"photoURLs": FieldValue.arrayUnion(["EMPTY"])}, merge: true);
 //  }
+
+  Future<void> saveBillUrls(String uid, String listid, String imgName, [isGroup = false]) async{
+    String path = isGroup ? "groups/$uid/lists/$listid/$imgName" : "users/$uid/lists/$listid/$imgName";
+    return _db
+        .collection(isGroup ? "groups" : "users")
+        .document(uid)
+        .collection("lists")
+        .document(listid)
+        .setData({"pictureURLs": FieldValue.arrayUnion([path])}, merge: true);
+  }
 }
 
 

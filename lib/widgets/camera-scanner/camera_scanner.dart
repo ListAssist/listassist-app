@@ -4,6 +4,7 @@ import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:after_init/after_init.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -276,12 +277,14 @@ class CameraScannerState extends State<CameraScanner> with AfterInitMixin<Camera
       "list": scannedList.toJSON()
     });
 
+     DateTime now = DateTime.now();
     /// Upload to firestore
     var task = storageService.upload(
         _imageFile,
         "users/${user.uid}/lists/${shoppingList.id}/",
         concatString: "",
         includeTimestamp: true,
+        timestamp: now,
         metadata: metadata);
 
     /// execute task to upload and display current progress
@@ -292,7 +295,13 @@ class CameraScannerState extends State<CameraScanner> with AfterInitMixin<Camera
       }
     });
     /// wait for task to finish to proceed going back
-    await task.onComplete;
+    await Future.wait(
+      [
+        task.onComplete,
+        databaseService.saveBillUrls(user.uid, shoppingList.id, "$now.png")
+      ]
+    );
+    //await task.onComplete;
   }
 
   /// Gets http resonse for specific editor type
