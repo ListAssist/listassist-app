@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:listassist/services/date_formatter.dart';
 import 'package:photo_view/photo_view.dart';
 
 class BillDetails extends StatefulWidget {
@@ -17,31 +18,14 @@ class _BillDetailsState extends State<BillDetails> {
   
   List<dynamic> detectedProducts;
   bool _loaded = false;
+  DateTime scanned;
 
   @override
   Widget build(BuildContext context) {
     if(!_loaded) {
       widget.image.getMetadata().then((val) {
-        print(val.customMetadata["detected_products"]);
-//        detectedProducts = [
-//          {"name": "Milchlaible", "price": 2.59},
-//          {"name": "Lieblingsartike]", "price": -0.65},
-//          {"name": "Clever Sauerrahm", "price": 0.59},
-//          {"name": "Frankfurter er", "price": 2.99},
-//          {"name": "Lieblingsartike]", "price": -0.75},
-//          {"name": "BLÜTENHONIG G", "price": 6.99},
-//          {"name": "Lieblingsartikel", "price": -1.75},
-//          {"name": "Detk Torte Wr Art", "price": 2.99},
-//          {"name": "Lieblingsartikel", "price": -0.75},
-//          {"name": "Maltesers Maxi", "price": 4.49},
-//          {"name": "*HITPARADE", "price": -0.8},
-//          {"name": "Perfect Fit Sensitiv", "price": 4.49},
-//          {"name": "AKTIONSNACHLASS", "price": -1.3},
-//          {"name": "", "price": 0.0},
-//          {"name": "BILLA LIEBLINGSARTIK", "price": 0.0}
-//        ];
-        detectedProducts = json.decode(val.customMetadata["detected_products"] ?? "[]");
-        print(detectedProducts);
+        detectedProducts = json.decode(val.customMetadata["list"] ?? "[]")["items"];
+        scanned = DateTime.parse(json.decode(val.customMetadata["list"] ?? "[]")["scanned"]);
         setState(() => { _loaded = true});
       });
     }
@@ -76,19 +60,19 @@ class _BillDetailsState extends State<BillDetails> {
             !_loaded ? SpinKitCircle(color: Colors.blueAccent) :
             detectedProducts.length == 0 ? Center(child: Text("Keine Produkte erkannt", style: Theme.of(context).textTheme.title)) :
             ListView.builder(
-              itemCount: detectedProducts.length,
+              itemCount: detectedProducts.length + 1,
               itemBuilder: (ctx, index) {
                 return Padding(
                   padding: EdgeInsets.fromLTRB(20, 0, 20, 10),
                   child: ListTile(
-                    title: Text(detectedProducts[index]["name"]),
-                    trailing: Text("${detectedProducts[index]["price"]}".replaceAllMapped(RegExp("(-?\\d+).(\\d*)"), (match) {
+                    title: Text(index == 0 ? "Gescannt am ${DateFormatter.getDateAndTime(scanned)}" : detectedProducts[index - 1]["name"]),
+                    trailing: index == 0 ? null : Text("${detectedProducts[index - 1]["price"]}".replaceAllMapped(RegExp("(-?\\d+).(\\d*)"), (match) {
                       return "${match.group(1)},${match.group(2).padRight(2, "0")}€";
                     })),
                   ),
                 );
               },
-              physics: BouncingScrollPhysics(),
+              physics: BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
             )
           ],
         ),

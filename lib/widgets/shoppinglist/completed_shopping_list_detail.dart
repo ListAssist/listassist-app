@@ -69,10 +69,10 @@ class _CompletedShoppingListDetailState extends State<CompletedShoppingListDetai
         children: [
           SpeedDialChild(
             child: Icon(Icons.list),
-            backgroundColor: (list.bills != null && list.bills.length > 0) ? Colors.blue : Colors.grey,
+            backgroundColor: (list.bills != null && list.bills.isNotEmpty) ? Colors.blue : Colors.grey,
             label: "Rechnungen",
             labelStyle: TextStyle(fontSize: 18.0),
-            onTap: (list.bills != null && list.bills.length > 0) ? () {
+            onTap: (list.bills != null && list.bills.isNotEmpty) ? () {
               Navigator.push(context, MaterialPageRoute(builder: (context) => Bills(index: widget.index)));
             } : null,
           ),

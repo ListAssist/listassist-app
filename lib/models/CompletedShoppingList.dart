@@ -32,7 +32,7 @@ class CompletedShoppingList {
       type: data["type"],
       allItems: tempAllItems,
       completedItems: tempCompletedItems,
-      bills: data["pictureURLs"]?.map<Bill>((b) => Bill.fromMap(b))?.toList()
+      bills: data["pictureURLs"]?.map<Bill>((url) => Bill.fromURL(url))?.toList() ?? []
     );
 }
 
@@ -45,7 +45,7 @@ class CompletedShoppingList {
         name: data["name"],
         type: data["type"],
         completedItems: List.from(data["items"] ?? []).map((x) => Item.fromMap(x)).toList(),
-        bills: data["pictureURLs"]?.map((b) => Bill.fromMap(b))?.toList()
+        bills: data["pictureURLs"]?.map((url) => Bill.fromURL(url))?.toList() ?? []
     );
   }
 
