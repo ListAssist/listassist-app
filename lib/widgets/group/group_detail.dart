@@ -143,9 +143,11 @@ class _GroupDetail extends State<GroupDetail> {
               height: 40,
               child: ProgressButton(
                 child: Text("Einladen", style: TextStyle(color: Theme.of(context).colorScheme.primary)),
-                onPressed: _isInviting ? () {} : (AnimationController controller) async {
+                onPressed: _isInviting ? null : (AnimationController controller) async {
                   controller.forward();
-                  _isInviting = true;
+                  setState(() {
+                    _isInviting = true;
+                  });
                   final HttpsCallable invite = cloudFunctionInstance.getHttpsCallable(
                       functionName: "inviteUsers"
                   );
@@ -304,7 +306,7 @@ class ShoppingListsHistory extends StatelessWidget {
       physics: BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
       itemCount: lists.length,
       //TODO: Add isGroup setting to completed shopping list views
-      itemBuilder: (ctx, index) => w2.CompletedShoppingList(index: index)
+      itemBuilder: (ctx, index) => w2.CompletedShoppingList(index: index, groupIndex: this.groupindex, isGroup: true)
     ) : ShoppyShimmer();
   }
 }

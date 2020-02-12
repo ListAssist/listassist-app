@@ -36,6 +36,8 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
   Timer _debounce;
   int _debounceTime = 1000;
 
+  int _boughtItemCount = 0;
+
   void itemChange(bool val, int index) {
     setState(() {
       list.items[index].bought = val;
@@ -68,13 +70,13 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
 
   @override
   Widget build(BuildContext context) {
-    //List<ShoppingList> lists = Provider.of<List<ShoppingList>>(context);
     if (!useCache) {
       if(widget.isGroup){
         list = Provider.of<ShoppingList>(context);
       }else {
         list = Provider.of<List<ShoppingList>>(context)[widget.index];
       }
+      _boughtItemCount = list.items.map((e) => e.bought ? 1 : 0).reduce((a, b) => a + b);
     }
     if(widget.isGroup){
       uid = Provider.of<List<Group>>(context)[widget.index].id;
@@ -94,8 +96,8 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
               widget.isGroup ?
               MaterialPageRoute(builder: (context) {
                 return StreamProvider<ShoppingList>.value(
-                    value: databaseService.streamListFromGroup(uid, list.id),
-                    child: EditShoppingList(index: widget.index, isGroup: true)
+                  value: databaseService.streamListFromGroup(uid, list.id),
+                  child: EditShoppingList(index: widget.index, isGroup: true)
                 );
               }) :
               MaterialPageRoute(builder: (context) => EditShoppingList(index: widget.index)),
@@ -107,52 +109,54 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Container(
-              padding: EdgeInsets.all(10.0),
-              child: list.items.isNotEmpty
-                  ? Text("${list.items.map((e) => e.bought ? 1 : 0).reduce((a, b) => a + b)} von ${list.items.length} Produkten gekauft", style: Theme.of(context).textTheme.headline)
-                  : Center(child: Text("Die Einkaufsliste hat noch keine Produkte"))),
+            alignment: Alignment.center,
+            padding: EdgeInsets.all(10.0),
+            child: list.items.isNotEmpty
+              ? Text("$_boughtItemCount von ${list.items.length} Produkt${list.items.length > 1 ? "en" : ""} gekauft", style: Theme.of(context).textTheme.headline)
+              : Center(child: Text("Die Einkaufsliste hat noch keine Produkte"))),
           Expanded(
-              child: list.items.isNotEmpty
-                  ? ListView.builder(
-                      itemCount: list.items.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        return Container(
-                            child: CheckboxListTile(
-                                value: list.items[index].bought,
-                                title: Text("${list.items[index].name}", style: list.items[index].bought ? TextStyle(decoration: TextDecoration.lineThrough, decorationThickness: 3) : null),
-                                subtitle: list.items[index].count != null ? Text(list.items[index].count.toString() + "x") : Text("0x"),
-                                secondary: OutlineButton(
-                                  //decoration: BoxDecoration(border: Border.all(width: 2), borderRadius: BorderRadius.all(Radius.circular(5.0))),
-                                  onPressed: () async {
+            child: list.items.isNotEmpty
+              ? ListView.builder(
+                physics: BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                itemCount: list.items.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return Container(
+                    child: CheckboxListTile(
+                      value: list.items[index].bought,
+                      title: Text("${list.items[index].name}", style: list.items[index].bought ? TextStyle(decoration: TextDecoration.lineThrough, decorationThickness: 3) : null),
+                      subtitle: list.items[index].count != null ? Text(list.items[index].count.toString() + "x") : Text("0x"),
+                      secondary: OutlineButton(
+                        //decoration: BoxDecoration(border: Border.all(width: 2), borderRadius: BorderRadius.all(Radius.circular(5.0))),
+                        onPressed: () async {
 
-                                    if (_debounce == null || !_debounce.isActive) {
-                                      var erg = await showDialog(context: context, builder: (context) {
-                                        return PrizeDialog(name: list.items[index].name, prize: list.items[index].prize != null ? list.items[index].prize : 0);
-                                      });
-                                      if(erg != null) {
-                                        list.items[index].prize = erg;
-                                        //hier wird bisschen getrickst HAHAH XD SRY SECZER WAR ZU FAUL
-                                        itemChange(list.items[index].bought, index);
-                                        setState(() {});
-                                        databaseService.updateList(uid, list, widget.isGroup).then((onUpdate) {
-                                          print("Saved items");
-                                        }).catchError((onError) {
-                                          InfoOverlay.showErrorSnackBar("Fehler beim aktualisieren der Einkaufsliste");
-                                        });
-                                      }
-                                    }
-                                  },
-                                  child: Padding(
-                                    padding: EdgeInsets.all(9.0),
-                                    child: list.items[index].prize != null ? Text(list.items[index].prize.toString() + " €") : Text("0 €"),
-                                  ),
-                                ),
-                                controlAffinity: ListTileControlAffinity.leading,
-                                onChanged: (bool val) {
-                                  itemChange(val, index);
-                                }));
-                      })
-                  : Container()),
+                          if (_debounce == null || !_debounce.isActive) {
+                            var erg = await showDialog(context: context, builder: (context) {
+                              return PrizeDialog(name: list.items[index].name, prize: list.items[index].prize != null ? list.items[index].prize : 0);
+                            });
+                            if(erg != null) {
+                              list.items[index].prize = erg;
+                              //hier wird bisschen getrickst HAHAH XD SRY SECZER WAR ZU FAUL
+                              itemChange(list.items[index].bought, index);
+                              setState(() {});
+                              databaseService.updateList(uid, list, widget.isGroup).then((onUpdate) {
+                                print("Saved items");
+                              }).catchError((onError) {
+                                InfoOverlay.showErrorSnackBar("Fehler beim aktualisieren der Einkaufsliste");
+                              });
+                            }
+                          }
+                        },
+                        child: Padding(
+                          padding: EdgeInsets.all(9.0),
+                          child: list.items[index].prize != null ? Text(list.items[index].prize.toString() + " €") : Text("0 €"),
+                        ),
+                      ),
+                      controlAffinity: ListTileControlAffinity.leading,
+                      onChanged: (bool val) {
+                        itemChange(val, index);
+                      }));
+                })
+              : Container()),
         ],
       ),
       floatingActionButton: Stack(

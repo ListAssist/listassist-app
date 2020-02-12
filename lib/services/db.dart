@@ -48,7 +48,6 @@ class DatabaseService {
     return _db
         .collection("invites")
         .where("to", isEqualTo: uid)
-        .where("type", isEqualTo: "pending")
         .snapshots()
         .map((snap) => snap.documents.map((d) => Invite.fromFirestore(d)).toList());
   }
@@ -135,6 +134,17 @@ class DatabaseService {
         .document(listid)
         .snapshots()
         .map((snap) => ShoppingList.fromFirestore(snap));
+  }
+
+  Stream<CompletedShoppingList> streamCompletedListFromGroup(String groupid, String listid) {
+    print("----- READ GROUP COMPLETED LIST ${listid} -----");
+    return _db
+        .collection("groups")
+        .document(groupid)
+        .collection("lists")
+        .document(listid)
+        .snapshots()
+        .map((snap) => CompletedShoppingList.fromFirestore(snap));
   }
 
   Future<void> updateProfileName(String uid, String newName) {

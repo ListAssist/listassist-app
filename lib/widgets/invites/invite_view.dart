@@ -38,10 +38,11 @@ class InviteItems extends StatelessWidget{
     List<model.Invite> invites = Provider.of<List<model.Invite>>(context);
     return invites != null ? invites.length == 0 ? Center(child: Text("Keine Einladungen", style: Theme.of(context).textTheme.title,)) :
       ListView.builder(
-          itemCount: invites.length,
-          itemBuilder: (BuildContext ctx, int index) {
-            return Invite(invite: invites[index]);
-          }
+        physics: BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+        itemCount: invites.length,
+        itemBuilder: (BuildContext ctx, int index) {
+          return Invite(invite: invites[index]);
+        }
       ) : ShoppyShimmer();
   }
 }
