@@ -33,7 +33,8 @@ export const updateGroup = functions.region("europe-west1").https.onCall((data, 
                 .doc(group["id"])
                 .set({
                     title: group["title"],
-                    members: newMembers
+                    members: newMembers,
+                    settings: group["settings"]
                 }, { merge: true })
             ]).catch(e => {
                 return { status: "Failed"};

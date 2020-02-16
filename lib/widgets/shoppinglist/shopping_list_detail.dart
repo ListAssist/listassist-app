@@ -31,6 +31,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
   bool useCache = false;
 
   //Spamschutz z.B. beim Löschen
+  //TODO: Check if buttonsDisabled is correctly implemented because it wasnt in the completed detail widget
   bool _buttonsDisabled = false;
 
   Timer _debounce;
@@ -76,7 +77,9 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
       }else {
         list = Provider.of<List<ShoppingList>>(context)[widget.index];
       }
-      _boughtItemCount = list.items.map((e) => e.bought ? 1 : 0).reduce((a, b) => a + b);
+      if(list != null) {
+        _boughtItemCount = list.items.map((e) => e.bought ? 1 : 0).reduce((a, b) => a + b);
+      }
     }
     if(widget.isGroup){
       uid = Provider.of<List<Group>>(context)[widget.index].id;
