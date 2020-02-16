@@ -10,6 +10,7 @@ import 'package:listassist/services/db.dart';
 import 'package:listassist/widgets/shoppinglist/edit_shopping_list.dart';
 import 'package:listassist/widgets/shoppinglist/prize_dialog.dart';
 import 'package:listassist/widgets/shoppinglist/search_items_view.dart';
+import 'package:listassist/widgets/shoppinglist/search_items_view_new.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:listassist/services/camera.dart';
@@ -147,7 +148,8 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
               child: Icon(Icons.add),
               backgroundColor: Colors.green,
               onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => SearchItemsView(lists.elementAt(widget.index).id)));
+                //Navigator.push(context, MaterialPageRoute(builder: (context) => SearchItemsView(lists.elementAt(widget.index).id)));
+                Navigator.push(context, MaterialPageRoute(builder: (context) => SearchItemsViewNew(list: lists.elementAt(widget.index))));
               },
             ),
           ),

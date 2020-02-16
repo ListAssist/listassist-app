@@ -12,6 +12,7 @@ import 'package:listassist/services/connectivity.dart';
 import 'package:listassist/services/db.dart';
 import 'package:listassist/services/info_overlay.dart';
 import 'package:listassist/widgets/shoppinglist/search_items_view.dart';
+import 'package:listassist/widgets/shoppinglist/search_items_view_new.dart';
 import 'package:progress_indicator_button/progress_button.dart';
 import 'package:provider/provider.dart';
 
@@ -127,7 +128,16 @@ class _CreateShoppingListView extends State<CreateShoppingListView> {
                             print(l.id)
                           });*/
 
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => SearchItemsView(docRef.documentID)));
+                          //_newShoppingList.id = docRef.documentID;
+                          ShoppingList _newShoppingListWithNewID = new ShoppingList(
+                            id: docRef.documentID,
+                            created: _newShoppingList.created,
+                            name: _newShoppingList.name,
+                            items: _newShoppingList.items,
+                            type: _newShoppingList.type
+                          );
+
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => SearchItemsViewNew(list: _newShoppingListWithNewID,)));
 
 /*
                           Navigator.push(

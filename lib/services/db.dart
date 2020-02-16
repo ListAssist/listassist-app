@@ -167,6 +167,17 @@ class DatabaseService {
         .setData({"name": list.name, "items" : items}, merge: true);
   }
 
+  Future<void> updateRecipe(String uid, Recipe recipe) async {
+    var items = recipe.items.map((e) => e.toJson()).toList();
+
+    return _db
+        .collection("users")
+        .document(uid)
+        .collection("recipes")
+        .document(recipe.id)
+        .setData({"name": recipe.name, "items" : items}, merge: true);
+  }
+
   Future<void> addItemToList(String uid, String listId, Item newItem) async{
     List items;
     String name;
@@ -290,6 +301,15 @@ class DatabaseService {
         .document(uid)
         .collection("lists")
         .document(listid)
+        .delete();
+  }
+
+  Future<void> deleteRecipe(String uid, String recipeId) {
+    return _db
+        .collection("users")
+        .document(uid)
+        .collection("recipes")
+        .document(recipeId)
         .delete();
   }
 

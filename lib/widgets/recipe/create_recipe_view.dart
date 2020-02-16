@@ -13,6 +13,7 @@ import 'package:listassist/services/camera.dart';
 import 'package:listassist/services/connectivity.dart';
 import 'package:listassist/services/db.dart';
 import 'package:listassist/services/info_overlay.dart';
+import 'package:listassist/widgets/shoppinglist/search_items_view_new.dart';
 import 'package:progress_indicator_button/progress_button.dart';
 import 'package:provider/provider.dart';
 
@@ -73,7 +74,10 @@ class _CreateRecipeView extends State<CreateRecipeView> {
               children: <Widget>[
                 Container(
                   color: _backgroundColor,
-                  width: MediaQuery.of(context).size.width,
+                  width: MediaQuery
+                      .of(context)
+                      .size
+                      .width,
                   height: 600.0,
                 ),
                 Container(
@@ -108,14 +112,16 @@ class _CreateRecipeView extends State<CreateRecipeView> {
                           //I am NOT connected
                           controller.reverse();
                           InfoOverlay.showErrorSnackBar("Keine Internetverbindung");
-                        } else if(!buttonDisabled && _nameController.text.length > 0){
+                        } else if (!buttonDisabled && _nameController.text.length > 0) {
                           //I am connected to the Internet
 
                           buttonDisabled = true;
 
                           String name = _nameController.text;
+                          String description = _descriptionController.text;
                           Recipe _newRecipe = new Recipe(
                             name: name,
+                            description: description,
                             items: new List(),
                           );
 
@@ -136,6 +142,14 @@ class _CreateRecipeView extends State<CreateRecipeView> {
                               MaterialPageRoute(
                                   builder: (context) => ShoppingListDetail(index: lists.indexWhere((l) => l.id == docRef.))));
                                   */
+
+                          Recipe _newRecipeWithNewID = new Recipe(
+                            id: docRef.documentID,
+                            name: _newRecipe.name,
+                            description: _newRecipe.description,
+                            items: _newRecipe.items
+                          );
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => SearchItemsViewNew(recipe: _newRecipeWithNewID,)));
                         } else {
                           controller.reverse();
                           InfoOverlay.showErrorSnackBar("Bitte gib einen Namen ein");
@@ -178,22 +192,13 @@ class _CreateRecipeView extends State<CreateRecipeView> {
           Expanded(
             child: Container(
               color: _backgroundColor,
-              width: MediaQuery.of(context).size.width,
+              width: MediaQuery
+                  .of(context)
+                  .size
+                  .width,
               child: Stack(children: []),
             ),
           )
         ]));
-  }
-
-  /// Starts up the camera scanner and awaits output to process
-  Future<void> _startCameraScanner(BuildContext context, ImageSource imageSource, ShoppingList list) async {
-    ScannedShoppingList scannedShoppingList = await cameraService.getResultFromCameraScanner(context, imageSource, addToList: list);
-    if (scannedShoppingList != null) {
-      setState(() {
-        scannedLists.add(scannedShoppingList);
-      });
-    }
-
-    Navigator.pop(context);
   }
 }

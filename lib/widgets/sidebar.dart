@@ -101,19 +101,6 @@ class _Sidebar extends State<Sidebar> {
           },
         ),*/
               ListTile(
-                leading: Icon(Icons.insert_chart),
-                title: Text("Statistiken"),
-                onTap: () {
-                  ScreenModel.of(context).setScreen(MultiProvider(
-                      providers: [StreamProvider.value(value: databaseService.streamLists(user.uid)), StreamProvider.value(value: databaseService.streamListsHistory(user.uid))],
-                      child: CustomNavigator(
-                        home: StatisticsView(),
-                        pageRoute: PageRoutes.materialPageRoute,
-                      )));
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
                 leading: Icon(Icons.local_dining),
                 title: Text("Rezepte"),
                 onTap: () {
