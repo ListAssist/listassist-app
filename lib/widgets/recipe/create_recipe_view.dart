@@ -125,6 +125,7 @@ class _CreateRecipeView extends State<CreateRecipeView> {
                             );
 
                             DocumentReference docRef = await databaseService.createRecipe(_user.uid, _newRecipe);
+                            InfoOverlay.showInfoSnackBar("Rezept ${_newRecipe.name} erstellt");
                             controller.reverse();
                             Navigator.pop(context);
 

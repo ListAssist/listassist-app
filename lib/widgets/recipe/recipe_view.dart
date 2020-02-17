@@ -75,13 +75,21 @@ class _RecipeView extends State<RecipeView> {
                             Padding(
                               padding: EdgeInsets.only(left: 15.0, right: 15.0, bottom: 8.0),
                               child: ListTile(
-                                title: Text("Zutaten"),
+                                title: Text("Zutaten", style: TextStyle(
+                                  color: recipes[index].items.length > 0 ? Colors.black : Colors.red,
+                                ),),
                                 subtitle: Text(
-                                  getItemsAsString(recipes[index].items),
+                                  recipes[index].items.length > 0 ? getItemsAsString(recipes[index].items) : "Keine Zutaten hinzugefügt",
+                                  style: TextStyle(
+                                    color: recipes[index].items.length > 0 ? Colors.grey : Colors.red,
+                                  ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
-                                trailing: Icon(Icons.keyboard_arrow_right),
+                                trailing: Icon(
+                                    Icons.keyboard_arrow_right,
+                                  color: recipes[index].items.length > 0 ? null : Colors.red,
+                                ),
                                 onTap: () {
                                   Navigator.push(
                                       context,
@@ -107,11 +115,11 @@ class _RecipeView extends State<RecipeView> {
                                   FloatingActionButton.extended(
                                     icon: Icon(Icons.check),
                                     label: Text("Liste erstellen"),
-                                    backgroundColor: Colors.green,
-                                    onPressed: () async {
-                                      await databaseService.createList(user.uid, new ShoppingList(created: Timestamp.now(), name: recipes[index].name, items: recipes[index].items, type: "pending"));
-                                      InfoOverlay.showInfoSnackBar("Einkaufsliste mit den benötigten Produkten erstellt");
-                                    },
+                                    backgroundColor: recipes[index].items.length > 0 ? Colors.green : Colors.grey,
+                                    onPressed: recipes[index].items.length > 0 ? () async {
+                                      await databaseService.createList(user.uid, new ShoppingList(created: Timestamp.now(), name: "Rezept: ${recipes[index].name}", items: recipes[index].items, type: "pending"));
+                                      InfoOverlay.showInfoSnackBar("Einkaufsliste für ${recipes[index].name} erstellt");
+                                    } : null,
                                   ),
                                   IconButton(
                                     icon: Icon(Icons.delete),

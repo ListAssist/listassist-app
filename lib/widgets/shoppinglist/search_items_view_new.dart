@@ -104,11 +104,11 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew> {
     if (_debounce?.isActive ?? false) _debounce.cancel();
     _debounce = Timer(Duration(milliseconds: _debounceTime), () {
       if (_listOrRecipe != null && _user.uid != null || _user.uid.length > 0) {
-
         print(_listOrRecipe.id);
 
-        _isList ? databaseService.updateList(_user.uid, _listOrRecipe).then((value) => {print("Liste wurde erfolgreich upgedated")}).catchError((_) => {print(_.toString())})
-          : databaseService.updateRecipe(_user.uid, _listOrRecipe).then((value) => {print("Rezept wurde erfolgreich upgedated")}).catchError((_) => {print(_.toString())});
+        _isList
+            ? databaseService.updateList(_user.uid, _listOrRecipe).then((value) => {print("Liste wurde erfolgreich upgedated")}).catchError((_) => {print(_.toString())})
+            : databaseService.updateRecipe(_user.uid, _listOrRecipe).then((value) => {print("Rezept wurde erfolgreich upgedated")}).catchError((_) => {print(_.toString())});
       }
     });
   }
@@ -131,26 +131,24 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew> {
         builder: (BuildContext buildContext) {
           return SpeechDialog(dialogContext: buildContext);
         });
-    if(resultText == null) {
+    if (resultText == null) {
       resultText = "";
     } else {
       var resultProducts = resultText.trim().split(" und ");
       resultProducts.forEach((p) {
-        if(_listOrRecipe.hasItem(p)){
+        if (_listOrRecipe.hasItem(p)) {
           _addCount(p);
         } else {
           _addItem(new Product(name: p, category: "Spracherkennung"));
         }
-
       });
     }
-    setState(() {
-    });
+    setState(() {});
   }
 
   @override
   void initState() {
-    if(widget.list != null) {
+    if (widget.list != null) {
       _listOrRecipe = widget.list;
       _isList = true;
     } else {
@@ -162,45 +160,42 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew> {
   @override
   Widget build(BuildContext context) {
     _user = Provider.of<User>(context);
-    
+
     return DefaultTabController(
       length: 3,
       child: Scaffold(
           key: _scaffoldKey,
-          floatingActionButton:
-
-          Stack(
-              children: [
-                Align(
-                  alignment: Alignment.bottomRight,
+          floatingActionButton: Stack(children: [
+            Align(
+              alignment: Alignment.bottomRight,
+              child: FloatingActionButton(
+                child: Icon(Icons.check),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                backgroundColor: Colors.green,
+              ),
+            ),
+            Align(
+              alignment: Alignment.bottomRight,
+              child: Padding(
+                padding: EdgeInsets.only(bottom: 60.0),
+                child: Transform.scale(
+                  scale: 0.75,
                   child: FloatingActionButton(
-                    child: Icon(Icons.check),
+                    child: Icon(
+                      Icons.camera_alt,
+                      color: Colors.black,
+                    ),
                     onPressed: () {
                       Navigator.pop(context);
                     },
-                    backgroundColor: Colors.green,
+                    backgroundColor: Colors.white,
                   ),
                 ),
-
-                Align(
-                  alignment: Alignment.bottomRight,
-                  child: Padding(
-                    padding: EdgeInsets.only(bottom: 60.0),
-                    child: Transform.scale(
-                      scale: 0.75,
-                      child: FloatingActionButton(
-                        child: Icon(Icons.camera_alt, color: Colors.black,),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        backgroundColor: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-              ]
-          ),
-
+              ),
+            ),
+          ]),
           body: Column(children: <Widget>[
             Container(
               height: 120.0,
@@ -266,179 +261,208 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew> {
             ),
             _searchController.text.length == 0
                 ? Container(
-              color: Theme.of(context).primaryColor,
-              child: TabBar(
-                indicatorColor: Colors.white,
-                tabs: [Tab(text: "Zuletzt"), Tab(text: "Beliebt"), Tab(text: "Kategorien")],
-              ),
-            )
+                    color: Theme.of(context).primaryColor,
+                    child: TabBar(
+                      indicatorColor: Colors.white,
+                      tabs: [Tab(text: _isList ? "Auf Liste" : "Auf Rezept"), Tab(text: "Beliebt"), Tab(text: "Kategorien")],
+                    ),
+                  )
                 : Container(),
             _searchController.text.length == 0
                 ? Expanded(
-              child: TabBarView(
-                children: <Widget>[
-                  
-                  
-                  Container(), //erster tab
-                  
-                  
-                  FutureBuilder(
-                      future: databaseService.getPopularProducts(),
-                      builder: (context, snapshot) {
-                        if(snapshot.connectionState == ConnectionState.waiting) {
-                          return ShoppyShimmer();
-                        }
-
-                        return MediaQuery.removePadding(
-                            removeTop: true,
-                            context: context,
-                            child: ListView.separated(
-                              itemCount: snapshot.data.length,
-                              separatorBuilder: (ctx, i) => Divider(
-                                indent: 70,
-                                endIndent: 10,
-                                color: Colors.grey,
-                              ),
-                              itemBuilder: (context, index) {
-                                _subtract() {
-                                  _subtractCount(snapshot.data[index].name);
-                                }
-
-                                return Container(
-                                  height: 65,
-                                  child: ListTile(
-                                    leading: Padding(
-                                      padding: EdgeInsets.all(8.0),
-                                      child: Icon(Icons.local_dining),
-                                    ),
-                                    title: Text(snapshot.data[index].name),
-                                    subtitle: Text(snapshot.data[index].category),
-                                    trailing: _listOrRecipe.hasItem(snapshot.data[index].name)
-                                        ? ItemCounter(count: _listOrRecipe.items.firstWhere((i) => i.name == snapshot.data[index].name).count, subtractCount: _subtract)
-                                        : Container(
-                                      width: 0,
-                                      height: 0,
-                                    ),
-                                    onTap: () {
-                                      if (!_listOrRecipe.hasItem(snapshot.data[index].name)) {
-                                        _addItem(new Product(name: snapshot.data[index].name, category: snapshot.data[index].category));
-                                      } else {
-                                        _addCount(snapshot.data[index].name);
-                                      }
-                                    },
+                    child: TabBarView(
+                      children: <Widget>[
+                        Container(
+                            child: MediaQuery.removePadding(
+                                removeTop: true,
+                                context: context,
+                                child: ListView.separated(
+                                  itemCount: _listOrRecipe.items.length,
+                                  separatorBuilder: (ctx, i) => Divider(
+                                    indent: 70,
+                                    endIndent: 10,
+                                    color: Colors.grey,
                                   ),
-                                );
-                              },
-                            ));
-                      }),
-                  Column(
-                    children: <Widget>[
-                      Text(resultText),
-                    ],
+                                  itemBuilder: (context, index) {
+                                    _subtract() {
+                                      _subtractCount(_listOrRecipe.items[index].name);
+                                    }
+
+                                    return Container(
+                                      height: 65,
+                                      child: ListTile(
+                                        leading: Padding(
+                                          padding: EdgeInsets.all(8.0),
+                                          child: Icon(Icons.local_dining),
+                                        ),
+                                        title: Text(_listOrRecipe.items[index].name),
+                                        subtitle: Text(_listOrRecipe.items[index].category),
+                                        trailing: ItemCounter(count: _listOrRecipe.items[index].count, subtractCount: _subtract),
+                                        onTap: () {
+                                          _addCount(_listOrRecipe.items[index].name);
+                                        },
+                                      ),
+                                    );
+                                  },
+                                ))), //erster tab
+
+                        FutureBuilder(
+                            future: databaseService.getPopularProducts(),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState == ConnectionState.waiting) {
+                                return ShoppyShimmer();
+                              }
+
+                              return MediaQuery.removePadding(
+                                  removeTop: true,
+                                  context: context,
+                                  child: ListView.separated(
+                                    itemCount: snapshot.data.length,
+                                    separatorBuilder: (ctx, i) => Divider(
+                                      indent: 70,
+                                      endIndent: 10,
+                                      color: Colors.grey,
+                                    ),
+                                    itemBuilder: (context, index) {
+                                      _subtract() {
+                                        _subtractCount(snapshot.data[index].name);
+                                      }
+
+                                      return Container(
+                                        height: 65,
+                                        child: ListTile(
+                                          leading: Padding(
+                                            padding: EdgeInsets.all(8.0),
+                                            child: Icon(Icons.local_dining),
+                                          ),
+                                          title: Text(snapshot.data[index].name),
+                                          subtitle: Text(snapshot.data[index].category),
+                                          trailing: _listOrRecipe.hasItem(snapshot.data[index].name)
+                                              ? ItemCounter(count: _listOrRecipe.items.firstWhere((i) => i.name == snapshot.data[index].name).count, subtractCount: _subtract)
+                                              : Container(
+                                                  width: 0,
+                                                  height: 0,
+                                                ),
+                                          onTap: () {
+                                            if (!_listOrRecipe.hasItem(snapshot.data[index].name)) {
+                                              _addItem(new Product(name: snapshot.data[index].name, category: snapshot.data[index].category));
+                                            } else {
+                                              _addCount(snapshot.data[index].name);
+                                            }
+                                          },
+                                        ),
+                                      );
+                                    },
+                                  ));
+                            }),
+                        Column(
+                          children: <Widget>[
+                            Text(resultText),
+                          ],
+                        )
+                      ],
+                    ),
                   )
-                ],
-              ),
-            )
                 : Expanded(
-              child: MediaQuery.removePadding(
-                  removeTop: true,
-                  context: context,
-                  child: Column(
-                    children: <Widget>[
-                      Container(
-                        height: 70,
-                        child: ListTile(
-                          leading: Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: Icon(Icons.shopping_cart, color: _listOrRecipe.hasItem(_searchController.text) ? Theme.of(context).primaryColor : null),
-                          ),
-                          title: Text(_searchController.text),
-                          subtitle: Text("Selbst erstellt"),
-                          trailing: _listOrRecipe.hasItem(_searchController.text)
-                              ? ItemCounter(count: _listOrRecipe.items.firstWhere((i) => i.name == _searchController.text).count, subtractCount: _subtractCountUserInput)
-                              : Container(
-                            width: 0,
-                            height: 0,
-                          ),
-                          onTap: () {
-                            if (!_listOrRecipe.hasItem(_searchController.text)) {
-                              _addItem(new Product(name: _searchController.text, category: "Selbst erstellt"));
-                            } else {
-                              _addCount(_searchController.text);
-                            }
-                          },
-                        ),
-                      ),
-                      _searching == false
-                          ? _products.length > 0
-                          ? Expanded(
-                        child: ListView.separated(
-                          itemCount: _products.length,
-                          separatorBuilder: (ctx, i) => Divider(
-                            indent: 70,
-                            endIndent: 10,
-                            color: Colors.grey,
-                          ),
-                          itemBuilder: (context, index) {
-                            _subtract() {
-                              _subtractCount(_products[index]["name"]);
-                            }
-
-                            int count = 0;
-
-                            if (_listOrRecipe.hasItem(_products[index]["name"])) {
-                              count = _listOrRecipe.items.firstWhere((i) => i.name == _products[index]["name"]).count;
-                            }
-
-                            return Container(
-                              height: 65,
+                    child: MediaQuery.removePadding(
+                        removeTop: true,
+                        context: context,
+                        child: Column(
+                          children: <Widget>[
+                            Container(
+                              height: 70,
                               child: ListTile(
                                 leading: Padding(
                                   padding: EdgeInsets.all(8.0),
-                                  child: Icon(Icons.local_dining, color: _listOrRecipe.hasItem(_products[index]["name"]) ? Theme.of(context).primaryColor : null),
+                                  child: Icon(Icons.shopping_cart, color: _listOrRecipe.hasItem(_searchController.text) ? Theme.of(context).primaryColor : null),
                                 ),
-                                title: Text(_products[index]["name"]),
-                                subtitle: Text(_products[index]["category"]),
-                                trailing: _listOrRecipe.hasItem(_products[index]["name"])
-                                    ? ItemCounter(count: count, subtractCount: _subtract)
+                                title: Text(_searchController.text),
+                                subtitle: Text("Selbst erstellt"),
+                                trailing: _listOrRecipe.hasItem(_searchController.text)
+                                    ? ItemCounter(count: _listOrRecipe.items.firstWhere((i) => i.name == _searchController.text).count, subtractCount: _subtractCountUserInput)
                                     : Container(
-                                  width: 0,
-                                  height: 0,
-                                ),
+                                        width: 0,
+                                        height: 0,
+                                      ),
                                 onTap: () {
-                                  if (!_listOrRecipe.hasItem(_products[index]["name"])) {
-                                    _addItem(new Product(name: _products[index]["name"], category: _products[index]["category"]));
+                                  if (!_listOrRecipe.hasItem(_searchController.text)) {
+                                    _addItem(new Product(name: _searchController.text, category: "Selbst erstellt"));
                                   } else {
-                                    _addCount(_products[index]["name"]);
+                                    _addCount(_searchController.text);
                                   }
                                 },
                               ),
-                            );
-                          },
-                        ),
-                      )
-                          : Column(
-                        children: <Widget>[
-                          Padding(
-                            padding: EdgeInsets.only(top: 50.0, bottom: 15.0),
-                            child: Icon(
-                              Icons.sentiment_dissatisfied,
-                              size: 50,
-                              color: Theme.of(context).primaryColor,
                             ),
-                          ),
-                          Text(
-                            "Keine Produkte gefunden",
-                            style: TextStyle(
-                              fontSize: 15,
-                            ),
-                          ),
-                        ],
-                      )
-                          : ShoppyShimmer(),
-                    ],
-                  )),
-            )
+                            _searching == false
+                                ? _products.length > 0
+                                    ? Expanded(
+                                        child: ListView.separated(
+                                          itemCount: _products.length,
+                                          separatorBuilder: (ctx, i) => Divider(
+                                            indent: 70,
+                                            endIndent: 10,
+                                            color: Colors.grey,
+                                          ),
+                                          itemBuilder: (context, index) {
+                                            _subtract() {
+                                              _subtractCount(_products[index]["name"]);
+                                            }
+
+                                            int count = 0;
+
+                                            if (_listOrRecipe.hasItem(_products[index]["name"])) {
+                                              count = _listOrRecipe.items.firstWhere((i) => i.name == _products[index]["name"]).count;
+                                            }
+
+                                            return Container(
+                                              height: 65,
+                                              child: ListTile(
+                                                leading: Padding(
+                                                  padding: EdgeInsets.all(8.0),
+                                                  child: Icon(Icons.local_dining, color: _listOrRecipe.hasItem(_products[index]["name"]) ? Theme.of(context).primaryColor : null),
+                                                ),
+                                                title: Text(_products[index]["name"]),
+                                                subtitle: Text(_products[index]["category"]),
+                                                trailing: _listOrRecipe.hasItem(_products[index]["name"])
+                                                    ? ItemCounter(count: count, subtractCount: _subtract)
+                                                    : Container(
+                                                        width: 0,
+                                                        height: 0,
+                                                      ),
+                                                onTap: () {
+                                                  if (!_listOrRecipe.hasItem(_products[index]["name"])) {
+                                                    _addItem(new Product(name: _products[index]["name"], category: _products[index]["category"]));
+                                                  } else {
+                                                    _addCount(_products[index]["name"]);
+                                                  }
+                                                },
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      )
+                                    : Column(
+                                        children: <Widget>[
+                                          Padding(
+                                            padding: EdgeInsets.only(top: 50.0, bottom: 15.0),
+                                            child: Icon(
+                                              Icons.sentiment_dissatisfied,
+                                              size: 50,
+                                              color: Theme.of(context).primaryColor,
+                                            ),
+                                          ),
+                                          Text(
+                                            "Keine Produkte gefunden",
+                                            style: TextStyle(
+                                              fontSize: 15,
+                                            ),
+                                          ),
+                                        ],
+                                      )
+                                : ShoppyShimmer(),
+                          ],
+                        )),
+                  )
           ])),
     );
   }

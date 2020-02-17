@@ -120,6 +120,7 @@ class _CreateShoppingListView extends State<CreateShoppingListView> {
                           }
 
                           DocumentReference docRef = await databaseService.createList(_user.uid, _newShoppingList);
+                          InfoOverlay.showInfoSnackBar("Einkaufsliste ${_newShoppingList.name} erstellt");
                           controller.reverse();
                           Navigator.pop(context);
 
