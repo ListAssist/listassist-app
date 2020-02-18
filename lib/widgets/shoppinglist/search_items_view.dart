@@ -154,6 +154,7 @@ class _SearchItemsView extends State<SearchItemsView> {
     });
   }
 
+  //FIXME: After creating shopping list in group endless shimmer
   @override
   Widget build(BuildContext context) {
     _user = Provider.of<User>(context);
@@ -203,7 +204,7 @@ class _SearchItemsView extends State<SearchItemsView> {
             ]
           ),
 
-          body: Column(children: <Widget>[
+          body: _list == null ? ShoppyShimmer() : Column(children: <Widget>[
             Container(
               height: 120.0,
               child: Stack(

@@ -7,9 +7,9 @@ import 'package:listassist/models/User.dart';
 import 'package:listassist/services/db.dart';
 import 'package:listassist/services/info_overlay.dart';
 import 'package:listassist/widgets/group/edit_group.dart';
-import 'package:listassist/widgets/group/group_create_shopping_list.dart';
 import 'package:listassist/widgets/group/group_userlist.dart';
 import 'package:listassist/widgets/shimmer/shoppy_shimmer.dart';
+import 'package:listassist/widgets/shoppinglist/create_shopping_list_view.dart';
 import 'package:listassist/widgets/shoppinglist/shopping_list.dart' as w;
 import 'package:listassist/widgets/shoppinglist/completed_shopping_list.dart' as w2;
 import 'package:progress_indicator_button/progress_button.dart';
@@ -97,7 +97,7 @@ class _GroupDetail extends State<GroupDetail> {
                    Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
                     return StreamProvider<List<ShoppingList>>.value(
                       value: databaseService.streamLists(_group.id, true),
-                      child: GroupCreateShoppingList(gid: _group.id),
+                      child: CreateShoppingListView(isGroup: true, groupIndex: widget.index),
                     );
                   }));
                 },

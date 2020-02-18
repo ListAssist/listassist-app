@@ -77,7 +77,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
       }else {
         list = Provider.of<List<ShoppingList>>(context)[widget.index];
       }
-      if(list != null) {
+      if(list != null && list.items.isNotEmpty) {
         _boughtItemCount = list.items.map((e) => e.bought ? 1 : 0).reduce((a, b) => a + b);
       }
     }

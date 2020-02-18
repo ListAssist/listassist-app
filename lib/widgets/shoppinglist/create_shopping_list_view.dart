@@ -1,9 +1,9 @@
 import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:listassist/models/Group.dart';
 import 'package:listassist/models/ScannedShoppinglist.dart';
 import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
@@ -16,6 +16,9 @@ import 'package:progress_indicator_button/progress_button.dart';
 import 'package:provider/provider.dart';
 
 class CreateShoppingListView extends StatefulWidget {
+  final bool isGroup;
+  final int groupIndex;
+  CreateShoppingListView({this.isGroup = false, this.groupIndex});
   @override
   _CreateShoppingListView createState() => _CreateShoppingListView();
 }
@@ -25,12 +28,20 @@ class _CreateShoppingListView extends State<CreateShoppingListView> {
 
   bool buttonDisabled = false;
 
+  List<ShoppingList> _lists;
+  String _uid;
+
   @override
   Widget build(BuildContext context) {
     Color _backgroundColor = /*Colors.blueAccent[400];*/ Theme.of(context).primaryColor;
 
-    User _user = Provider.of<User>(context);
-    List<ShoppingList> lists = Provider.of<List<ShoppingList>>(context);
+    if(!widget.isGroup) {
+      _uid = Provider.of<User>(context).uid;
+      _lists = Provider.of<List<ShoppingList>>(context);
+    }else {
+      _uid = Provider.of<List<Group>>(context)[widget.groupIndex].id;
+      _lists = Provider.of<List<ShoppingList>>(context);
+    }
 
     RegExp defaultListName = new RegExp(r"Einkaufsliste #[0-9]+");
 
@@ -102,7 +113,7 @@ class _CreateShoppingListView extends State<CreateShoppingListView> {
                               items: new List(),
                             );
                           } else {
-                            List<ShoppingList> listen = lists;
+                            List<ShoppingList> listen = _lists;
                             listen = listen.where((i) => defaultListName.hasMatch(i.name)).toList();
                             print(listen);
                             int lastId = 0;
@@ -118,7 +129,7 @@ class _CreateShoppingListView extends State<CreateShoppingListView> {
                             );
                           }
 
-                          DocumentReference docRef = await databaseService.createList(_user.uid, _newShoppingList);
+                          DocumentReference docRef = await databaseService.createList(_uid, _newShoppingList, widget.isGroup);
                           controller.reverse();
                           Navigator.pop(context);
 
@@ -127,7 +138,12 @@ class _CreateShoppingListView extends State<CreateShoppingListView> {
                             print(l.id)
                           });*/
 
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => SearchItemsView(docRef.documentID)));
+                          Navigator.push(context, MaterialPageRoute(builder: (context) =>
+                              widget.isGroup ?
+                              StreamProvider<ShoppingList>.value(
+                                value: databaseService.streamListFromGroup("${widget.groupIndex}", docRef.documentID),
+                                child: SearchItemsView(docRef.documentID, true),
+                              ) : SearchItemsView(docRef.documentID)));
 
 /*
                           Navigator.push(
