@@ -269,12 +269,32 @@ class GroupMenu extends StatelessWidget {
 
 }
 
+//FIXME: Wenn der Preis 0 in der DB ist exception, int kein subtype von double
+
 class ShoppingLists extends StatelessWidget {
   final int groupindex;
   ShoppingLists({this.groupindex});
 
+  bool first = true;
+
   @override
   Widget build(BuildContext context) {
+    if(first) {
+      Group group = Provider.of<List<Group>>(context)[groupindex];
+      if(group.settings["ai_enabled"]) {
+        if(group.settings["ai_interval"] != null) {
+          if(group.lastAutomaticallyGenerated == null) {
+            _createAutomaticList();
+          }else {
+            DateTime nextList = group.lastAutomaticallyGenerated.toDate().add(Duration(days: group.settings["ai_interval"]));
+            if (DateTime.now().isAfter(nextList)) {
+              _createAutomaticList();
+            }
+          }
+        }
+      }
+      first = false;
+    }
     List<ShoppingList> lists = Provider.of<List<ShoppingList>>(context);
     return lists != null ? lists.length == 0 ? Center(child: Text("Noch keine Einkaufslisten erstellt", style: Theme.of(context).textTheme.title,)) : ListView.separated(
         separatorBuilder: (ctx, i) => Divider(
@@ -286,6 +306,24 @@ class ShoppingLists extends StatelessWidget {
         itemCount: lists.length,
         itemBuilder: (ctx, index) => w.ShoppingList(index: index, groupIndex: this.groupindex, isGroup: true)
     ) : ShoppyShimmer();
+  }
+
+  _createAutomaticList() async {
+    final HttpsCallable autoList = cloudFunctionInstance.getHttpsCallable(
+        functionName: "createAutomaticList"
+    );
+    try {
+      dynamic resp = await autoList.call(<String, dynamic>{
+        "groupid": _group.id
+      });
+      if (resp.data["status"] != "Successful") {
+        InfoOverlay.showErrorSnackBar("Fehler beim Erstellen der Automatischen Einkaufsliste");
+      } else {
+        InfoOverlay.showInfoSnackBar("Automatische Einkaufsliste wurde erstellt");
+      }
+    }catch(e) {
+      InfoOverlay.showErrorSnackBar("Fehler: ${e.message}");
+    }
   }
 }
 
