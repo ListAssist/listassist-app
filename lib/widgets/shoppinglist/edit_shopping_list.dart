@@ -27,8 +27,6 @@ class _EditShoppingListState extends State<EditShoppingList> {
   String uid;
   ShoppingList list;
 
-  //TODO: Change all widgets to work for groups and single users
-
   @override
   Widget build(BuildContext context) {
     if(widget.isGroup) {

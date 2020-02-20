@@ -343,7 +343,6 @@ class ShoppingListsHistory extends StatelessWidget {
       ),
       physics: BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
       itemCount: lists.length,
-      //TODO: Add isGroup setting to completed shopping list views
       itemBuilder: (ctx, index) => w2.CompletedShoppingList(index: index, groupIndex: this.groupindex, isGroup: true)
     ) : ShoppyShimmer();
   }
