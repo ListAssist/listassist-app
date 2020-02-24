@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -28,6 +29,9 @@ class _GroupShoppingListDetail extends State<GroupShoppingListDetail> {
 
   Timer _debounce;
   int _debounceTime = 1500;
+
+  ScrollController _hideButtonController;
+  bool _isVisible;
 
   void itemChange(bool val, int index) {
     setState(() {
@@ -58,6 +62,42 @@ class _GroupShoppingListDetail extends State<GroupShoppingListDetail> {
       InfoOverlay.showErrorSnackBar(
           "Fehler beim aktualisieren der Einkaufsliste");
     }
+  }
+
+  _scrollListener() {
+
+  }
+
+  @override
+  initState(){
+    _isVisible = true;
+    _hideButtonController = ScrollController();
+    _hideButtonController.addListener((){
+      print('scrolling = ${_hideButtonController.position.isScrollingNotifier.value}');
+      if(_hideButtonController.position.userScrollDirection == ScrollDirection.reverse){
+        if(_isVisible == true) {
+          /* only set when the previous state is false
+             * Less widget rebuilds
+             */
+          print("**** ${_isVisible} up"); //Move IO away from setState
+          setState((){
+            _isVisible = false;
+          });
+        }
+      } else {
+        if(_hideButtonController.position.userScrollDirection == ScrollDirection.forward){
+          if(_isVisible == false) {
+            /* only set when the previous state is false
+               * Less widget rebuilds
+               */
+            print("**** ${_isVisible} down"); //Move IO away from setState
+            setState((){
+              _isVisible = true;
+            });
+          }
+        }
+      }});
+    super.initState();
   }
 
   @override
@@ -97,6 +137,7 @@ class _GroupShoppingListDetail extends State<GroupShoppingListDetail> {
           Expanded(
               child: list.items.isNotEmpty
                   ? ListView.builder(
+                  controller: _hideButtonController,
                   itemCount: list.items.length,
                   itemBuilder: (BuildContext context, int index) {
                     return Container(
@@ -118,15 +159,17 @@ class _GroupShoppingListDetail extends State<GroupShoppingListDetail> {
                   : Container()),
         ],
       ),
-      floatingActionButton: Stack(
-        children: <Widget>[
-          Padding(
-            padding: EdgeInsets.only(right: 80.0),
-            child: Align(
-              alignment: Alignment.bottomRight,
-              child: FloatingActionButton(
-                child: Icon(Icons.add),
-                backgroundColor: Colors.green,
+      floatingActionButton: Visibility(
+        visible: _isVisible,
+        child: Stack(
+          children: <Widget>[
+            Padding(
+              padding: EdgeInsets.only(right: 80.0),
+              child: Align(
+                alignment: Alignment.bottomRight,
+                child: FloatingActionButton(
+                  child: Icon(Icons.add),
+                  backgroundColor: Colors.green,
 //                onPressed: () {
 //                  Navigator.push(
 //                      context,
@@ -134,66 +177,67 @@ class _GroupShoppingListDetail extends State<GroupShoppingListDetail> {
 //                          builder: (context) => SearchItemsView(
 //                              lists.elementAt(widget.index).id)));
 //                },
+                ),
               ),
             ),
-          ),
-          SpeedDial(
-            animatedIcon: AnimatedIcons.menu_close,
-            animatedIconTheme: IconThemeData(size: 22.0),
-            closeManually: false,
-            curve: Curves.easeIn,
-            overlayOpacity: 0.35,
-            backgroundColor: Theme.of(context).primaryColor,
-            elevation: 8.0,
-            shape: CircleBorder(),
-            children: [
-              SpeedDialChild(
-                  child: Icon(Icons.check),
-                  backgroundColor: Colors.green,
+            SpeedDial(
+              animatedIcon: AnimatedIcons.menu_close,
+              animatedIconTheme: IconThemeData(size: 22.0),
+              closeManually: false,
+              curve: Curves.easeIn,
+              overlayOpacity: 0.35,
+              backgroundColor: Theme.of(context).primaryColor,
+              elevation: 8.0,
+              shape: CircleBorder(),
+              children: [
+                SpeedDialChild(
+                    child: Icon(Icons.check),
+                    backgroundColor: Colors.green,
+                    labelBackgroundColor:
+                    Theme.of(context).brightness == Brightness.dark
+                        ? Theme.of(context).primaryColor
+                        : Colors.white,
+                    label: "Complete",
+                    labelStyle: TextStyle(
+                        fontSize: 18.0,
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white
+                            : Colors.black),
+                    onTap: _showCompleteDialog),
+                SpeedDialChild(
+                    child: Icon(Icons.delete),
+                    backgroundColor: Colors.red,
+                    labelBackgroundColor:
+                    Theme.of(context).brightness == Brightness.dark
+                        ? Theme.of(context).primaryColor
+                        : Colors.white,
+                    label: "Delete",
+                    labelStyle: TextStyle(
+                        fontSize: 18.0,
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white
+                            : Colors.black),
+                    onTap: _showDeleteDialog),
+                SpeedDialChild(
+                  child: Icon(Icons.camera),
+                  backgroundColor: Colors.blue,
+                  label: "Image Check",
                   labelBackgroundColor:
                   Theme.of(context).brightness == Brightness.dark
                       ? Theme.of(context).primaryColor
                       : Colors.white,
-                  label: "Complete",
                   labelStyle: TextStyle(
                       fontSize: 18.0,
                       color: Theme.of(context).brightness == Brightness.dark
                           ? Colors.white
                           : Colors.black),
-                  onTap: _showCompleteDialog),
-              SpeedDialChild(
-                  child: Icon(Icons.delete),
-                  backgroundColor: Colors.red,
-                  labelBackgroundColor:
-                  Theme.of(context).brightness == Brightness.dark
-                      ? Theme.of(context).primaryColor
-                      : Colors.white,
-                  label: "Delete",
-                  labelStyle: TextStyle(
-                      fontSize: 18.0,
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? Colors.white
-                          : Colors.black),
-                  onTap: _showDeleteDialog),
-              SpeedDialChild(
-                child: Icon(Icons.camera),
-                backgroundColor: Colors.blue,
-                label: "Image Check",
-                labelBackgroundColor:
-                Theme.of(context).brightness == Brightness.dark
-                    ? Theme.of(context).primaryColor
-                    : Colors.white,
-                labelStyle: TextStyle(
-                    fontSize: 18.0,
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? Colors.white
-                        : Colors.black),
 //                onTap: () => InfoOverlay.showSourceSelectionSheet(context,
 //                    callback: _startCameraScanner, arg: widget.index),
-              )
-            ],
-          ),
-        ],
+                )
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

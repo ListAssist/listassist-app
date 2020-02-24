@@ -75,6 +75,17 @@ class DatabaseService {
         .map((snap) => snap.documents.map((d) => Recipe.fromFirestore(d)).toList());
   }
 
+  /*Stream<List<Product>> streamPopularProducts() {
+    print("----- READ POPULAR-PRODUCTS -----");
+
+    return _db
+        .collection("popular_products")
+        .document("products")
+        .snapshots()
+        //.map((snap) => Product.fromMap(snap.data)).toList().asStream();
+        .map((snap) => snap.data["products"].map((d) => Product.fromFirestore(d)));
+  }*/
+
   Stream<List<CompletedShoppingList>> streamListsHistory(String uid) {
     print("----- READ COMPLETED LISTS -----");
     return _db

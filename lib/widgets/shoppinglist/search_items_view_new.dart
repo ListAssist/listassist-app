@@ -27,9 +27,10 @@ class SearchItemsViewNew extends StatefulWidget {
   _SearchItemsViewNew createState() => _SearchItemsViewNew();
 }
 
-class _SearchItemsViewNew extends State<SearchItemsViewNew> {
+class _SearchItemsViewNew extends State<SearchItemsViewNew>  with TickerProviderStateMixin{
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
   TextEditingController _searchController = TextEditingController();
+  TabController _tabController;
 
   var _listOrRecipe;
   bool _isList;
@@ -155,6 +156,8 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew> {
       _listOrRecipe = widget.recipe;
       _isList = false;
     }
+
+    _tabController = new TabController(length: 3, initialIndex: _listOrRecipe.items.length > 0 ? 0 : 1, vsync: this);
   }
 
   @override
@@ -263,6 +266,7 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew> {
                 ? Container(
                     color: Theme.of(context).primaryColor,
                     child: TabBar(
+                      controller: _tabController,
                       indicatorColor: Colors.white,
                       tabs: [Tab(text: _isList ? "Auf Liste" : "Auf Rezept"), Tab(text: "Beliebt"), Tab(text: "Kategorien")],
                     ),
@@ -271,9 +275,10 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew> {
             _searchController.text.length == 0
                 ? Expanded(
                     child: TabBarView(
+                      controller: _tabController,
                       children: <Widget>[
                         Container(
-                            child: MediaQuery.removePadding(
+                            child: _listOrRecipe.items.length > 0 ? MediaQuery.removePadding(
                                 removeTop: true,
                                 context: context,
                                 child: ListView.separated(
@@ -304,7 +309,7 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew> {
                                       ),
                                     );
                                   },
-                                ))), //erster tab
+                                )): Center(child: Text("keko"))), //erster tab
 
                         FutureBuilder(
                             future: databaseService.getPopularProducts(),
