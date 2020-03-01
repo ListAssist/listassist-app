@@ -269,8 +269,6 @@ class GroupMenu extends StatelessWidget {
 
 }
 
-//FIXME: Wenn der Preis 0 in der DB ist exception, int kein subtype von double
-
 class ShoppingLists extends StatelessWidget {
   final int groupindex;
   ShoppingLists({this.groupindex});

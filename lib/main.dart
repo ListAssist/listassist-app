@@ -60,7 +60,6 @@ class _MainAppState extends State<MainApp> {
 *//*
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) async {
