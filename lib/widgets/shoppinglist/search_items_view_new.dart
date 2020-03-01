@@ -2,8 +2,10 @@ import 'dart:async';
 
 import 'package:algolia/algolia.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:listassist/models/Item.dart';
 import 'package:listassist/models/Product.dart';
 import 'package:listassist/models/Recipe.dart';
 import 'package:listassist/models/ScannedShoppinglist.dart';
@@ -34,8 +36,6 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew>  with TickerProvider
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
   TextEditingController _searchController = TextEditingController();
   TabController _tabController;
-
-  List<ScannedShoppingList> scannedLists = [];
 
   var _listOrRecipe;
   bool _isList;
@@ -184,7 +184,7 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew>  with TickerProvider
                 backgroundColor: Colors.green,
               ),
             ),
-           /* Align(
+            _isList ? Align(
               alignment: Alignment.bottomRight,
               child: Padding(
                 padding: EdgeInsets.only(bottom: 60.0),
@@ -196,14 +196,14 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew>  with TickerProvider
                       color: Colors.black,
                     ),
                     onPressed: () async{
-                      await connectivityService.testInternetConnection() ? InfoOverlay.showSourceSelectionSheet(context, callback: _startCameraScanner, arg: null)
+                      await connectivityService.testInternetConnection() ? InfoOverlay.showSourceSelectionSheet(context, callback: _startCameraScanner, arg: _listOrRecipe)
                           : InfoOverlay.showErrorSnackBar("Kein Internetzugriff");
                     },
                     backgroundColor: Colors.white,
                   ),
                 ),
               ),
-            ),*/
+            ) : Container(),
           ]),
           body: Column(children: <Widget>[
             Container(
@@ -484,7 +484,8 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew>  with TickerProvider
     ScannedShoppingList scannedShoppingList = await cameraService.getResultFromCameraScanner(context, imageSource, addToList: list);
     if (scannedShoppingList != null) {
       setState(() {
-        scannedLists.add(scannedShoppingList);
+        _listOrRecipe.items.addAll(scannedShoppingList.items.map((item) => new Item(name: item.name, prize: item.price, bought: true, count: 1, category: "Gescannt")).toList());
+        _requestDatabaseUpdate();
       });
     }
 
