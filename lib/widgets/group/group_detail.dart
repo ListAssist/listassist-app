@@ -1,19 +1,19 @@
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:listassist/models/CompletedShoppingList.dart';
 import 'package:listassist/models/Group.dart';
 import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
 import 'package:listassist/services/db.dart';
 import 'package:listassist/services/info_overlay.dart';
 import 'package:listassist/widgets/group/edit_group.dart';
-import 'package:listassist/widgets/group/group_create_shopping_list.dart';
 import 'package:listassist/widgets/group/group_userlist.dart';
 import 'package:listassist/widgets/shimmer/shoppy_shimmer.dart';
+import 'package:listassist/widgets/shoppinglist/create_shopping_list_view.dart';
 import 'package:listassist/widgets/shoppinglist/shopping_list.dart' as w;
+import 'package:listassist/widgets/shoppinglist/completed_shopping_list.dart' as w2;
+import 'package:progress_indicator_button/progress_button.dart';
 import 'package:provider/provider.dart';
-import 'group_shopping_list.dart';
 
 class GroupDetail extends StatefulWidget {
   final index;
@@ -29,6 +29,7 @@ bool _useCache = false;
 
 class _GroupDetail extends State<GroupDetail> {
   String username;
+  bool _isInviting = false;
 
   @override
   Widget build(BuildContext context) {
@@ -59,10 +60,13 @@ class _GroupDetail extends State<GroupDetail> {
         body: TabBarView(
           children: [
             StreamProvider<List<ShoppingList>>.value(
-              value: databaseService.streamListsFromGroup(_group.id),
-              child:  ShoppingLists(groupindex: widget.index),
+              value: databaseService.streamLists(_group.id, true),
+              child: ShoppingLists(groupindex: widget.index),
             ),
-            Text("Verlauf"),
+            StreamProvider<List<CompletedShoppingList>>.value(
+              value: databaseService.streamListsHistory(_group.id, true),
+              child: ShoppingListsHistory(groupindex: widget.index),
+            ),
             Text("Statistiken der Gruppe"),
             GroupUserList(index: widget.index)
           ],
@@ -92,8 +96,8 @@ class _GroupDetail extends State<GroupDetail> {
                 onPressed: () {
                    Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
                     return StreamProvider<List<ShoppingList>>.value(
-                      value: databaseService.streamListsFromGroup(_group.id),
-                      child:  GroupCreateShoppingList(gid: _group.id),
+                      value: databaseService.streamLists(_group.id, true),
+                      child: CreateShoppingListView(isGroup: true, groupIndex: widget.index),
                     );
                   }));
                 },
@@ -134,29 +138,44 @@ class _GroupDetail extends State<GroupDetail> {
                 Navigator.of(context).pop();
               },
             ),
-            FlatButton(
-              child: Text("Einladen"),
-              onPressed: () async {
-                final HttpsCallable invite = cloudFunctionInstance.getHttpsCallable(
-                    functionName: "inviteUsers"
-                );
-                try {
-                  dynamic resp = await invite.call(<String, dynamic>{
-                    "targetemails": [_addressController.text],
-                    "groupid": _group.id,
-                    "groupname": _group.title,
-                    "from": username,
+            Container(
+              width: 100,
+              height: 40,
+              child: ProgressButton(
+                child: Text("Einladen", style: TextStyle(color: Theme.of(context).colorScheme.primary)),
+                onPressed: _isInviting ? null : (AnimationController controller) async {
+                  controller.forward();
+                  setState(() {
+                    _isInviting = true;
                   });
-                  if (resp.data["status"] != "Successful") {
-                    InfoOverlay.showErrorSnackBar("Fehler beim Verschicken");
-                  } else {
-                    InfoOverlay.showInfoSnackBar("Einladungen verschickt");
-                    Navigator.pop(context);
+                  final HttpsCallable invite = cloudFunctionInstance.getHttpsCallable(
+                      functionName: "inviteUsers"
+                  );
+                  try {
+                    dynamic resp = await invite.call(<String, dynamic>{
+                      "targetemails": [_addressController.text],
+                      "groupid": _group.id,
+                      "groupname": _group.title,
+                      "from": username,
+                    });
+                    if (resp.data["status"] != "Successful") {
+                      InfoOverlay.showErrorSnackBar("Fehler beim Verschicken");
+                    } else {
+                      InfoOverlay.showInfoSnackBar("Einladungen verschickt");
+                      Navigator.pop(context);
+                    }
+                  } catch(e) {
+                    InfoOverlay.showErrorSnackBar("Fehler: ${e.message}");
+                  } finally {
+                    _isInviting = false;
+                    controller.reverse();
                   }
-                }catch(e) {
-                  InfoOverlay.showErrorSnackBar("Fehler: ${e.message}");
-                }
-              },
+                },
+                borderRadius: BorderRadius.all(Radius.circular(4)),
+                color: Colors.white,
+                progressIndicatorColor: Theme.of(context).colorScheme.primary,
+                progressIndicatorSize: 20,
+              ),
             ),
           ],
         );
@@ -254,18 +273,76 @@ class ShoppingLists extends StatelessWidget {
   final int groupindex;
   ShoppingLists({this.groupindex});
 
+  bool first = true;
+
   @override
   Widget build(BuildContext context) {
+    if(first) {
+      Group group = Provider.of<List<Group>>(context)[groupindex];
+      if(group.settings["ai_enabled"]) {
+        if(group.settings["ai_interval"] != null) {
+          if(group.lastAutomaticallyGenerated == null) {
+            _createAutomaticList();
+          }else {
+            DateTime nextList = group.lastAutomaticallyGenerated.toDate().add(Duration(days: group.settings["ai_interval"]));
+            if (DateTime.now().isAfter(nextList)) {
+              _createAutomaticList();
+            }
+          }
+        }
+      }
+      first = false;
+    }
     List<ShoppingList> lists = Provider.of<List<ShoppingList>>(context);
-    print("BUILDING LISTS");
     return lists != null ? lists.length == 0 ? Center(child: Text("Noch keine Einkaufslisten erstellt", style: Theme.of(context).textTheme.title,)) : ListView.separated(
         separatorBuilder: (ctx, i) => Divider(
           indent: 10,
           endIndent: 10,
           color: Colors.grey,
         ),
+        physics: BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
         itemCount: lists.length,
-        itemBuilder: (ctx, index) => GroupShoppingList(groupindex: this.groupindex, index: index)
-    ) : SpinKitDoubleBounce(color: Colors.blueAccent,);
+        itemBuilder: (ctx, index) => w.ShoppingList(index: index, groupIndex: this.groupindex, isGroup: true)
+    ) : ShoppyShimmer();
+  }
+
+  _createAutomaticList() async {
+    final HttpsCallable autoList = cloudFunctionInstance.getHttpsCallable(
+        functionName: "createAutomaticList"
+    );
+    try {
+      dynamic resp = await autoList.call(<String, dynamic>{
+        "groupid": _group.id
+      });
+      if (resp.data["status"] != "Successful") {
+        //InfoOverlay.showErrorSnackBar("Fehler beim Erstellen der Automatischen Einkaufsliste");
+      } else {
+        InfoOverlay.showInfoSnackBar("Automatische Einkaufsliste wurde erstellt");
+      }
+    }catch(e) {
+      InfoOverlay.showErrorSnackBar("Fehler: ${e.message}");
+    }
+  }
+}
+
+
+class ShoppingListsHistory extends StatelessWidget {
+  final int groupindex;
+  ShoppingListsHistory({this.groupindex});
+
+  //FIXME: Error when deleting completed list "items" called on null
+  @override
+  Widget build(BuildContext context) {
+    List<CompletedShoppingList> lists = Provider.of<List<CompletedShoppingList>>(context);
+    return lists != null ? lists.length == 0 ? Center(child: Text("Noch keine Einkäufe abgeschlossen", style: Theme.of(context).textTheme.title,)) : ListView.separated(
+      separatorBuilder: (ctx, i) => Divider(
+        indent: 10,
+        endIndent: 10,
+        color: Colors.grey,
+      ),
+      physics: BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+      itemCount: lists.length,
+      itemBuilder: (ctx, index) => w2.CompletedShoppingList(index: index, groupIndex: this.groupindex, isGroup: true)
+    ) : ShoppyShimmer();
   }
 }

@@ -20,9 +20,11 @@ class _BillsState extends State<Bills> {
 
   List<dynamic> urls;
   List<StorageReference> images;
-  bool hasChanged = true;
+  bool hasChanged = false;
   CompletedShoppingList list;
   int _current = 0;
+
+  //FIXME: The getter 'length' was called on null. when opening bills
 
   @override
   Widget build(BuildContext context) {

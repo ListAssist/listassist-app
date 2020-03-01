@@ -29,9 +29,13 @@ class _ShoppingListView extends State<ShoppingListView> {
       User user = Provider.of<User>(context);
       if(user.settings["ai_enabled"]) {
         if(user.settings["ai_interval"] != null) {
-          DateTime nextList = user.lastAutomaticallyGenerated.toDate().add(Duration(days: user.settings["ai_interval"]));
-          if(DateTime.now().isAfter(nextList)) {
+          if(user.lastAutomaticallyGenerated == null) {
             _createAutomaticList();
+          }else {
+            DateTime nextList = user.lastAutomaticallyGenerated.toDate().add(Duration(days: user.settings["ai_interval"]));
+            if (DateTime.now().isAfter(nextList)) {
+              _createAutomaticList();
+            }
           }
         }
       }
@@ -95,7 +99,7 @@ class _ShoppingListView extends State<ShoppingListView> {
     try {
       dynamic resp = await autoList.call();
       if (resp.data["status"] != "Successful") {
-        InfoOverlay.showErrorSnackBar("Fehler beim Erstellen der Automatischen Einkaufsliste");
+        //InfoOverlay.showErrorSnackBar("Fehler beim Erstellen der Automatischen Einkaufsliste");
       } else {
         InfoOverlay.showInfoSnackBar("Automatische Einkaufsliste wurde erstellt");
       }

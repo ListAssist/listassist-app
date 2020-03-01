@@ -7,8 +7,10 @@ class Group {
   final PublicUser creator;
   final List<PublicUser> members;
   final String id;
+  final Map settings;
+  final Timestamp lastAutomaticallyGenerated;
 
-  Group({this.title, this.creator, this.members, this.id});
+  Group({this.title, this.creator, this.members, this.id, this.settings, this.lastAutomaticallyGenerated});
 
   factory Group.fromFirestore(DocumentSnapshot doc) {
     Map data = doc.data ?? { };
@@ -17,7 +19,9 @@ class Group {
         id: doc.documentID,
         title: data["title"],
         creator: PublicUser.fromMap(data["creator"]),
-        members: List.from(data["members"] ?? []).map((member) => PublicUser.fromMap(member)).toList()
+        members: List.from(data["members"] ?? []).map((member) => PublicUser.fromMap(member)).toList(),
+        lastAutomaticallyGenerated: data["last_automatically_generated"] ?? null,
+        settings: data["settings"] ?? {}
     );
   }
 
@@ -29,7 +33,9 @@ class Group {
     return Group(
         title: data["title"],
         creator: PublicUser.fromMap(data["creator"]),
-        members: List.from(data["members"] ?? []).map((member) => PublicUser.fromMap(member)).toList()
+        members: List.from(data["members"] ?? []).map((member) => PublicUser.fromMap(member)).toList(),
+        lastAutomaticallyGenerated: data["last_automatically_generated"] ?? null,
+        settings: data["settings"] ?? {}
     );
   }
 }

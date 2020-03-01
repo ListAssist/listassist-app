@@ -27,10 +27,11 @@
     </item> -->
 
     <!-- You can insert your own image assets here -->
-    <item android:width="250dp" android:height="250dp" android:bottom="300dp" android:gravity="center">
-        <bitmap
-            android:gravity="fill_horizontal|fill_vertical"
-            android:src="@drawable/splashscreen" />
-    </item>
+<!--    <item android:width="250dp" android:height="250dp" android:bottom="300dp" android:gravity="center">-->
+<!--        <bitmap-->
+<!--            android:gravity="fill_horizontal|fill_vertical"-->
+<!--            android:src="@drawable/splashscreen" />-->
+<!--    </item>-->
+    <!-- FIXME: Fix crash on start when using the image asset -->
 
 </layer-list>

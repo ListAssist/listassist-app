@@ -8,18 +8,23 @@ class CompletedShoppingList {
   final Timestamp created;
   final Timestamp completed;
   final String name;
-  final String type;
   final List<Item> allItems;
   final List<Item> completedItems;
+  final List<Item> uncompletedItems;
   final List<Bill> bills;
 
-  CompletedShoppingList({this.id, this.created, this.completed, this.name, this.type, this.completedItems, this.allItems, this.bills});
+  CompletedShoppingList({this.id, this.created, this.completed, this.name, this.uncompletedItems, this.completedItems, this.allItems, this.bills});
 
   factory CompletedShoppingList.fromFirestore(DocumentSnapshot doc) {
     Map data = doc.data;
+    if(data == null || data.isEmpty)
+      return CompletedShoppingList();
 
     List<Item> tempCompletedItems = List.from(data["items"] ?? []).map((x) => Item.fromMap(x)).toList();
     tempCompletedItems.removeWhere((item) => !item.bought);
+
+    List<Item> tempUncompletedItems = List.from(data["items"] ?? []).map((x) => Item.fromMap(x)).toList();
+    tempUncompletedItems.removeWhere((item) => item.bought);
 
     List<Item> tempAllItems = List.from(data["items"] ?? []).map((x) => Item.fromMap(x)).toList();
     tempAllItems.sort((a, b) => (b.bought ? 1 : 0) - (a.bought ? 1 : 0));
@@ -29,32 +34,32 @@ class CompletedShoppingList {
       created: data["created"],
       completed: data["completed"],
       name: data["name"],
-      type: data["type"],
-      allItems: tempAllItems,
+      uncompletedItems: tempUncompletedItems,
       completedItems: tempCompletedItems,
-      bills: data["pictureURLs"]?.map<Bill>((b) => Bill.fromMap(b))?.toList()
-    );
-}
-
-  factory CompletedShoppingList.fromMap(Map data) {
-    data = data ?? { };
-
-    return CompletedShoppingList(
-        created: data["created"],
-        completed: data["completed"],
-        name: data["name"],
-        type: data["type"],
-        completedItems: List.from(data["items"] ?? []).map((x) => Item.fromMap(x)).toList(),
-        bills: data["pictureURLs"]?.map((b) => Bill.fromMap(b))?.toList()
+      allItems: tempAllItems,
+      bills: data["pictureURLs"]?.map<Bill>((url) => Bill.fromURL(url))?.toList() ?? []
     );
   }
 
-  ShoppingList createNewCopy([String newName]) {
+  ShoppingList createNewCopy([String newName, bool copyCompleted = false, bool copyUncompleted = false]) {
+    List<Item> toCopy = (copyCompleted && copyUncompleted)
+        ? allItems
+        : copyUncompleted
+          ? uncompletedItems
+          : completedItems;
+    print(toCopy);
     return ShoppingList(
         created: Timestamp.now(),
         name: newName ?? this.name,
         type: "pending",
-        items: this.completedItems.map((item) => Item(name: item.name, bought: item.bought = false)).toList());
+        items: toCopy.map((item) =>
+            Item(
+                name: item.name,
+                bought: false,
+                prize: item.prize,
+                count: item.count,
+                category: item.category
+            )).toList());
   }
 
 }

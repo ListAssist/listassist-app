@@ -22,12 +22,10 @@ class _EditShoppingListState extends State<EditShoppingList> {
   TextEditingController _nameTextController;
 
   bool firstLoad = true;
-  List<Item> copyItems;
+  List<Item> copyItems = [];
 
   String uid;
   ShoppingList list;
-
-  //TODO: Change all widgets to work for groups and single users
 
   @override
   Widget build(BuildContext context) {
@@ -38,12 +36,12 @@ class _EditShoppingListState extends State<EditShoppingList> {
       list = Provider.of<List<ShoppingList>>(context)[widget.index];
       uid = Provider.of<User>(context).uid;
     }
-    if(firstLoad) {
-      copyItems = List.from(list.items);
+    if(firstLoad && list != null) {
+      copyItems = List.from(list.items) ?? [];
       firstLoad = false;
     }
 
-    _nameTextController = TextEditingController(text: list.name);
+    _nameTextController = TextEditingController(text: list != null ? list.name : "");
     return Scaffold(
       appBar: AppBar(
         title: Text("Einkaufsliste bearbeiten"),

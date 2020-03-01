@@ -6,29 +6,46 @@ const db = admin.firestore();
 
 export const createAutomaticList = functions.region("europe-west1").https.onCall(async (data, context) => {
     const uid = context.auth.uid;
+    const groupid = data.groupid || null;
 
-    //TODO: If necessary also save and add category of products
+    let doc = await db.collection("users").doc(uid).get();
 
-    const userDoc = await db.collection("users").doc(uid).get();
-    const days = userDoc.data()["settings"]["ai_interval"];
-    const last = userDoc.data()["last_automatically_generated"] ?
-        userDoc.data()["last_automatically_generated"].toDate() :
+    if(groupid) {
+        doc = await db.collection("groups").doc(groupid).get();
+        const usersInGroup = doc.data()["members"].map((m: any) => m["uid"]);
+        console.log(usersInGroup);
+        if(!usersInGroup.includes(uid)){
+            return {status: "Failed"};
+        }
+    }
+
+    const days = doc.data()["settings"]["ai_interval"] || 0;
+    const last = doc.data()["last_automatically_generated"] ?
+        doc.data()["last_automatically_generated"].toDate() :
         null;
 
-    if (days && last) {
-        // Not enough days since the last automatic list have passed.
+    if (!days) {
+        return {status: "Failed"};
+    }
+
+    // Not enough days since the last automatic list have passed.
+    // If last is null it never generated a list
+    if(last) {
         //@ts-ignore
         const daysPassed = Math.ceil(Math.abs(new Date(Date.now()) - last) / (1000 * 60 * 60 * 24));
-        if(daysPassed < days) return { status: "Failed" };
+        if (daysPassed < days) return {status: "Failed"};
     }
 
     //TODO: Increase from 5 to 10 Lists
-    const lists = await loadLists(uid, 5);
+    const lists = await loadLists(groupid || uid, 5, !!groupid);
     if(!lists || lists.length < 5) {
         return {status: "Failed"};
     }
 
+    console.log(lists);
     const recommendedItems = recommend(lists);
+
+    //TODO: Add category and price to recommendedItems
 
     const today = new Date(Date.now());
 
@@ -44,8 +61,8 @@ export const createAutomaticList = functions.region("europe-west1").https.onCall
     }
 
     return Promise.all([
-        db.collection("users").doc(uid).collection("lists").add(newList),
-        db.collection("users").doc(uid).set({last_automatically_generated: Timestamp.now()}, { merge: true })
+        db.collection(!groupid ? "users" : "groups").doc(groupid || uid).collection("lists").add(newList),
+        db.collection(!groupid ? "users" : "groups").doc(groupid || uid).set({last_automatically_generated: Timestamp.now()}, { merge: true })
     ]).catch(() => {
         return { status: "Failed" };
     }).then(() => {
@@ -55,9 +72,9 @@ export const createAutomaticList = functions.region("europe-west1").https.onCall
 
 });
 
-async function loadLists(uid: string, amount: number) {
+async function loadLists(uid: string, amount: number, isGroup: boolean) {
     try{
-        const file: any = await db.collection("users").doc(uid).collection("shopping_data").doc("data").get();
+        const file: any = await db.collection(isGroup ? "groups" : "users").doc(uid).collection("shopping_data").doc("data").get();
         return file.data()["last"].splice(-amount);
     }catch (e) {
         return [];

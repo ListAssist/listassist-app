@@ -24,7 +24,8 @@ class GroupView extends StatelessWidget {
       ),
       body: groups != null ? groups.length == 0 ? Center(child: Text("Keine Gruppen", style: Theme.of(context).textTheme.title)) :
       ListView.separated(
-        separatorBuilder: (ctx, i) => Divider(
+          physics: BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+          separatorBuilder: (ctx, i) => Divider(
           indent: 10,
           endIndent: 10,
           color: Colors.grey,

@@ -45,8 +45,7 @@ export const inviteUsers = functions.region("europe-west1").https.onCall(async (
                                     from: from,
                                     groupid: groupid,
                                     groupname: groupname,
-                                    to: sn.docs[0].data()["uid"],
-                                    type: "pending"
+                                    to: sn.docs[0].data()["uid"]
                                 })
                         }))
                 )

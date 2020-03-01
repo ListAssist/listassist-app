@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:algolia/algolia.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -19,8 +18,8 @@ import 'add_shopping_list.dart';
 
 class SearchItemsView extends StatefulWidget {
   final String listId;
-
-  SearchItemsView(this.listId);
+  final bool isGroup;
+  SearchItemsView(this.listId, [this.isGroup = false]);
 
   @override
   _SearchItemsView createState() => _SearchItemsView();
@@ -104,7 +103,7 @@ class _SearchItemsView extends State<SearchItemsView> {
     if (_debounce?.isActive ?? false) _debounce.cancel();
     _debounce = Timer(Duration(milliseconds: _debounceTime), () {
       if (_list != null && _user.uid != null || _user.uid.length > 0) {
-        databaseService.updateList(_user.uid, _list).then((value) => {print("Liste wurde erfolgreich upgedated")}).catchError((_) => {print(_.toString())});
+        databaseService.updateList(widget.isGroup ? widget.listId : _user.uid, _list, widget.isGroup).then((value) => {print("Liste wurde erfolgreich upgedated")}).catchError((_) => {print(_.toString())});
       }
     });
   }
@@ -155,12 +154,17 @@ class _SearchItemsView extends State<SearchItemsView> {
     });
   }
 
+  //FIXME: After creating shopping list in group endless shimmer
   @override
   Widget build(BuildContext context) {
     _user = Provider.of<User>(context);
-    List lists = Provider.of<List<ShoppingList>>(context);
-    int index = lists.indexWhere((e) => e.id == widget.listId);
-    _list = lists[index];
+    if(widget.isGroup) {
+      _list = Provider.of<ShoppingList>(context);
+    }else {
+      List lists = Provider.of<List<ShoppingList>>(context);
+      int index = lists.indexWhere((e) => e.id == widget.listId);
+      _list = lists[index];
+    }
 
     return DefaultTabController(
       length: 3,
@@ -200,7 +204,7 @@ class _SearchItemsView extends State<SearchItemsView> {
             ]
           ),
 
-          body: Column(children: <Widget>[
+          body: _list == null ? ShoppyShimmer() : Column(children: <Widget>[
             Container(
               height: 120.0,
               child: Stack(

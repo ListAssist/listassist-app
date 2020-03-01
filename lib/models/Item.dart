@@ -20,7 +20,9 @@ class Item {
   Map<String, dynamic> getNameAndCount() {
     return {
       "name": name,
-      "count": count
+      "count": count,
+      "prize": prize,
+      "category": category
     };
   }
 

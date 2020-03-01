@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/material.dart';
 import 'package:listassist/models/Achievement.dart';
 import 'package:listassist/models/CompletedShoppingList.dart';
 import 'package:listassist/models/Group.dart';
@@ -49,15 +48,14 @@ class DatabaseService {
     return _db
         .collection("invites")
         .where("to", isEqualTo: uid)
-        .where("type", isEqualTo: "pending")
         .snapshots()
         .map((snap) => snap.documents.map((d) => Invite.fromFirestore(d)).toList());
   }
 
-  Stream<List<ShoppingList>> streamLists(String uid) {
-    print("----- READ LISTS -----");
+  Stream<List<ShoppingList>> streamLists(String uid, [isGroup = false]) {
+    print("----- READ ${isGroup ? "GROUP" : "USER"} LISTS -----");
     return _db
-        .collection("users")
+        .collection(isGroup ? "groups" : "users")
         .document(uid)
         .collection("lists")
         .where("type", isEqualTo: "pending")
@@ -75,10 +73,10 @@ class DatabaseService {
         .map((snap) => snap.documents.map((d) => Recipe.fromFirestore(d)).toList());
   }
 
-  Stream<List<CompletedShoppingList>> streamListsHistory(String uid) {
-    print("----- READ COMPLETED LISTS -----");
+  Stream<List<CompletedShoppingList>> streamListsHistory(String uid, [isGroup = false]) {
+    print("----- READ ${isGroup ? "GROUP" : "USER"} COMPLETED LISTS -----");
     return _db
-        .collection("users")
+        .collection(isGroup ? "groups" : "users")
         .document(uid)
         .collection("lists")
         .where("type", isEqualTo: "completed")
@@ -127,17 +125,6 @@ class DatabaseService {
         .add({"name": recipe.name, "description" : recipe.description, "items": items});
   }
 
-  Stream<List<ShoppingList>> streamListsFromGroup(String groupid) {
-    print("----- READ GROUP LISTS -----");
-    return _db
-        .collection("groups")
-        .document(groupid)
-        .collection("lists")
-        .where("type", isEqualTo: "pending")
-        .snapshots()
-        .map((snap) => snap.documents.map((d) => ShoppingList.fromFirestore(d)).toList());
-  }
-
   Stream<ShoppingList> streamListFromGroup(String groupid, String listid) {
     print("----- READ GROUP LIST ${listid} -----");
     return _db
@@ -147,6 +134,19 @@ class DatabaseService {
         .document(listid)
         .snapshots()
         .map((snap) => ShoppingList.fromFirestore(snap));
+  }
+
+  Stream<CompletedShoppingList> streamCompletedListFromGroup(String groupid, String listid) {
+    if(listid == null)
+      return Stream<CompletedShoppingList>.value(null);
+    print("----- READ GROUP COMPLETED LIST ${listid} -----");
+    return _db
+        .collection("groups")
+        .document(groupid)
+        .collection("lists")
+        .document(listid)
+        .snapshots()
+        .map((snap) => CompletedShoppingList.fromFirestore(snap));
   }
 
   Future<void> updateProfileName(String uid, String newName) {
@@ -333,6 +333,16 @@ class DatabaseService {
 //        .document(list.id)
 //        .setData({"photoURLs": FieldValue.arrayUnion(["EMPTY"])}, merge: true);
 //  }
+
+  Future<void> saveBillUrls(String uid, String listid, String imgName, [isGroup = false]) async{
+    String path = isGroup ? "groups/$uid/lists/$listid/$imgName" : "users/$uid/lists/$listid/$imgName";
+    return _db
+        .collection(isGroup ? "groups" : "users")
+        .document(uid)
+        .collection("lists")
+        .document(listid)
+        .setData({"pictureURLs": FieldValue.arrayUnion([path])}, merge: true);
+  }
 }
 
 
