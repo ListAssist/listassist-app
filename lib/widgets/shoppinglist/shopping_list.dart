@@ -48,6 +48,7 @@ class _ShoppingListState extends State<ShoppingList> {
         }) :
         MaterialPageRoute(builder: (context) => ShoppingListDetail(index: widget.index)),
       ),
+      //TODO: Implement in completed shopping list
       onLongPressStart: (details) async {
         RenderBox overlay = Overlay.of(context).context.findRenderObject();
         dynamic picked = await showMenu(
