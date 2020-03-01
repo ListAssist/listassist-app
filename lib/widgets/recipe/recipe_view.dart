@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:listassist/models/Item.dart';
-import 'package:listassist/models/Product.dart';
 import 'package:listassist/models/Recipe.dart';
 import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
@@ -202,11 +201,11 @@ class _RecipeView extends State<RecipeView> {
                     ),
                   ),
 
-                  /*ProgressButton(
+                  ProgressButton(
                     child: Text("Speichern"),
                     onPressed: (AnimationController animation) {
                     },
-                  )*/
+                  )
                 ],
               ),
             ),

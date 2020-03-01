@@ -3,10 +3,13 @@ import 'dart:async';
 import 'package:algolia/algolia.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:listassist/models/Product.dart';
 import 'package:listassist/models/Recipe.dart';
+import 'package:listassist/models/ScannedShoppinglist.dart';
 import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
+import 'package:listassist/services/camera.dart';
 import 'package:listassist/services/connectivity.dart';
 import 'package:listassist/services/db.dart';
 import 'package:listassist/services/info_overlay.dart';
@@ -31,6 +34,8 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew>  with TickerProvider
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
   TextEditingController _searchController = TextEditingController();
   TabController _tabController;
+
+  List<ScannedShoppingList> scannedLists = [];
 
   var _listOrRecipe;
   bool _isList;
@@ -179,7 +184,7 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew>  with TickerProvider
                 backgroundColor: Colors.green,
               ),
             ),
-            Align(
+           /* Align(
               alignment: Alignment.bottomRight,
               child: Padding(
                 padding: EdgeInsets.only(bottom: 60.0),
@@ -190,14 +195,15 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew>  with TickerProvider
                       Icons.camera_alt,
                       color: Colors.black,
                     ),
-                    onPressed: () {
-                      Navigator.pop(context);
+                    onPressed: () async{
+                      await connectivityService.testInternetConnection() ? InfoOverlay.showSourceSelectionSheet(context, callback: _startCameraScanner, arg: null)
+                          : InfoOverlay.showErrorSnackBar("Kein Internetzugriff");
                     },
                     backgroundColor: Colors.white,
                   ),
                 ),
               ),
-            ),
+            ),*/
           ]),
           body: Column(children: <Widget>[
             Container(
@@ -471,4 +477,18 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew>  with TickerProvider
           ])),
     );
   }
+
+
+  /// Starts up the camera scanner and awaits output to process
+  Future<void> _startCameraScanner(BuildContext context, ImageSource imageSource, ShoppingList list) async {
+    ScannedShoppingList scannedShoppingList = await cameraService.getResultFromCameraScanner(context, imageSource, addToList: list);
+    if (scannedShoppingList != null) {
+      setState(() {
+        scannedLists.add(scannedShoppingList);
+      });
+    }
+
+    Navigator.pop(context);
+  }
+
 }

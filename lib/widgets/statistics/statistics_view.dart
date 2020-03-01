@@ -170,6 +170,14 @@ class _StatisticsView extends State<StatisticsView> {
       });
       data.remove(helper);
 
+      //Sort funktioniert nur mit int, deswegen nicht b.value - a.value
+      data.sort((a, b) {
+        if (b.value - a.value == 0) {
+          return 0;
+        }
+        return b.value > a.value ? 1 : -1;
+      });
+
       return [
         new charts.Series<CategoryMoney, String>(
           id: 'MoneyPerCategory',

@@ -1,17 +1,11 @@
-import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:listassist/models/ScannedShoppinglist.dart';
 import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
-import 'package:listassist/services/camera.dart';
 import 'package:listassist/services/connectivity.dart';
 import 'package:listassist/services/db.dart';
 import 'package:listassist/services/info_overlay.dart';
-import 'package:listassist/widgets/shoppinglist/search_items_view.dart';
 import 'package:listassist/widgets/shoppinglist/search_items_view_new.dart';
 import 'package:progress_indicator_button/progress_button.dart';
 import 'package:provider/provider.dart';
@@ -22,7 +16,6 @@ class CreateShoppingListView extends StatefulWidget {
 }
 
 class _CreateShoppingListView extends State<CreateShoppingListView> {
-  List<ScannedShoppingList> scannedLists = [];
 
   bool buttonDisabled = false;
 
@@ -168,13 +161,7 @@ class _CreateShoppingListView extends State<CreateShoppingListView> {
                               decoration: InputDecoration(border: UnderlineInputBorder(), hintText: "Name", contentPadding: EdgeInsets.only(top: 17, left: 5, right: 17, bottom: 10)),
                             ),
                           ),
-                          IconButton(
-                            icon: Icon(Icons.camera_alt),
-                            onPressed: () async{
-                              await connectivityService.testInternetConnection() ? InfoOverlay.showSourceSelectionSheet(context, callback: _startCameraScanner, arg: null)
-                                  : InfoOverlay.showErrorSnackBar("Kein Internetzugriff");
-                            },
-                          )
+
                         ],
                       ),
                     ),
@@ -193,15 +180,4 @@ class _CreateShoppingListView extends State<CreateShoppingListView> {
         ]));
   }
 
-  /// Starts up the camera scanner and awaits output to process
-  Future<void> _startCameraScanner(BuildContext context, ImageSource imageSource, ShoppingList list) async {
-    ScannedShoppingList scannedShoppingList = await cameraService.getResultFromCameraScanner(context, imageSource, addToList: list);
-    if (scannedShoppingList != null) {
-      setState(() {
-        scannedLists.add(scannedShoppingList);
-      });
-    }
-
-    Navigator.pop(context);
-  }
 }
