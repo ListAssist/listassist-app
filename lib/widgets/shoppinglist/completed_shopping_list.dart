@@ -25,17 +25,17 @@ class CompletedShoppingList extends StatelessWidget {
     }
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
-      onTap: () => Navigator.push(
+      onTap: () => list != null ? Navigator.push(
         context,
         this.isGroup ?
         MaterialPageRoute(builder: (context) {
-          return StreamProvider<model.CompletedShoppingList>.value(
+          return list != null ? StreamProvider<model.CompletedShoppingList>.value(
               value: databaseService.streamCompletedListFromGroup(groupid, list.id),
               child: CompletedShoppingListDetail(index: this.groupIndex, isGroup: true)
-          );
+          ) : null;
         }) :
-        MaterialPageRoute(builder: (context) => CompletedShoppingListDetail(index: this.index)),
-      ),
+        MaterialPageRoute(builder: (context) => CompletedShoppingListDetail(index: this.index))
+      ) : null,
       child: Container(
         padding: EdgeInsets.all(20),
         child: Align(

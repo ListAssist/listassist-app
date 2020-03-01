@@ -17,6 +17,8 @@ class CompletedShoppingList {
 
   factory CompletedShoppingList.fromFirestore(DocumentSnapshot doc) {
     Map data = doc.data;
+    if(data == null || data.isEmpty)
+      return CompletedShoppingList();
 
     List<Item> tempCompletedItems = List.from(data["items"] ?? []).map((x) => Item.fromMap(x)).toList();
     tempCompletedItems.removeWhere((item) => !item.bought);

@@ -315,7 +315,7 @@ class ShoppingLists extends StatelessWidget {
         "groupid": _group.id
       });
       if (resp.data["status"] != "Successful") {
-        InfoOverlay.showErrorSnackBar("Fehler beim Erstellen der Automatischen Einkaufsliste");
+        //InfoOverlay.showErrorSnackBar("Fehler beim Erstellen der Automatischen Einkaufsliste");
       } else {
         InfoOverlay.showInfoSnackBar("Automatische Einkaufsliste wurde erstellt");
       }
@@ -330,6 +330,7 @@ class ShoppingListsHistory extends StatelessWidget {
   final int groupindex;
   ShoppingListsHistory({this.groupindex});
 
+  //FIXME: Error when deleting completed list "items" called on null
   @override
   Widget build(BuildContext context) {
     List<CompletedShoppingList> lists = Provider.of<List<CompletedShoppingList>>(context);

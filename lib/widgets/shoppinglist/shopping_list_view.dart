@@ -99,7 +99,7 @@ class _ShoppingListView extends State<ShoppingListView> {
     try {
       dynamic resp = await autoList.call();
       if (resp.data["status"] != "Successful") {
-        InfoOverlay.showErrorSnackBar("Fehler beim Erstellen der Automatischen Einkaufsliste");
+        //InfoOverlay.showErrorSnackBar("Fehler beim Erstellen der Automatischen Einkaufsliste");
       } else {
         InfoOverlay.showInfoSnackBar("Automatische Einkaufsliste wurde erstellt");
       }

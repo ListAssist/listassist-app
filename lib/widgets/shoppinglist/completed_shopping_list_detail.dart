@@ -37,8 +37,6 @@ class _CompletedShoppingListDetailState extends State<CompletedShoppingListDetai
   bool _copyBought = true;
   bool _copyUnbought = false;
 
-  //TODO: NoSuchMethodError when deleting a list (only in groups).
-
   @override
   Widget build(BuildContext context) {
     if (!_useCache) {
@@ -149,6 +147,9 @@ class _CompletedShoppingListDetailState extends State<CompletedShoppingListDetai
   }
 
   ListView buildItemList(List<Item> items) {
+    if(items == null || items.isEmpty){
+      return ListView();
+    }
     return ListView.builder(
       physics: BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
       itemCount: items.length,

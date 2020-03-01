@@ -137,6 +137,8 @@ class DatabaseService {
   }
 
   Stream<CompletedShoppingList> streamCompletedListFromGroup(String groupid, String listid) {
+    if(listid == null)
+      return Stream<CompletedShoppingList>.value(null);
     print("----- READ GROUP COMPLETED LIST ${listid} -----");
     return _db
         .collection("groups")
