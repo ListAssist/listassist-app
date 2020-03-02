@@ -277,14 +277,18 @@ class ShoppingLists extends StatelessWidget {
   Widget build(BuildContext context) {
     if(first) {
       Group group = Provider.of<List<Group>>(context)[groupindex];
-      if(group.settings["ai_enabled"]) {
-        if(group.settings["ai_interval"] != null) {
-          if(group.lastAutomaticallyGenerated == null) {
-            _createAutomaticList();
-          }else {
-            DateTime nextList = group.lastAutomaticallyGenerated.toDate().add(Duration(days: group.settings["ai_interval"]));
-            if (DateTime.now().isAfter(nextList)) {
+      if(group.settings != null) {
+        //TODO: Default settings speichern
+        if(group.settings["ai_enabled"]) {
+          if (group.settings["ai_interval"] != null) {
+            if (group.lastAutomaticallyGenerated == null) {
               _createAutomaticList();
+            } else {
+              DateTime nextList = group.lastAutomaticallyGenerated.toDate().add(
+                  Duration(days: group.settings["ai_interval"]));
+              if (DateTime.now().isAfter(nextList)) {
+                _createAutomaticList();
+              }
             }
           }
         }

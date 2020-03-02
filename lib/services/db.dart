@@ -265,28 +265,6 @@ class DatabaseService {
     return products;
   }
 
-  Future<bool> getScannerSetting(String uid) async{
-    Map settings;
-    var document = _db
-        .collection("users")
-        .document(uid);
-    await document.get().then((value) => {
-      settings = value["settings"]
-    });
-    return settings["scanner_manual"];
-  }
-
-  Future<Map> getUserSettings(String uid) async{
-    Map settings;
-    var document = _db
-        .collection("users")
-        .document(uid);
-    await document.get().then((value) => {
-      settings = value["settings"]
-    });
-    return settings;
-  }
-
   Future<void> updateUserSettings(String uid, Map settings) async{
     _db
         .collection("users")

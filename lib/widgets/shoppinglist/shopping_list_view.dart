@@ -25,14 +25,18 @@ class _ShoppingListView extends State<ShoppingListView> {
   Widget build(BuildContext context) {
     if(first) {
       User user = Provider.of<User>(context);
-      if(user.settings["ai_enabled"]) {
-        if(user.settings["ai_interval"] != null) {
-          if(user.lastAutomaticallyGenerated == null) {
-            _createAutomaticList();
-          }else {
-            DateTime nextList = user.lastAutomaticallyGenerated.toDate().add(Duration(days: user.settings["ai_interval"]));
-            if (DateTime.now().isAfter(nextList)) {
+      if(user.settings != null) {
+        //TODO: Default settings speichern
+        if (user.settings["ai_enabled"]) {
+          if (user.settings["ai_interval"] != null) {
+            if (user.lastAutomaticallyGenerated == null) {
               _createAutomaticList();
+            } else {
+              DateTime nextList = user.lastAutomaticallyGenerated.toDate().add(
+                  Duration(days: user.settings["ai_interval"]));
+              if (DateTime.now().isAfter(nextList)) {
+                _createAutomaticList();
+              }
             }
           }
         }
