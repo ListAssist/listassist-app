@@ -178,7 +178,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
                                         list.items[index].price = erg;
                                         itemChange(list.items[index].bought, index);
                                         setState(() {});
-                                        databaseService.updateList(uid, list).then((onUpdate) {
+                                        databaseService.updateList(uid, list, widget.isGroup).then((onUpdate) {
                                           print("Saved items");
                                         }).catchError((onError) {
                                           InfoOverlay.showErrorSnackBar("Fehler beim aktualisieren der Einkaufsliste");

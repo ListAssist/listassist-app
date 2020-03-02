@@ -332,7 +332,6 @@ class ShoppingListsHistory extends StatelessWidget {
   final int groupindex;
   ShoppingListsHistory({this.groupindex});
 
-  //FIXME: Error when deleting completed list "items" called on null
   @override
   Widget build(BuildContext context) {
     List<CompletedShoppingList> lists = Provider.of<List<CompletedShoppingList>>(context);
