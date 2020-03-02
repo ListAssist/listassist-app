@@ -25,10 +25,11 @@ class FirstView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     User user = Provider.of<User>(context);
-    return MultiProvider(
+    return user == null ? Container() : MultiProvider(
       providers: [
         StreamProvider.value(value: databaseService.streamLists(user.uid)),
-        StreamProvider.value(value: databaseService.streamListsHistory(user.uid))
+        StreamProvider.value(value: databaseService.streamListsHistory(user.uid)),
+        //StreamProvider.value(value: databaseService.streamPopularProducts())
       ],
       child: CustomNavigator(
         home: ShoppingListView(),

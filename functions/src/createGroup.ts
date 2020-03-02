@@ -37,6 +37,10 @@ export const createGroup = functions.region("europe-west1").https.onCall(async (
                         displayName: snap.data()["displayName"],
                         photoURL: snap.data()["photoURL"] || "",
                     }],
+                    settings: {
+                        ai_enabled: true,
+                        ai_interval: 7,
+                    }
                 })
                 .then((doc) => {
                     return db.collection("groups_user")

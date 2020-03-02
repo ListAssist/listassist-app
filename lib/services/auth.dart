@@ -7,7 +7,6 @@ import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:flutter_twitter_login/flutter_twitter_login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:listassist/models/User.dart';
-import 'package:listassist/models/current-screen.dart';
 import 'package:listassist/services/db.dart';
 import 'package:listassist/services/info_overlay.dart';
 import 'package:rxdart/rxdart.dart';
@@ -16,7 +15,6 @@ import 'package:listassist/widgets/authentication/authentication.dart';
 enum AuthenticationType {Facebook, Google, Twitter}
 
 class AuthService {
-
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   final FacebookLogin _facebookSignIn = FacebookLogin();
   final TwitterLogin _twitterSignIn = TwitterLogin(
@@ -28,7 +26,6 @@ class AuthService {
   Firestore _db = Firestore.instance;
 
   Stream<FirebaseUser> get user => _auth.onAuthStateChanged;
-
   Observable<User> get userDoc => Observable(user).switchMap(
       (FirebaseUser user)  {
         if (user != null) {
@@ -60,6 +57,7 @@ class AuthService {
         "email": user.email,
         "displayName": displayName,
         "lastLogin": DateTime.now(),
+
       }, merge: true);
 
       return user;
@@ -98,33 +96,39 @@ class AuthService {
 
     /** Handle depending on auth type **/
     AuthCredential credential;
-    switch (type) {
-      case AuthenticationType.Facebook:
+    try {
+      switch (type) {
+        case AuthenticationType.Facebook:
         /** Native Facebook login screen **/
-        FacebookLoginResult result = await _facebookSignIn.logIn(["email"]);
+          FacebookLoginResult result = await _facebookSignIn.logIn(["email"]);
 
-        if (ResultHandler.handleFacebookResultError(result)) return null;
+          if (ResultHandler.handleFacebookResultError(result)) return null;
 
-        credential = FacebookAuthProvider.getCredential(accessToken: result.accessToken.token);
-        break;
-      case AuthenticationType.Google:
+          credential = FacebookAuthProvider.getCredential(accessToken: result.accessToken.token);
+          break;
+        case AuthenticationType.Google:
         /** Native Google login screen **/
-        GoogleSignInAccount googleUser = await _googleSignIn.signIn();
-        GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+          GoogleSignInAccount googleUser = await _googleSignIn.signIn();
+          GoogleSignInAuthentication googleAuth = await googleUser.authentication;
 
-        credential = GoogleAuthProvider.getCredential(
-          accessToken: googleAuth.accessToken,
-          idToken: googleAuth.idToken,
-        );
-        break;
-      case AuthenticationType.Twitter:
-        TwitterLoginResult result = await _twitterSignIn.authorize();
+          credential = GoogleAuthProvider.getCredential(
+            accessToken: googleAuth.accessToken,
+            idToken: googleAuth.idToken,
+          );
+          break;
+        case AuthenticationType.Twitter:
+          TwitterLoginResult result = await _twitterSignIn.authorize();
 
-        /// Signing in with Twitter currently doesn't work. Created Issue at firebase_auth repo
-        if (ResultHandler.handleTwitterResultError(result)) return null;
+          /// Signing in with Twitter currently doesn't work. Created Issue at firebase_auth repo
+          if (ResultHandler.handleTwitterResultError(result)) return null;
 
-        credential = TwitterAuthProvider.getCredential(authToken: result.session.token, authTokenSecret: result.session.secret);
-        break;
+          credential = TwitterAuthProvider.getCredential(authToken: result.session.token, authTokenSecret: result.session.secret);
+          break;
+      }
+    } catch (e) {
+      InfoOverlay.showInfoSnackBar("Es ist ein Fehler aufgetreten bei der Anmeldemethode die du gewählt hast. Versuche es erneut oder versuche eine andere Anmeldemethode aus.");
+      loading.add(false);
+      return null;
     }
 
     try {
@@ -156,6 +160,29 @@ class AuthService {
       "lastLogin": DateTime.now(),
       "type": authenticationEnumToString(type)
     }, merge: true);
+  }
+
+  Future<String> reauthenticateUser(FirebaseUser firebaseUser, String password) async {
+    String currentEmail = (await _auth.currentUser()).email;
+
+    print("currentEmail: " + currentEmail);
+    try{
+      AuthCredential credential = EmailAuthProvider.getCredential(email: currentEmail, password: password);
+      await firebaseUser.reauthenticateWithCredential(credential);
+      return "loggedin";
+    } on PlatformException catch(e) {
+      print(e.toString());
+      return "Falsches Passwort";
+    }
+
+  }
+
+  Future<void> updateEmail(FirebaseUser firebaseUser, String newEmail) async {
+    return firebaseUser.updateEmail(newEmail);
+  }
+
+  Future<void> updatePassword(FirebaseUser firebaseUser, String newPassword) async {
+    return firebaseUser.updatePassword(newPassword);
   }
 
   Future setProfilePicture(User user, String newPhotoURL) async{

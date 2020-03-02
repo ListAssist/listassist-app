@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "977251739072-m4dkjadni6h812vup2qf3am9a0rcj7cr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "gq.listassist.www",
+            "certificate_hash": "0ed0731f6d8cde21281f944b8993866290532448"
+          }
+        },
+        {
           "client_id": "977251739072-j1rlahclev8sdn14fif7cd8lbf3vbnq1.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

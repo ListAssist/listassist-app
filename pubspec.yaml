@@ -27,7 +27,6 @@ dependencies:
   # firebase
   firebase_core:
   firebase_auth:
-  firebase_ml_vision:
   firebase_storage:
   cloud_firestore:
   cloud_functions:
@@ -37,10 +36,15 @@ dependencies:
   flutter_twitter_login:
   flutter_facebook_login:
   flutter_signin_button: ^1.0.0
+
   # state management
   rxdart:
   scoped_model:
   provider:
+  shimmer:
+  connectivity:
+  localstorage:
+  firebase_messaging:
 
   # addons
   url_launcher:
@@ -54,6 +58,9 @@ dependencies:
   progress_indicator_button:
   algolia:
   flutter_typeahead:
+  string_similarity:
+  speech_recognition:
+  shared_preferences:
 
   # design
   fluttertoast:
@@ -65,6 +72,19 @@ dependencies:
   fancy_bottom_navigation:
   image_cropper:
   after_init:
+  carousel_slider:
+  photo_view:
+  flutter_launcher_icons: "^0.7.3"
+  charts_flutter:
+  auto_size_text:
+  percent_indicator:
+  intro_slider:
+  numberpicker:
+
+flutter_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icon/icon.png"
 
 dev_dependencies:
   flutter_test:
@@ -86,9 +106,14 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
-  # To add assets to your application, add an assets section, like this:
-  # assets:
-  #  - images/a_dot_burr.jpeg
+  assets:
+    - assets/images/avatar.png
+    - assets/images/liste.png
+    - assets/images/group.png
+    - assets/images/scan.png
+    - assets/images/userpic.png
+    - assets/images/cookbook.png
+    - assets/icon/icon.png
   #  - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

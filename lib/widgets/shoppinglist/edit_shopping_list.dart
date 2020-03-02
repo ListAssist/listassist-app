@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:listassist/models/Group.dart';
 import 'package:listassist/models/Item.dart';
 import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
@@ -9,7 +10,8 @@ import 'package:provider/provider.dart';
 
 class EditShoppingList extends StatefulWidget {
   final int index;
-  EditShoppingList({this.index});
+  final bool isGroup;
+  EditShoppingList({this.index, this.isGroup = false});
 
   @override
   _EditShoppingListState createState() => _EditShoppingListState();
@@ -20,21 +22,30 @@ class _EditShoppingListState extends State<EditShoppingList> {
   TextEditingController _nameTextController;
 
   bool firstLoad = true;
-  List<Item> copyItems;
+  List<Item> copyItems = [];
+
+  String uid;
+  ShoppingList list;
 
   @override
   Widget build(BuildContext context) {
-    ShoppingList list = Provider.of<List<ShoppingList>>(context)[widget.index];
-    String uid = Provider.of<User>(context).uid;
-    if(firstLoad) {
-      copyItems = List.from(list.items);
+    if(widget.isGroup) {
+      uid = Provider.of<List<Group>>(context)[widget.index].id;
+      list = Provider.of<ShoppingList>(context);
+    }else {
+      list = Provider.of<List<ShoppingList>>(context)[widget.index];
+      uid = Provider.of<User>(context).uid;
+    }
+    if(firstLoad && list != null) {
+      copyItems = List.from(list.items) ?? [];
       firstLoad = false;
     }
 
-    _nameTextController = TextEditingController(text: list.name);
+    _nameTextController = TextEditingController(text: list != null ? list.name : "");
     return Scaffold(
       appBar: AppBar(
         title: Text("Einkaufsliste bearbeiten"),
+        backgroundColor: Theme.of(context).colorScheme.primary,
       ),
       body: Container(
           child: ListView(
@@ -79,7 +90,7 @@ class _EditShoppingListState extends State<EditShoppingList> {
           databaseService.updateList(uid, ShoppingList(
             id: list.id,
             name: _nameTextController.text,
-            items: copyItems))
+            items: copyItems), widget.isGroup)
           .then((onSaved) {
             InfoOverlay.showInfoSnackBar("Einkaufsliste bearbeitet");
             Navigator.of(context).pop();

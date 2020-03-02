@@ -1,15 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:listassist/models/User.dart';
+import 'package:listassist/services/db.dart';
 import 'package:listassist/widgets/settings/notification_settings_view.dart';
 import 'package:listassist/services/auth.dart';
 import 'package:listassist/widgets/settings/profile_settings_view.dart';
-import 'package:listassist/widgets/settings/shopping_list_settings_view.dart';
+import 'package:listassist/widgets/settings/app_settings_view.dart';
+import 'package:listassist/widgets/shoppinglist/item_counter.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class SettingsView extends StatelessWidget {
-  String img = "https://www.indiewire.com/wp-content/uploads/2019/05/shutterstock_8999492b.jpg?w=780";
+class SettingsView extends StatefulWidget {
+  @override
+  _SettingsViewState createState() => _SettingsViewState();
+}
 
+class _SettingsViewState extends State<SettingsView> {
+  String img = "https://www.indiewire.com/wp-content/uploads/2019/05/shutterstock_8999492b.jpg?w=780";
 
   void _showDialog(BuildContext context) {
     // flutter defined function
@@ -42,6 +48,7 @@ class SettingsView extends StatelessWidget {
               onPressed: () {
                 authService.signOut();
                 Navigator.pop(context);
+                Navigator.pop(context);
               },
             ),
           ],
@@ -49,7 +56,6 @@ class SettingsView extends StatelessWidget {
       },
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -119,7 +125,6 @@ class Test extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
 
-
           Container(
               margin: const EdgeInsets.only(top: 30.0),
               child:
@@ -142,14 +147,14 @@ class Test extends StatelessWidget {
                     },
                   ),
                   ListTile(
-                    leading: Icon(Icons.view_agenda),
-                    title: Text('Ansicht'),
+                    leading: Icon(Icons.settings),
+                    title: Text('App Einstellungen'),
                     trailing: Icon(Icons.keyboard_arrow_right),
                     onTap: () => {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => ShoppinglistsettingsView()
+                              builder: (context) => AppSettingsView()
                           )
                       )
                     },
@@ -179,7 +184,9 @@ class Test extends StatelessWidget {
                     leading: Icon(Icons.bug_report),
                     title: Text('Fehler melden'),
                     trailing: Icon(Icons.keyboard_arrow_right),
-                    onTap: () => {},
+                    onTap: () => {
+                      _launchURL("https://github.com/ListAssist/listassist-app")
+                    },
                   ),
                   ListTile(
                     leading: Icon(Icons.info),
@@ -189,7 +196,6 @@ class Test extends StatelessWidget {
                       _launchURL("https://listassist.gq")
                     },
                   ),
-
                 ],
               )
           ),

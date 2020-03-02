@@ -7,18 +7,21 @@ import 'package:progress_dialog/progress_dialog.dart';
 /// Reserved for later use..
 class InfoOverlay {
 
-  static void showInfoSnackBar(String message) {
+  static void showInfoSnackBar(String message, {Toast toastLength = Toast.LENGTH_LONG}) {
     Fluttertoast.showToast(
         msg: message,
         textColor: Colors.white,
+        toastLength: toastLength
     );
   }
 
-  static void showErrorSnackBar(String message) {
+  static void showErrorSnackBar(String message, {Toast toastLength = Toast.LENGTH_LONG}) {
     Fluttertoast.showToast(
         msg: message,
         backgroundColor: Colors.red,
         textColor: Colors.white,
+        timeInSecForIos: 3,
+        toastLength: toastLength
     );
   }
 
@@ -56,5 +59,20 @@ class InfoOverlay {
             color: Colors.black, fontSize: 16.0, fontWeight: FontWeight.w600)
     );
     return progressDialog;
+  }
+
+  static showSourceSelectionSheet(BuildContext context, {Function callback, dynamic arg}) {
+    mainModalBottomSheet(context, [
+      ListTile(
+        leading: Icon(Icons.camera_alt),
+        title: Text("Kamera"),
+        onTap: () => callback(context, ImageSource.camera, arg),
+      ),
+      ListTile(
+        leading: Icon(Icons.photo),
+        title: Text("Galerie"),
+        onTap: () => callback(context, ImageSource.gallery, arg),
+      )
+    ]);
   }
 }

@@ -5,25 +5,21 @@ import Timestamp = admin.firestore.Timestamp;
 const db = admin.firestore();
 
 export const inviteUsers = functions.region("europe-west1").https.onCall(async (data, context) => {
-    const targetuids = data.targetuids;
+    const targetemails = data.targetemails;
     const groupid = data.groupid;
     const groupname = data.groupname;
     const from = data.from;
     const uid = context.auth.uid;
 
-    if (!targetuids) {
-        throw new functions.https.HttpsError("invalid-argument", "UID is required");
+    if (!targetemails) {
+        throw new functions.https.HttpsError("invalid-argument", "Emails are required");
     }
 
     if (!groupid) {
         throw new functions.https.HttpsError("invalid-argument", "GroupID is required");
     }
 
-    if(targetuids.includes(uid)) {
-        return { status: "Failed" };
-    }
-
-    console.log(targetuids);
+    console.log(targetemails);
 
     return db.collection("groups_user")
         .doc(uid)
@@ -35,22 +31,21 @@ export const inviteUsers = functions.region("europe-west1").https.onCall(async (
             if(!snap.data()["groups"].includes(groupid)) {
                 return { status: "Failed not in group" };
             }
+            //TODO: If User already has an invitation or is in group dont send another one
             return Promise.all(
-                    targetuids.map((target: string) => db.collection("users")
+                    targetemails.map((target: string) => db.collection("users")
                         .where("email", "==", target)
                         .get()
                         .then((sn) => {
-                            console.log(sn);
-                            console.log(sn.docs[0]);
                             if(!sn.docs && !sn.docs[0]) return null;
+                            if(sn.docs[0].data()["uid"] === uid) return null;
                             return db.collection("invites")
                                 .add({
                                     created: Timestamp.now(),
                                     from: from,
                                     groupid: groupid,
                                     groupname: groupname,
-                                    to: sn.docs[0].data()["uid"],
-                                    type: "pending"
+                                    to: sn.docs[0].data()["uid"]
                                 })
                         }))
                 )
@@ -58,11 +53,11 @@ export const inviteUsers = functions.region("europe-west1").https.onCall(async (
                     return { status: "Successful" };
                 })
                 .catch(() => {
-                    return { status: "Failed exception" };
+                    return { status: "Failed" };
                 });
         })
         .catch((e) => {
-            return { status: "Failed exception aussen ", e: e };
+            return { status: "Failed" };
         });
 
 });

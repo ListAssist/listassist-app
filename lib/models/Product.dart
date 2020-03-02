@@ -1,8 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Product {
   final String name;
-  bool category;
+  String category;
 
-  Item({this.name, this.category});
+  Product({this.name, this.category});
 
   Map<String, dynamic> toJson() =>
       {
@@ -10,12 +12,21 @@ class Product {
         'category': category,
       };
 
-  factory Item.fromMap(Map data) {
+  factory Product.fromMap(Map data) {
     data = data ?? { };
 
-    return Item(
+    return Product(
         name: data["name"],
         category: data["category"]
+    );
+  }
+
+  factory Product.fromFirestore(DocumentSnapshot doc) {
+    Map data = doc.data;
+
+    return Product(
+      name: data["name"],
+      category: data["category"],
     );
   }
 }

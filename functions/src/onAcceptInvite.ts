@@ -26,7 +26,7 @@ export const acceptInvite = functions.region("europe-west1").https.onCall((data,
                         .set({ groups: FieldValue.arrayUnion(snap.data()["groupid"]) }, { merge: true }),
                     db.collection("invites")
                         .doc(inviteid)
-                        .set({ type: "accepted" }, { merge: true }),
+                        .delete(),
                     db.collection("users")
                         .doc(uid)
                         .get()
