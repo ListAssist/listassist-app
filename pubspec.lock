@@ -57,13 +57,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.5"
-  camera_fix_exception:
-    dependency: "direct main"
-    description:
-      name: camera_fix_exception
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.4.0+5"
   carousel_slider:
     dependency: "direct main"
     description:
@@ -249,13 +242,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_twitter_login:
-    dependency: "direct main"
-    description:
-      name: flutter_twitter_login
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.1.0"
   flutter_typeahead:
     dependency: "direct main"
     description:
@@ -270,6 +256,11 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.2.1"
+  flutter_web_plugins:
+    dependency: transitive
+    description: flutter
+    source: sdk
+    version: "0.0.0"
   fluttertoast:
     dependency: "direct main"
     description:
@@ -290,14 +281,21 @@ packages:
       name: google_sign_in
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.0.14"
+    version: "4.1.4"
   google_sign_in_platform_interface:
     dependency: transitive
     description:
       name: google_sign_in_platform_interface
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.2"
+    version: "1.0.4"
+  google_sign_in_web:
+    dependency: transitive
+    description:
+      name: google_sign_in_web
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.8.3+2"
   http:
     dependency: transitive
     description:
@@ -361,6 +359,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.2.8"
+  js:
+    dependency: transitive
+    description:
+      name: js
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.6.1+1"
   localstorage:
     dependency: "direct main"
     description:
@@ -523,9 +528,11 @@ packages:
   speech_recognition:
     dependency: "direct main"
     description:
-      name: speech_recognition
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "."
+      ref: master
+      resolved-ref: "82ccef031b7549d5fa71aae4e458a24303d77004"
+      url: "https://github.com/webeverde/speech_recognition.git"
+    source: git
     version: "0.3.0+1"
   stack_trace:
     dependency: transitive
@@ -612,5 +619,5 @@ packages:
     source: hosted
     version: "2.2.0"
 sdks:
-  dart: ">=2.5.0 <3.0.0"
-  flutter: ">=1.6.7 <2.0.0"
+  dart: ">=2.6.0 <3.0.0"
+  flutter: ">=1.12.13+hotfix.4 <2.0.0"
