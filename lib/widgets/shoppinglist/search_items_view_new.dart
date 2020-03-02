@@ -1,37 +1,47 @@
 import 'dart:async';
 import 'package:algolia/algolia.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:listassist/models/Item.dart';
 import 'package:listassist/models/Product.dart';
+import 'package:listassist/models/Recipe.dart';
+import 'package:listassist/models/ScannedShoppinglist.dart';
 import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
+import 'package:listassist/services/camera.dart';
 import 'package:listassist/services/connectivity.dart';
 import 'package:listassist/services/db.dart';
 import 'package:listassist/services/info_overlay.dart';
 import 'package:listassist/widgets/shimmer/shoppy_shimmer.dart';
 import 'package:listassist/widgets/shoppinglist/item_counter.dart';
 import 'package:listassist/widgets/shoppinglist/speech_dialog.dart';
-import 'package:localstorage/localstorage.dart';
 import 'package:provider/provider.dart';
 import 'package:speech_recognition/speech_recognition.dart';
 import 'add_shopping_list.dart';
 
-class SearchItemsView extends StatefulWidget {
-  final String listId;
+class SearchItemsViewNew extends StatefulWidget {
+  final ShoppingList list;
+  final Recipe recipe;
   final bool isGroup;
-  SearchItemsView(this.listId, [this.isGroup = false]);
+
+  SearchItemsViewNew({this.list, this.recipe}, [this.isGroup = false]);
 
   @override
-  _SearchItemsView createState() => _SearchItemsView();
+  _SearchItemsViewNew createState() => _SearchItemsViewNew();
 }
 
-class _SearchItemsView extends State<SearchItemsView> {
+class _SearchItemsViewNew extends State<SearchItemsViewNew>  with TickerProviderStateMixin{
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
   TextEditingController _searchController = TextEditingController();
-  LocalStorage _storage = new LocalStorage("popular_products.json");
+  TabController _tabController;
+
+  var _listOrRecipe;
+  bool _isList;
 
   User _user;
-  ShoppingList _list;
+  //ShoppingList _list;
 
   Algolia algolia = Application.algolia;
   bool _searching = false;
@@ -47,7 +57,6 @@ class _SearchItemsView extends State<SearchItemsView> {
   List<dynamic> _products = [];
   List<Product> _popularProducts = [];
 
-  List<Product> _recentProducts = [];
   bool initialized = false;
 
   _searchProducts(String search) async {
@@ -74,61 +83,53 @@ class _SearchItemsView extends State<SearchItemsView> {
   }
 
   _addItem(Product product) {
-    _list.addItem(product.name, product.category);
-    _addToRecentProducts(product);
+    _listOrRecipe.addItem(product.name, product.category);
     setState(() {});
-    _requestListUpdate();
+    _requestDatabaseUpdate();
   }
 
   _addCount(String itemName) {
-    _list.changeItemCount(itemName, 1);
+    _listOrRecipe.changeItemCount(itemName, 1);
     setState(() {});
-    _requestListUpdate();
+    _requestDatabaseUpdate();
   }
 
   _subtractCount(String itemName) {
-    if (_list.getItemCount(itemName) == 1) {
-      _list.removeItem(itemName);
+    if (_listOrRecipe.getItemCount(itemName) == 1) {
+      _listOrRecipe.removeItem(itemName);
       setState(() {});
-      _requestListUpdate();
+      _requestDatabaseUpdate();
     } else {
-      _list.changeItemCount(itemName, -1);
+      _listOrRecipe.changeItemCount(itemName, -1);
       setState(() {});
-      _requestListUpdate();
+      _requestDatabaseUpdate();
     }
   }
 
   // Updated mit Debounce die Einkaufsliste in der Datenbank
-  _requestListUpdate() {
+  _requestDatabaseUpdate() {
     if (_debounce?.isActive ?? false) _debounce.cancel();
     _debounce = Timer(Duration(milliseconds: _debounceTime), () {
-      if (_list != null && _user.uid != null || _user.uid.length > 0) {
-        databaseService.updateList(widget.isGroup ? widget.listId : _user.uid, _list, widget.isGroup).then((value) => {print("Liste wurde erfolgreich upgedated")}).catchError((_) => {print(_.toString())});
+      if (_listOrRecipe != null && _user.uid != null || _user.uid.length > 0) {
+        print(_listOrRecipe.id);
+
+        _isList
+            ? databaseService.updateList(widget.isGroup ? widget.listId : _user.uid, _listOrRecipe, widget.isGroup).then((value) => {print("Liste wurde erfolgreich upgedated")}).catchError((_) => {print(_.toString())})
+            : databaseService.updateRecipe(_user.uid, _listOrRecipe).then((value) => {print("Rezept wurde erfolgreich upgedated")}).catchError((_) => {print(_.toString())});
       }
     });
   }
 
   _subtractCountUserInput() {
-    if (_list.getItemCount(_searchController.text) == 1) {
-      _list.removeItem(_searchController.text);
+    if (_listOrRecipe.getItemCount(_searchController.text) == 1) {
+      _listOrRecipe.removeItem(_searchController.text);
       setState(() {});
-      _requestListUpdate();
+      _requestDatabaseUpdate();
     } else {
-      _list.changeItemCount(_searchController.text, -1);
+      _listOrRecipe.changeItemCount(_searchController.text, -1);
       setState(() {});
-      _requestListUpdate();
+      _requestDatabaseUpdate();
     }
-  }
-
-  _addToRecentProducts(Product product) {
-    _recentProducts.removeWhere((p) => p.name == product.name);
-    _recentProducts.length >= 10 ? _recentProducts.removeLast() : {};
-    _recentProducts.insert(0, product);
-    _storage.setItem(
-        'list',
-        _recentProducts.map((product) {
-          return product.toJson();
-        }).toList());
   }
 
   Future<void> showSpeechRecognitionDialog() async {
@@ -136,75 +137,84 @@ class _SearchItemsView extends State<SearchItemsView> {
         context: context,
         builder: (BuildContext buildContext) {
           return SpeechDialog(dialogContext: buildContext);
-    });
-    if(resultText == null) {
+        });
+    if (resultText == null) {
       resultText = "";
     } else {
       var resultProducts = resultText.trim().split(" und ");
       resultProducts.forEach((p) {
-        if(_list.hasItem(p)){
+        if (_listOrRecipe.hasItem(p)) {
           _addCount(p);
         } else {
           _addItem(new Product(name: p, category: "Spracherkennung"));
         }
-
       });
     }
-    setState(() {
-    });
+    setState(() {});
+  }
+
+  @override
+  void initState() {
+    if (widget.list != null) {
+      _listOrRecipe = widget.list;
+      _isList = true;
+    } else {
+      _listOrRecipe = widget.recipe;
+      _isList = false;
+    }
+
+    _tabController = new TabController(length: 3, initialIndex: _listOrRecipe.items.length > 0 ? 0 : 1, vsync: this);
   }
 
   //FIXME: After creating shopping list in group endless shimmer
   @override
   Widget build(BuildContext context) {
     _user = Provider.of<User>(context);
-    if(widget.isGroup) {
-      _list = Provider.of<ShoppingList>(context);
-    }else {
-      List lists = Provider.of<List<ShoppingList>>(context);
-      int index = lists.indexWhere((e) => e.id == widget.listId);
-      _list = lists[index];
-    }
+//    if(widget.isGroup) {
+//      _list = Provider.of<ShoppingList>(context);
+//    }else {
+//      List lists = Provider.of<List<ShoppingList>>(context);
+//      int index = lists.indexWhere((e) => e.id == widget.listId);
+//      _list = lists[index];
+//    }
 
     return DefaultTabController(
       length: 3,
       child: Scaffold(
           key: _scaffoldKey,
-          floatingActionButton:
-
-          Stack(
-            children: [
-              Align(
-                alignment: Alignment.bottomRight,
-                child: FloatingActionButton(
-                  child: Icon(Icons.check),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  backgroundColor: Colors.green,
-                ),
+          floatingActionButton: Stack(children: [
+            Align(
+              alignment: Alignment.bottomRight,
+              child: FloatingActionButton(
+                child: Icon(Icons.check),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                backgroundColor: Colors.green,
               ),
-
-              Align(
-                alignment: Alignment.bottomRight,
-                child: Padding(
-                  padding: EdgeInsets.only(bottom: 60.0),
-                  child: Transform.scale(
-                    scale: 0.75,
-                    child: FloatingActionButton(
-                      child: Icon(Icons.camera_alt, color: Colors.black,),
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      backgroundColor: Colors.white,
+            ),
+            _isList ? Align(
+              alignment: Alignment.bottomRight,
+              child: Padding(
+                padding: EdgeInsets.only(bottom: 60.0),
+                child: Transform.scale(
+                  scale: 0.75,
+                  child: FloatingActionButton(
+                    child: Icon(
+                      Icons.camera_alt,
+                      color: Colors.black,
                     ),
+                    onPressed: () async{
+                      await connectivityService.testInternetConnection() ? InfoOverlay.showSourceSelectionSheet(context, callback: _startCameraScanner, arg: _listOrRecipe)
+                          : InfoOverlay.showErrorSnackBar("Kein Internetzugriff");
+                    },
+                    backgroundColor: Colors.white,
                   ),
                 ),
               ),
-            ]
-          ),
-
-          body: _list == null ? ShoppyShimmer() : Column(children: <Widget>[
+            ) : Container(),
+          ]),
+          body: Column(children: <Widget>[
             Container(
               height: 120.0,
               child: Stack(
@@ -271,113 +281,55 @@ class _SearchItemsView extends State<SearchItemsView> {
                 ? Container(
                     color: Theme.of(context).primaryColor,
                     child: TabBar(
+                      controller: _tabController,
                       indicatorColor: Colors.white,
-                      tabs: [Tab(text: "Zuletzt"), Tab(text: "Beliebt"), Tab(text: "Kategorien")],
+                      tabs: [Tab(text: _isList ? "Auf Liste" : "Auf Rezept"), Tab(text: "Beliebt"), Tab(text: "Kategorien")],
                     ),
                   )
                 : Container(),
             _searchController.text.length == 0
                 ? Expanded(
                     child: TabBarView(
+                      controller: _tabController,
                       children: <Widget>[
-                        FutureBuilder(
-                            future: _storage.ready,
-                            builder: (context, snapshot) {
-                              if (snapshot.data == null) {
-                                return ShoppyShimmer();
-                              }
-
-                              _recentProducts = (_storage.getItem("list") ?? [])
-                                  .map((product) {
-                                    return new Product(name: product["name"], category: product["category"]);
-                                  })
-                                  .cast<Product>()
-                                  .toList();
-
-                              if (_recentProducts.isNotEmpty != null) {
-                                return MediaQuery.removePadding(
-                                    removeTop: true,
-                                    context: context,
-                                    child: ListView.separated(
-                                      itemCount: _recentProducts.length,
-                                      separatorBuilder: (ctx, i) => Divider(
-                                        indent: 70,
-                                        endIndent: 10,
-                                        color: Colors.grey,
-                                      ),
-                                      itemBuilder: (context, index) {
-                                        _subtract() {
-                                          _subtractCount(_recentProducts[index].name);
-                                        }
-
-                                        int count;
-                                        if (_list.hasItem(_recentProducts[index].name)) {
-                                          count = _list.items.firstWhere((i) => i.name == _recentProducts[index].name).count;
-                                        }
-                                        return Container(
-                                          height: 65,
-                                          child: ListTile(
-                                              leading: Padding(
-                                                padding: EdgeInsets.all(8.0),
-                                                child: Icon(Icons.local_dining),
-                                              ),
-                                              title: Text(_recentProducts[index].name),
-                                              subtitle: Text(_recentProducts[index].category),
-                                              trailing: _list.hasItem(_recentProducts[index].name)
-                                                  ? ItemCounter(count: count, subtractCount: _subtract)
-                                                  : Container(
-                                                      width: 0,
-                                                      height: 0,
-                                                    ),
-                                              onTap: () {
-                                                if (!_list.hasItem(_recentProducts[index].name)) {
-                                                  _addItem(new Product(name: _recentProducts[index].name, category: _recentProducts[index].category));
-                                                } else {
-                                                  _addCount(_recentProducts[index].name);
-                                                }
-                                              }),
-                                        );
-                                      },
-                                    ));
-                              }
-
-                              return FutureBuilder(
-                                  future: databaseService.getPopularProducts(),
-                                  builder: (context, snapshot) {
-                                    if (snapshot.connectionState == ConnectionState.waiting) {
-                                      return ShoppyShimmer();
+                        Container(
+                            child: _listOrRecipe.items.length > 0 ? MediaQuery.removePadding(
+                                removeTop: true,
+                                context: context,
+                                child: ListView.separated(
+                                  itemCount: _listOrRecipe.items.length,
+                                  separatorBuilder: (ctx, i) => Divider(
+                                    indent: 70,
+                                    endIndent: 10,
+                                    color: Colors.grey,
+                                  ),
+                                  itemBuilder: (context, index) {
+                                    _subtract() {
+                                      _subtractCount(_listOrRecipe.items[index].name);
                                     }
 
-                                    return MediaQuery.removePadding(
-                                        removeTop: true,
-                                        context: context,
-                                        child: ListView.separated(
-                                          itemCount: snapshot.data.length,
-                                          separatorBuilder: (ctx, i) => Divider(
-                                            indent: 70,
-                                            endIndent: 10,
-                                            color: Colors.grey,
-                                          ),
-                                          itemBuilder: (context, index) {
-                                            return Container(
-                                              height: 65,
-                                              child: ListTile(
-                                                leading: Padding(
-                                                  padding: EdgeInsets.all(8.0),
-                                                  child: Icon(Icons.local_dining),
-                                                ),
-                                                title: Text(snapshot.data[index].name),
-                                                subtitle: Text(snapshot.data[index].category),
-                                              ),
-                                            );
-                                          },
-                                        ));
-                                  });
-                            }),
+                                    return Container(
+                                      height: 65,
+                                      child: ListTile(
+                                        leading: Padding(
+                                          padding: EdgeInsets.all(8.0),
+                                          child: Icon(Icons.local_dining),
+                                        ),
+                                        title: Text(_listOrRecipe.items[index].name),
+                                        subtitle: Text(_listOrRecipe.items[index].category),
+                                        trailing: ItemCounter(count: _listOrRecipe.items[index].count, subtractCount: _subtract),
+                                        onTap: () {
+                                          _addCount(_listOrRecipe.items[index].name);
+                                        },
+                                      ),
+                                    );
+                                  },
+                                )): Center(child: Text("keko"))), //erster tab
+
                         FutureBuilder(
                             future: databaseService.getPopularProducts(),
                             builder: (context, snapshot) {
-                              if(snapshot.connectionState == ConnectionState.waiting) {
+                              if (snapshot.connectionState == ConnectionState.waiting) {
                                 return ShoppyShimmer();
                               }
 
@@ -405,14 +357,14 @@ class _SearchItemsView extends State<SearchItemsView> {
                                           ),
                                           title: Text(snapshot.data[index].name),
                                           subtitle: Text(snapshot.data[index].category),
-                                          trailing: _list.hasItem(snapshot.data[index].name)
-                                              ? ItemCounter(count: _list.items.firstWhere((i) => i.name == snapshot.data[index].name).count, subtractCount: _subtract)
+                                          trailing: _listOrRecipe.hasItem(snapshot.data[index].name)
+                                              ? ItemCounter(count: _listOrRecipe.items.firstWhere((i) => i.name == snapshot.data[index].name).count, subtractCount: _subtract)
                                               : Container(
                                                   width: 0,
                                                   height: 0,
                                                 ),
                                           onTap: () {
-                                            if (!_list.hasItem(snapshot.data[index].name)) {
+                                            if (!_listOrRecipe.hasItem(snapshot.data[index].name)) {
                                               _addItem(new Product(name: snapshot.data[index].name, category: snapshot.data[index].category));
                                             } else {
                                               _addCount(snapshot.data[index].name);
@@ -442,18 +394,18 @@ class _SearchItemsView extends State<SearchItemsView> {
                               child: ListTile(
                                 leading: Padding(
                                   padding: EdgeInsets.all(8.0),
-                                  child: Icon(Icons.shopping_cart, color: _list.hasItem(_searchController.text) ? Theme.of(context).primaryColor : null),
+                                  child: Icon(Icons.shopping_cart, color: _listOrRecipe.hasItem(_searchController.text) ? Theme.of(context).primaryColor : null),
                                 ),
                                 title: Text(_searchController.text),
                                 subtitle: Text("Selbst erstellt"),
-                                trailing: _list.hasItem(_searchController.text)
-                                    ? ItemCounter(count: _list.items.firstWhere((i) => i.name == _searchController.text).count, subtractCount: _subtractCountUserInput)
+                                trailing: _listOrRecipe.hasItem(_searchController.text)
+                                    ? ItemCounter(count: _listOrRecipe.items.firstWhere((i) => i.name == _searchController.text).count, subtractCount: _subtractCountUserInput)
                                     : Container(
                                         width: 0,
                                         height: 0,
                                       ),
                                 onTap: () {
-                                  if (!_list.hasItem(_searchController.text)) {
+                                  if (!_listOrRecipe.hasItem(_searchController.text)) {
                                     _addItem(new Product(name: _searchController.text, category: "Selbst erstellt"));
                                   } else {
                                     _addCount(_searchController.text);
@@ -478,8 +430,8 @@ class _SearchItemsView extends State<SearchItemsView> {
 
                                             int count = 0;
 
-                                            if (_list.hasItem(_products[index]["name"])) {
-                                              count = _list.items.firstWhere((i) => i.name == _products[index]["name"]).count;
+                                            if (_listOrRecipe.hasItem(_products[index]["name"])) {
+                                              count = _listOrRecipe.items.firstWhere((i) => i.name == _products[index]["name"]).count;
                                             }
 
                                             return Container(
@@ -487,18 +439,18 @@ class _SearchItemsView extends State<SearchItemsView> {
                                               child: ListTile(
                                                 leading: Padding(
                                                   padding: EdgeInsets.all(8.0),
-                                                  child: Icon(Icons.local_dining, color: _list.hasItem(_products[index]["name"]) ? Theme.of(context).primaryColor : null),
+                                                  child: Icon(Icons.local_dining, color: _listOrRecipe.hasItem(_products[index]["name"]) ? Theme.of(context).primaryColor : null),
                                                 ),
                                                 title: Text(_products[index]["name"]),
                                                 subtitle: Text(_products[index]["category"]),
-                                                trailing: _list.hasItem(_products[index]["name"])
+                                                trailing: _listOrRecipe.hasItem(_products[index]["name"])
                                                     ? ItemCounter(count: count, subtractCount: _subtract)
                                                     : Container(
                                                         width: 0,
                                                         height: 0,
                                                       ),
                                                 onTap: () {
-                                                  if (!_list.hasItem(_products[index]["name"])) {
+                                                  if (!_listOrRecipe.hasItem(_products[index]["name"])) {
                                                     _addItem(new Product(name: _products[index]["name"], category: _products[index]["category"]));
                                                   } else {
                                                     _addCount(_products[index]["name"]);
@@ -534,4 +486,19 @@ class _SearchItemsView extends State<SearchItemsView> {
           ])),
     );
   }
+
+
+  /// Starts up the camera scanner and awaits output to process
+  Future<void> _startCameraScanner(BuildContext context, ImageSource imageSource, ShoppingList list) async {
+    ScannedShoppingList scannedShoppingList = await cameraService.getResultFromCameraScanner(context, imageSource, addToList: list);
+    if (scannedShoppingList != null) {
+      setState(() {
+        _listOrRecipe.items.addAll(scannedShoppingList.items.map((item) => new Item(name: item.name, prize: item.price, bought: true, count: 1, category: "Gescannt")).toList());
+        _requestDatabaseUpdate();
+      });
+    }
+
+    Navigator.pop(context);
+  }
+
 }

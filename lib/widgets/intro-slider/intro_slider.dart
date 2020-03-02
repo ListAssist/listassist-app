@@ -35,7 +35,7 @@ class _IntroSliderViewState extends State<IntroSliderView> {
         title: "GRUPPEN ERSTELLEN",
         description: "Erstelle Gruppen und teile deine Einkaufslisten mit Freunden",
         pathImage: "assets/images/group.png",
-        backgroundColor: Color(0xff203152),
+        backgroundColor: Color(0xff6a1b9a),
         heightImage: 200,
         widthImage: 200,
         marginDescription: EdgeInsets.only(top: 50, left: 22, right: 22),
@@ -46,7 +46,18 @@ class _IntroSliderViewState extends State<IntroSliderView> {
         title: "RECHNUNGEN SCANNEN",
         description: "Scanne deine Rechnungen ein, um gekaufte Produkte automatisch von der Einkaufsliste zu streichen",
         pathImage: "assets/images/scan.png",
-        backgroundColor: Color(0xff9932CC),
+        backgroundColor: Color(0xff203152),
+        heightImage: 200,
+        widthImage: 200,
+        marginDescription: EdgeInsets.only(top: 50, left: 22, right: 22),
+      ),
+    );
+    slides.add(
+      new Slide(
+        title: "REZEPTE ERSTELLEN",
+        description: "Erstelle Rezepte, um Einkaufslisten mit den benötigten Produkten schneller und einfacher zu erstellen",
+        pathImage: "assets/images/cookbook.png",
+        backgroundColor: Color(0xff00695c),
         heightImage: 200,
         widthImage: 200,
         marginDescription: EdgeInsets.only(top: 50, left: 22, right: 22),

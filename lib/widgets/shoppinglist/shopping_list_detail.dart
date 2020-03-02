@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:listassist/models/Group.dart';
@@ -10,7 +11,7 @@ import 'package:listassist/services/db.dart';
 import 'package:listassist/widgets/shimmer/shoppy_shimmer.dart';
 import 'package:listassist/widgets/shoppinglist/edit_shopping_list.dart';
 import 'package:listassist/widgets/shoppinglist/prize_dialog.dart';
-import 'package:listassist/widgets/shoppinglist/search_items_view.dart';
+import 'package:listassist/widgets/shoppinglist/search_items_view_new.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:listassist/services/camera.dart';
@@ -55,10 +56,11 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
     });
   }
 
-  void itemChangeMultiple({bool val = true, List<int> indecesToCheck}) async {
+  void itemChangeMultiple({bool val = true, List<int> indecesToCheck, List<double> prices}) async {
     setState(() {
       for (int i = 0; i < indecesToCheck.length; i++) {
         list.items[indecesToCheck[i]].bought = val;
+        list.items[indecesToCheck[i]].prize = prices[i];
       }
     });
 
@@ -67,6 +69,41 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
     } catch (e) {
       InfoOverlay.showErrorSnackBar("Fehler beim aktualisieren der Einkaufsliste");
     }
+  }
+
+  ScrollController _hideButtonController;
+  bool _isVisible;
+
+  @override
+  initState(){
+    _isVisible = true;
+    _hideButtonController = ScrollController();
+    _hideButtonController.addListener((){
+      print('scrolling = ${_hideButtonController.position.isScrollingNotifier.value}');
+      if(_hideButtonController.position.userScrollDirection == ScrollDirection.reverse){
+        if(_isVisible == true) {
+          /* only set when the previous state is false
+             * Less widget rebuilds
+             */
+          print("**** ${_isVisible} up"); //Move IO away from setState
+          setState((){
+            _isVisible = false;
+          });
+        }
+      } else {
+        if(_hideButtonController.position.userScrollDirection == ScrollDirection.forward){
+          if(_isVisible == false) {
+            /* only set when the previous state is false
+               * Less widget rebuilds
+               */
+            print("**** ${_isVisible} down"); //Move IO away from setState
+            setState((){
+              _isVisible = true;
+            });
+          }
+        }
+      }});
+    super.initState();
   }
 
   @override
@@ -118,125 +155,135 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
               ? Text("$_boughtItemCount von ${list.items.length} Produkt${list.items.length > 1 ? "en" : ""} gekauft", style: Theme.of(context).textTheme.headline)
               : Center(child: Text("Die Einkaufsliste hat noch keine Produkte"))),
           Expanded(
-            child: list.items.isNotEmpty
-              ? ListView.builder(
-                physics: BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-                itemCount: list.items.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return Container(
-                    child: CheckboxListTile(
-                      value: list.items[index].bought,
-                      title: Text("${list.items[index].name}", style: list.items[index].bought ? TextStyle(decoration: TextDecoration.lineThrough, decorationThickness: 3) : null),
-                      subtitle: list.items[index].count != null ? Text(list.items[index].count.toString() + "x") : Text("0x"),
-                      secondary: OutlineButton(
-                        //decoration: BoxDecoration(border: Border.all(width: 2), borderRadius: BorderRadius.all(Radius.circular(5.0))),
-                        onPressed: () async {
+              child: list.items.isNotEmpty
+                  ? ListView.builder(
+                  controller: _hideButtonController,
+                  physics: BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                  itemCount: list.items.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return Container(
+                            child: CheckboxListTile(
+                                value: list.items[index].bought,
+                                title: Text("${list.items[index].name}", style: list.items[index].bought ? TextStyle(decoration: TextDecoration.lineThrough, decorationThickness: 3) : null),
+                                subtitle: list.items[index].count != null ? Text(list.items[index].count.toString() + "x") : Text("0x"),
+                                secondary: OutlineButton(
+                                  //decoration: BoxDecoration(border: Border.all(width: 2), borderRadius: BorderRadius.all(Radius.circular(5.0))),
+                                  onPressed: () async {
 
-                          if (_debounce == null || !_debounce.isActive) {
-                            var erg = await showDialog(context: context, builder: (context) {
-                              return PrizeDialog(name: list.items[index].name, prize: list.items[index].prize != null ? list.items[index].prize : 0);
-                            });
-                            if(erg != null) {
-                              list.items[index].prize = erg;
-                              //hier wird bisschen getrickst HAHAH XD SRY SECZER WAR ZU FAUL
-                              itemChange(list.items[index].bought, index);
-                              setState(() {});
-                              databaseService.updateList(uid, list, widget.isGroup).then((onUpdate) {
-                                print("Saved items");
-                              }).catchError((onError) {
-                                InfoOverlay.showErrorSnackBar("Fehler beim aktualisieren der Einkaufsliste");
-                              });
-                            }
-                          }
-                        },
-                        child: Padding(
-                          padding: EdgeInsets.all(9.0),
-                          child: list.items[index].prize != null ? Text(list.items[index].prize.toString() + " €") : Text("0 €"),
-                        ),
-                      ),
-                      controlAffinity: ListTileControlAffinity.leading,
-                      onChanged: (bool val) {
-                        itemChange(val, index);
-                      }));
-                })
-              : Container()),
+                                    if (_debounce == null || !_debounce.isActive) {
+                                      var erg = await showDialog(context: context, builder: (context) {
+                                        return PrizeDialog(name: list.items[index].name, prize: list.items[index].prize != null ? list.items[index].prize : 0);
+                                      });
+                                      if(erg != null) {
+                                        list.items[index].prize = erg;
+                                        itemChange(list.items[index].bought, index);
+                                        setState(() {});
+                                        databaseService.updateList(uid, list).then((onUpdate) {
+                                          print("Saved items");
+                                        }).catchError((onError) {
+                                          InfoOverlay.showErrorSnackBar("Fehler beim aktualisieren der Einkaufsliste");
+                                        });
+                                      }
+                                    }
+                                  },
+                                  child: Padding(
+                                    padding: EdgeInsets.all(9.0),
+                                    child: list.items[index].prize != null && list.items[index].prize != 0.0 ? Text(list.items[index].prize.toString() + " €") : Text("0 €"),
+                                  ),
+                                ),
+                                controlAffinity: ListTileControlAffinity.leading,
+                                onChanged: (bool val) {
+                                  itemChange(val, index);
+                                }));
+                      })
+                  : Container()),
         ],
       ),
-      floatingActionButton: Stack(
-        children: <Widget>[
-          Align(
-            alignment: Alignment.bottomRight,
-            child: FloatingActionButton(
-              child: Icon(Icons.add),
-              backgroundColor: Colors.green,
-              onPressed: () {
-                Navigator.push(context,
-                    widget.isGroup ?
+      floatingActionButton: AnimatedOpacity(
+        opacity: _isVisible ? 1.0 : 0.0,
+        duration: Duration(milliseconds: 200),
+        child: Stack(
+          children: <Widget>[
+            Align(
+              alignment: Alignment.bottomRight,
+              child: FloatingActionButton(
+                child: Icon(Icons.add),
+                backgroundColor: Colors.green,
+                onPressed: () {
+                  Navigator.push(context,
+                  widget.isGroup ?
                     MaterialPageRoute(builder: (context) =>
                       StreamProvider<ShoppingList>.value(
                         value: databaseService.streamListFromGroup(uid, list.id),
                         child: SearchItemsView(uid, true)
                       ))
-                    : MaterialPageRoute(builder: (context) => SearchItemsView(list.id)));
-              },
+                      : MaterialPageRoute(builder: (context) => SearchItemsView(list.id)));
+                },
+              ),
             ),
-          ),
-          Padding(
-            padding: EdgeInsets.only(bottom: 75.0),
-            child: SpeedDial(
-              animatedIcon: AnimatedIcons.menu_close,
-              animatedIconTheme: IconThemeData(size: 22.0),
-              closeManually: false,
-              curve: Curves.easeIn,
-              overlayOpacity: 0.35,
-              backgroundColor: Theme.of(context).primaryColor,
-              elevation: 8.0,
-              shape: CircleBorder(),
-              children: [
-                SpeedDialChild(
-                    child: Icon(Icons.check),
-                    backgroundColor: Colors.green,
+            Padding(
+              padding: EdgeInsets.only(bottom: 75.0),
+              child: SpeedDial(
+                animatedIcon: AnimatedIcons.menu_close,
+                animatedIconTheme: IconThemeData(size: 22.0),
+                closeManually: false,
+                curve: Curves.easeIn,
+                overlayOpacity: 0.35,
+                backgroundColor: Theme.of(context).primaryColor,
+                elevation: 8.0,
+                shape: CircleBorder(),
+                children: [
+                  SpeedDialChild(
+                      child: Icon(Icons.check),
+                      backgroundColor: Colors.green,
+                      labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
+                      label: "Complete",
+                      labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
+                      onTap: _showCompleteDialog),
+                  SpeedDialChild(
+                      child: Icon(Icons.delete),
+                      backgroundColor: Colors.red,
+                      labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
+                      label: "Delete",
+                      labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
+                      onTap: _showDeleteDialog),
+                  SpeedDialChild(
+                    child: Icon(Icons.camera),
+                    backgroundColor: Colors.blue,
+                    label: "Image Check",
                     labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
-                    label: "Complete",
                     labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
-                    onTap: _showCompleteDialog),
-                SpeedDialChild(
-                    child: Icon(Icons.delete),
-                    backgroundColor: Colors.red,
-                    labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
-                    label: "Delete",
-                    labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
-                    onTap: _showDeleteDialog),
-                SpeedDialChild(
-                  child: Icon(Icons.camera),
-                  backgroundColor: Colors.blue,
-                  label: "Image Check",
-                  labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
-                  labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
-                  onTap: () async {
-                    bool connected = await connectivityService.testInternetConnection();
-                    if (!connected) {
-                      //I am NOT connected to the Internet
-                      InfoOverlay.showErrorSnackBar("Kein Internetzugriff");
-                      _buttonsDisabled = false;
-                    } else {
-                      InfoOverlay.showSourceSelectionSheet(context, callback: _startCameraScanner, arg: widget.index);
-                    }
-                  },
-                )
-              ],
+                    onTap: () async {
+                      bool connected = await connectivityService.testInternetConnection();
+                      if (!connected) {
+                        //I am NOT connected to the Internet
+                        InfoOverlay.showErrorSnackBar("Kein Internetzugriff");
+                        _buttonsDisabled = false;
+                      } else {
+                        InfoOverlay.showSourceSelectionSheet(context, callback: _startCameraScanner, arg: widget.index);
+                      }
+                    },
+                  )
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   /// Starts up the camera scanner and awaits the output
   Future<void> _startCameraScanner(BuildContext context, ImageSource imageSource, int index) async {
-    List<int> indecesToCheck = await cameraService.getResultFromCameraScanner(context, imageSource, listIndex: index);
+    List<Map<String, dynamic>> indecesToCheck = await cameraService.getResultFromCameraScanner(context, imageSource, listIndex: index);
     if (indecesToCheck != null) {
-      itemChangeMultiple(indecesToCheck: indecesToCheck);
+      List<int> indices = [];
+      List<double> prices = [];
+
+      indecesToCheck.forEach((i) => indices.add(i["index"]));
+      indecesToCheck.forEach((i) => prices.add(i["newPrice"]));
+
+      itemChangeMultiple(indecesToCheck: indices, prices: prices);
     }
     Navigator.pop(context);
   }

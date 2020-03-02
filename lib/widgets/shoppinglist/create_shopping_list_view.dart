@@ -1,17 +1,12 @@
-import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:listassist/models/Group.dart';
-import 'package:listassist/models/ScannedShoppinglist.dart';
 import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
-import 'package:listassist/services/camera.dart';
 import 'package:listassist/services/connectivity.dart';
 import 'package:listassist/services/db.dart';
 import 'package:listassist/services/info_overlay.dart';
-import 'package:listassist/widgets/shoppinglist/search_items_view.dart';
+import 'package:listassist/widgets/shoppinglist/search_items_view_new.dart';
 import 'package:progress_indicator_button/progress_button.dart';
 import 'package:provider/provider.dart';
 
@@ -24,7 +19,6 @@ class CreateShoppingListView extends StatefulWidget {
 }
 
 class _CreateShoppingListView extends State<CreateShoppingListView> {
-  List<ScannedShoppingList> scannedLists = [];
 
   bool buttonDisabled = false;
 
@@ -130,6 +124,7 @@ class _CreateShoppingListView extends State<CreateShoppingListView> {
                           }
 
                           DocumentReference docRef = await databaseService.createList(_uid, _newShoppingList, widget.isGroup);
+                          InfoOverlay.showInfoSnackBar("Einkaufsliste ${_newShoppingList.name} erstellt");
                           controller.reverse();
                           Navigator.pop(context);
 
@@ -138,12 +133,22 @@ class _CreateShoppingListView extends State<CreateShoppingListView> {
                             print(l.id)
                           });*/
 
+                          //_newShoppingList.id = docRef.documentID;
+                          ShoppingList _newShoppingListWithNewID = new ShoppingList(
+                            id: docRef.documentID,
+                            created: _newShoppingList.created,
+                            name: _newShoppingList.name,
+                            items: _newShoppingList.items,
+                            type: _newShoppingList.type
+                          );
+
                           Navigator.push(context, MaterialPageRoute(builder: (context) =>
-                              widget.isGroup ?
-                              StreamProvider<ShoppingList>.value(
-                                value: databaseService.streamListFromGroup("${widget.groupIndex}", docRef.documentID),
-                                child: SearchItemsView(docRef.documentID, true),
-                              ) : SearchItemsView(docRef.documentID)));
+                          widget.isGroup ?
+                          StreamProvider<ShoppingList>.value(
+                            value: databaseService.streamListFromGroup("${widget.groupIndex}", docRef.documentID),
+                            child: SearchItemsViewNew(list: _newShoppingListWithNewID, true),
+                          ) : SearchItemsViewNew(list: _newShoppingListWithNewID, true)));
+
 
 /*
                           Navigator.push(
@@ -173,13 +178,7 @@ class _CreateShoppingListView extends State<CreateShoppingListView> {
                               decoration: InputDecoration(border: UnderlineInputBorder(), hintText: "Name", contentPadding: EdgeInsets.only(top: 17, left: 5, right: 17, bottom: 10)),
                             ),
                           ),
-                          IconButton(
-                            icon: Icon(Icons.camera_alt),
-                            onPressed: () async{
-                              await connectivityService.testInternetConnection() ? InfoOverlay.showSourceSelectionSheet(context, callback: _startCameraScanner, arg: null)
-                                  : InfoOverlay.showErrorSnackBar("Kein Internetzugriff");
-                            },
-                          )
+
                         ],
                       ),
                     ),
@@ -198,15 +197,4 @@ class _CreateShoppingListView extends State<CreateShoppingListView> {
         ]));
   }
 
-  /// Starts up the camera scanner and awaits output to process
-  Future<void> _startCameraScanner(BuildContext context, ImageSource imageSource, ShoppingList list) async {
-    ScannedShoppingList scannedShoppingList = await cameraService.getResultFromCameraScanner(context, imageSource, addToList: list);
-    if (scannedShoppingList != null) {
-      setState(() {
-        scannedLists.add(scannedShoppingList);
-      });
-    }
-
-    Navigator.pop(context);
-  }
 }

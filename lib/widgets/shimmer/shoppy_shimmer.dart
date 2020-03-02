@@ -13,7 +13,7 @@ class ShoppyShimmer extends StatelessWidget {
       child: Padding(
         padding: EdgeInsets.all(20.0),
         child: Column(
-          children: [0, 1, 2, 3, 4]
+          children: [0, 1, 2, 3]
               .map((_) => Padding(
             padding: EdgeInsets.only(bottom: 8.0),
             child: Row(

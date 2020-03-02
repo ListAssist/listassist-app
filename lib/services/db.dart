@@ -125,6 +125,17 @@ class DatabaseService {
         .add({"name": recipe.name, "description" : recipe.description, "items": items});
   }
 
+  Stream<List<ShoppingList>> streamListsFromGroup(String groupid) {
+    print("----- READ GROUP LISTS -----");
+    return _db
+        .collection("groups")
+        .document(groupid)
+        .collection("lists")
+        .document(listid)
+        .snapshots()
+        .map((snap) => snap.documents.map((d) => ShoppingList.fromFirestore(d)).toList());
+  }
+
   Stream<ShoppingList> streamListFromGroup(String groupid, String listid) {
     print("----- READ GROUP LIST ${listid} -----");
     return _db
@@ -165,6 +176,17 @@ class DatabaseService {
         .collection("lists")
         .document(list.id)
         .setData({"name": list.name, "items" : items}, merge: true);
+  }
+
+  Future<void> updateRecipe(String uid, Recipe recipe) async {
+    var items = recipe.items.map((e) => e.toJson()).toList();
+
+    return _db
+        .collection("users")
+        .document(uid)
+        .collection("recipes")
+        .document(recipe.id)
+        .setData({"name": recipe.name, "items" : items}, merge: true);
   }
 
   Future<void> addItemToList(String uid, String listId, Item newItem) async{
@@ -290,6 +312,15 @@ class DatabaseService {
         .document(uid)
         .collection("lists")
         .document(listid)
+        .delete();
+  }
+
+  Future<void> deleteRecipe(String uid, String recipeId) {
+    return _db
+        .collection("users")
+        .document(uid)
+        .collection("recipes")
+        .document(recipeId)
         .delete();
   }
 

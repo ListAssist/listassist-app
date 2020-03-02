@@ -212,10 +212,11 @@ class CameraScannerState extends State<CameraScanner> with AfterInitMixin<Camera
 
   Future createFromScratch(BuildContext context, List<PossibleItem> detectedItems, User user, ProgressDialog dialog) async {
     /// let user choose what is corrrect of our detections
-    if ((await databaseService.getScannerSetting(user.uid)) == false) {
+    if ((await databaseService.getScannerSetting(user.uid)) == true) {
       var selectedProducts = await showSelectDialog(context, detectedItems);
       if (selectedProducts != null) {
         detectedItems = selectedProducts;
+        print(selectedProducts);
       }
     }
 
@@ -252,9 +253,12 @@ class CameraScannerState extends State<CameraScanner> with AfterInitMixin<Camera
     Map<Item, PossibleItem> finalMappings = findMappings(possibleItems: detectedItems, shoppingItems: shoppingList.items.where((Item item) => item.bought == false).toList());
 
     /// get indices to check
-    List<int> indicesToCheck = [];
+    List<Map<String, dynamic>> indicesToCheck = [];
     finalMappings.forEach((Item key, PossibleItem value) {
-      indicesToCheck.add(originalList.items.indexOf(key));
+      indicesToCheck.add({
+        "index": originalList.items.indexOf(key),
+        "newPrice": value.price
+      });
     });
     if (indicesToCheck.isEmpty) {
       InfoOverlay.showErrorSnackBar("Keine Übereinstimmungen mit Produkten aus der Einkaufsliste");

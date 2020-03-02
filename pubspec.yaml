@@ -112,6 +112,7 @@ flutter:
     - assets/images/group.png
     - assets/images/scan.png
     - assets/images/userpic.png
+    - assets/images/cookbook.png
     - assets/icon/icon.png
   #  - images/a_dot_ham.jpeg
 
