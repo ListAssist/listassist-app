@@ -56,7 +56,7 @@ class CompletedShoppingList {
             Item(
                 name: item.name,
                 bought: false,
-                prize: item.prize,
+                price: item.price,
                 count: item.count,
                 category: item.category
             )).toList());

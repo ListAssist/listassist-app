@@ -155,7 +155,7 @@ class _CompletedShoppingListDetailState extends State<CompletedShoppingListDetai
       itemCount: items.length,
       itemBuilder: (BuildContext context, int index){
         return ListTile(
-          trailing: items[index].prize != null ? Text("${items[index].prize} €") : null,
+          trailing: items[index].price != null ? Text("${items[index].price} €") : null,
           title: Text("${items[index].name}", style: TextStyle(fontSize: 16)),
           subtitle: items[index].count != null ? Text(items[index].count.toString() + "x") : Text("0x"),
         );

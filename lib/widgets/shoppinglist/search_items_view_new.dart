@@ -321,7 +321,7 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew>  with TickerProvider
                                       ),
                                     );
                                   },
-                                )): Center(child: Text("keko"))), //erster tab
+                                )): Center(child: Text("Noch keine Produkte hinzugefügt", style: Theme.of(context).textTheme.title))), //erster tab
 
                         FutureBuilder(
                             future: databaseService.getPopularProducts(),
@@ -490,7 +490,7 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew>  with TickerProvider
     ScannedShoppingList scannedShoppingList = await cameraService.getResultFromCameraScanner(context, imageSource, addToList: list);
     if (scannedShoppingList != null) {
       setState(() {
-        _listOrRecipe.items.addAll(scannedShoppingList.items.map((item) => new Item(name: item.name, prize: item.price, bought: true, count: 1, category: "Gescannt")).toList());
+        _listOrRecipe.items.addAll(scannedShoppingList.items.map((item) => new Item(name: item.name, price: item.price, bought: true, count: 1, category: "Gescannt")).toList());
         _requestDatabaseUpdate();
       });
     }

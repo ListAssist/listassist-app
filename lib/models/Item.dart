@@ -5,23 +5,23 @@ class Item {
   String category;
   int count;
   bool bought;
-  double prize;
+  double price;
 
-  Item({this.name, this.category, this.count, this.bought, this.prize});
+  Item({this.name, this.category, this.count, this.bought, this.price});
 
   Map<String, dynamic> toJson() => {
         'name': name,
         'category': category,
         'count': count,
         'bought': bought,
-        'prize': prize,
+        'price': price,
       };
 
   Map<String, dynamic> getNameAndCount() {
     return {
       "name": name,
       "count": count,
-      "prize": prize,
+      "price": price,
       "category": category
     };
   }
@@ -34,7 +34,7 @@ class Item {
       category: data["category"],
       count: data["count"],
       bought: data["bought"],
-      prize: data["prize"].toDouble(),
+      price: data["price"].toDouble(),
     );
   }
 
@@ -46,7 +46,7 @@ class Item {
       category: data["category"],
       count: data["count"],
       bought: data["bought"],
-      prize: data["prize"].toDouble(),
+      price: data["price"].toDouble(),
     );
   }
 

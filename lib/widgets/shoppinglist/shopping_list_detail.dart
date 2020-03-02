@@ -60,7 +60,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
     setState(() {
       for (int i = 0; i < indecesToCheck.length; i++) {
         list.items[indecesToCheck[i]].bought = val;
-        list.items[indecesToCheck[i]].prize = prices[i];
+        list.items[indecesToCheck[i]].price = prices[i];
       }
     });
 
@@ -145,15 +145,14 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
           )
         ],
       ),
-      body: list == null ? ShoppyShimmer() : Column(
+      body: list == null ? ShoppyShimmer() : list.items.isEmpty ? Center(child: Text("Die Einkaufsliste hat noch keine Produkte", style: Theme.of(context).textTheme.title)) : Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Container(
             alignment: Alignment.center,
             padding: EdgeInsets.all(10.0),
-            child: list.items.isNotEmpty
-              ? Text("$_boughtItemCount von ${list.items.length} Produkt${list.items.length > 1 ? "en" : ""} gekauft", style: Theme.of(context).textTheme.headline)
-              : Center(child: Text("Die Einkaufsliste hat noch keine Produkte"))),
+            child: Text("$_boughtItemCount von ${list.items.length} Produkt${list.items.length > 1 ? "en" : ""} gekauft", style: Theme.of(context).textTheme.headline)
+          ),
           Expanded(
               child: list.items.isNotEmpty
                   ? ListView.builder(
@@ -173,10 +172,10 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
 
                                     if (_debounce == null || !_debounce.isActive) {
                                       var erg = await showDialog(context: context, builder: (context) {
-                                        return PrizeDialog(name: list.items[index].name, prize: list.items[index].prize != null ? list.items[index].prize : 0);
+                                        return PrizeDialog(name: list.items[index].name, prize: list.items[index].price != null ? list.items[index].price : 0);
                                       });
                                       if(erg != null) {
-                                        list.items[index].prize = erg;
+                                        list.items[index].price = erg;
                                         itemChange(list.items[index].bought, index);
                                         setState(() {});
                                         databaseService.updateList(uid, list).then((onUpdate) {
@@ -189,7 +188,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
                                   },
                                   child: Padding(
                                     padding: EdgeInsets.all(9.0),
-                                    child: list.items[index].prize != null && list.items[index].prize != 0.0 ? Text(list.items[index].prize.toString() + " €") : Text("0 €"),
+                                    child: list.items[index].price != null && list.items[index].price != 0.0 ? Text(list.items[index].price.toString() + " €") : Text("0 €"),
                                   ),
                                 ),
                                 controlAffinity: ListTileControlAffinity.leading,

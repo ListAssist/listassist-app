@@ -42,7 +42,7 @@ class ShoppingList {
   }
 
   void addItem(String productName, String category){
-    items.add(new Item(name: productName, category: category, count: 1, bought: false, prize: 0));
+    items.add(new Item(name: productName, category: category, count: 1, bought: false, price: 0));
   }
 
   void changeItemCount(String itemName, int value) {

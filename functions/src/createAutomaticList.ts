@@ -113,7 +113,10 @@ function recommend(lists: object[]) {
                     //@ts-ignore
                     count: timeDiffToToday === 0 ? 1 : Math.round(timeDiffToToday / itemFrequency[i]),
                     name: i,
-                    bought: false
+                    bought: false,
+                    price: 0,
+                    //TODO: Richtige Kategorie einfügen
+                    category: "Generated"
                 }
             );
         }

@@ -18,6 +18,7 @@ class StatisticsView extends StatefulWidget {
 
 //TODO: Statistiken Overflow bottom
 //TODO: Launcher icon einbinden
+//TODO: Screen falls noch nichts gekauft wurde
 
 class _StatisticsView extends State<StatisticsView> {
   @override
@@ -144,11 +145,11 @@ class _StatisticsView extends State<StatisticsView> {
             if(shoppingList.items[i].category == null) break;
             if (shoppingList.items[i].category == data[j].category && shoppingList.items[i].bought) {
               print(data[j].category.toString() + " ist gleich wie " + shoppingList.items[i].category.toString());
-              data[j].value += shoppingList.items[i].prize;
+              data[j].value += shoppingList.items[i].price;
               break;
             }
             if (j == data.length - 1 && shoppingList.items[i].bought) {
-              data.add(new CategoryMoney(shoppingList.items[i].category, shoppingList.items[i].prize));
+              data.add(new CategoryMoney(shoppingList.items[i].category, shoppingList.items[i].price));
               break;
             }
           }
@@ -160,11 +161,11 @@ class _StatisticsView extends State<StatisticsView> {
         for (var i = 0; i < shoppingList.completedItems.length; i++) {
           for (var j = 0; j < data.length; j++) {
             if (shoppingList.completedItems[i].category == data[j].category) {
-              data[j].value += shoppingList.completedItems[i].prize;
+              data[j].value += shoppingList.completedItems[i].price;
               break;
             }
             if (j == data.length - 1) {
-              data.add(new CategoryMoney(shoppingList.completedItems[i].category, shoppingList.completedItems[i].prize));
+              data.add(new CategoryMoney(shoppingList.completedItems[i].category, shoppingList.completedItems[i].price));
               break;
             }
           }

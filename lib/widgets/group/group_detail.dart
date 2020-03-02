@@ -40,7 +40,7 @@ class _GroupDetail extends State<GroupDetail> {
     username = user.displayName;
 
     return DefaultTabController(
-      length: 4,
+      length: 3,
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.primary,
@@ -52,7 +52,6 @@ class _GroupDetail extends State<GroupDetail> {
             tabs: [
               Tab(icon: Icon(Icons.list)),
               Tab(icon: Icon(Icons.playlist_add_check)),
-              Tab(icon: Icon(Icons.insert_chart)),
               Tab(icon: Icon(Icons.group))
             ],
           ),
@@ -67,7 +66,6 @@ class _GroupDetail extends State<GroupDetail> {
               value: databaseService.streamListsHistory(_group.id, true),
               child: ShoppingListsHistory(groupindex: widget.index),
             ),
-            Text("Statistiken der Gruppe"),
             GroupUserList(index: widget.index)
           ],
         ),
