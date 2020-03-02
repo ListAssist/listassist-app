@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:listassist/models/Group.dart';
 import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
 import 'package:listassist/services/connectivity.dart';
@@ -146,16 +147,8 @@ class _CreateShoppingListView extends State<CreateShoppingListView> {
                           widget.isGroup ?
                           StreamProvider<ShoppingList>.value(
                             value: databaseService.streamListFromGroup("${widget.groupIndex}", docRef.documentID),
-                            child: SearchItemsViewNew(list: _newShoppingListWithNewID, true),
-                          ) : SearchItemsViewNew(list: _newShoppingListWithNewID, true)));
-
-
-/*
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => ShoppingListDetail(index: lists.indexWhere((l) => l.id == docRef.))));
-                                  */
+                            child: SearchItemsViewNew(list: _newShoppingListWithNewID, isGroup: true, groupid: _uid),
+                          ) : SearchItemsViewNew(list: _newShoppingListWithNewID)));
                         }
                       },
                     ),

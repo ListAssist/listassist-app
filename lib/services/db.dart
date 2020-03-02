@@ -125,17 +125,6 @@ class DatabaseService {
         .add({"name": recipe.name, "description" : recipe.description, "items": items});
   }
 
-  Stream<List<ShoppingList>> streamListsFromGroup(String groupid) {
-    print("----- READ GROUP LISTS -----");
-    return _db
-        .collection("groups")
-        .document(groupid)
-        .collection("lists")
-        .document(listid)
-        .snapshots()
-        .map((snap) => snap.documents.map((d) => ShoppingList.fromFirestore(d)).toList());
-  }
-
   Stream<ShoppingList> streamListFromGroup(String groupid, String listid) {
     print("----- READ GROUP LIST ${listid} -----");
     return _db

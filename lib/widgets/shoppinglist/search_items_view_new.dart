@@ -25,8 +25,9 @@ class SearchItemsViewNew extends StatefulWidget {
   final ShoppingList list;
   final Recipe recipe;
   final bool isGroup;
+  final String groupid;
 
-  SearchItemsViewNew({this.list, this.recipe}, [this.isGroup = false]);
+  SearchItemsViewNew({this.list, this.recipe, this.isGroup = false, this.groupid});
 
   @override
   _SearchItemsViewNew createState() => _SearchItemsViewNew();
@@ -41,7 +42,7 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew>  with TickerProvider
   bool _isList;
 
   User _user;
-  //ShoppingList _list;
+  //TODO: keko Text wenn es keine popular products gibt durch sinnvollen text ersetzen
 
   Algolia algolia = Application.algolia;
   bool _searching = false;
@@ -114,7 +115,7 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew>  with TickerProvider
         print(_listOrRecipe.id);
 
         _isList
-            ? databaseService.updateList(widget.isGroup ? widget.listId : _user.uid, _listOrRecipe, widget.isGroup).then((value) => {print("Liste wurde erfolgreich upgedated")}).catchError((_) => {print(_.toString())})
+            ? databaseService.updateList(widget.isGroup ? widget.groupid : _user.uid, _listOrRecipe, widget.isGroup).then((value) => {print("Liste wurde erfolgreich upgedated")}).catchError((_) => {print(_.toString())})
             : databaseService.updateRecipe(_user.uid, _listOrRecipe).then((value) => {print("Rezept wurde erfolgreich upgedated")}).catchError((_) => {print(_.toString())});
       }
     });
@@ -171,12 +172,8 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew>  with TickerProvider
   Widget build(BuildContext context) {
     _user = Provider.of<User>(context);
 //    if(widget.isGroup) {
-//      _list = Provider.of<ShoppingList>(context);
+//      _groupid = Provider.of<ShoppingList>(context);
 //    }else {
-//      List lists = Provider.of<List<ShoppingList>>(context);
-//      int index = lists.indexWhere((e) => e.id == widget.listId);
-//      _list = lists[index];
-//    }
 
     return DefaultTabController(
       length: 3,

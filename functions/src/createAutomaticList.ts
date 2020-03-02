@@ -6,7 +6,7 @@ const db = admin.firestore();
 
 export const createAutomaticList = functions.region("europe-west1").https.onCall(async (data, context) => {
     const uid = context.auth.uid;
-    const groupid = data.groupid || null;
+    const groupid = data.groupid;
 
     let doc = await db.collection("users").doc(uid).get();
 

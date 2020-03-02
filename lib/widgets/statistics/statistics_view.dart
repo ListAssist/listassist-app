@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:listassist/models/CompletedShoppingList.dart';
@@ -16,6 +15,9 @@ class StatisticsView extends StatefulWidget {
   @override
   _StatisticsView createState() => _StatisticsView();
 }
+
+//TODO: Statistiken Overflow bottom
+//TODO: Launcher icon einbinden
 
 class _StatisticsView extends State<StatisticsView> {
   @override

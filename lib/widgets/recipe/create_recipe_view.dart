@@ -1,15 +1,10 @@
-import 'dart:async';
 import 'dart:math';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:listassist/models/ScannedShoppinglist.dart';
-import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
 import 'package:listassist/models/Recipe.dart';
-import 'package:listassist/services/camera.dart';
 import 'package:listassist/services/connectivity.dart';
 import 'package:listassist/services/db.dart';
 import 'package:listassist/services/info_overlay.dart';
@@ -32,9 +27,8 @@ class _CreateRecipeView extends State<CreateRecipeView> {
     Color _backgroundColor = Colors.blueAccent;
 
     User _user = Provider.of<User>(context);
-    List<Recipe> recipes = Provider.of<List<Recipe>>(context);
 
-    RegExp defaultListName = new RegExp(r"Einkaufsliste #[0-9]+");
+    //TODO: Farbe änder sich nach dem der erstellen knopf gedrückt wird
 
     TextEditingController _nameController = new TextEditingController();
     TextEditingController _descriptionController = new TextEditingController();

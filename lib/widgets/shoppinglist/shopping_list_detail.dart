@@ -165,7 +165,8 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
                             child: CheckboxListTile(
                                 value: list.items[index].bought,
                                 title: Text("${list.items[index].name}", style: list.items[index].bought ? TextStyle(decoration: TextDecoration.lineThrough, decorationThickness: 3) : null),
-                                subtitle: list.items[index].count != null ? Text(list.items[index].count.toString() + "x") : Text("0x"),
+                                //subtitle: list.items[index].count != null ? Text(list.items[index].count.toString() + "x") : Text("0x"),
+                                subtitle: list.items[index].count != null && list.items[index].count != 1 ? Text("${list.items[index].count.toString()}x | ${list.items[index].category}") : Text("${list.items[index].category}"),
                                 secondary: OutlineButton(
                                   //decoration: BoxDecoration(border: Border.all(width: 2), borderRadius: BorderRadius.all(Radius.circular(5.0))),
                                   onPressed: () async {
@@ -210,14 +211,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
                 child: Icon(Icons.add),
                 backgroundColor: Colors.green,
                 onPressed: () {
-                  Navigator.push(context,
-                  widget.isGroup ?
-                    MaterialPageRoute(builder: (context) =>
-                      StreamProvider<ShoppingList>.value(
-                        value: databaseService.streamListFromGroup(uid, list.id),
-                        child: SearchItemsView(uid, true)
-                      ))
-                      : MaterialPageRoute(builder: (context) => SearchItemsView(list.id)));
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => SearchItemsViewNew(list: list, isGroup: widget.isGroup, groupid: uid,)));
                 },
               ),
             ),
