@@ -26,7 +26,6 @@ class _ShoppingListView extends State<ShoppingListView> {
     if(first) {
       User user = Provider.of<User>(context);
       if(user.settings != null) {
-        //TODO: Default settings speichern
         if (user.settings["ai_enabled"]) {
           if (user.settings["ai_interval"] != null) {
             if (user.lastAutomaticallyGenerated == null) {
@@ -109,7 +108,7 @@ class _ShoppingListView extends State<ShoppingListView> {
         InfoOverlay.showInfoSnackBar("Automatische Einkaufsliste wurde erstellt");
       }
     }catch(e) {
-      InfoOverlay.showErrorSnackBar("Fehler: ${e.message}");
+      //InfoOverlay.showErrorSnackBar("Fehler: ${e.message}");
     }
   }
 
