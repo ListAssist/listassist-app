@@ -42,7 +42,6 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew>  with TickerProvider
   bool _isList;
 
   User _user;
-  //TODO: keko Text wenn es keine popular products gibt durch sinnvollen text ersetzen
 
   Algolia algolia = Application.algolia;
   bool _searching = false;
