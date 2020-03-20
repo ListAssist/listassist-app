@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
-import 'package:flutter_twitter_login/flutter_twitter_login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:listassist/models/User.dart';
 import 'package:listassist/services/db.dart';
@@ -17,10 +16,10 @@ enum AuthenticationType {Facebook, Google, Twitter}
 class AuthService {
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   final FacebookLogin _facebookSignIn = FacebookLogin();
-  final TwitterLogin _twitterSignIn = TwitterLogin(
-    consumerKey: "nh0JWR84wnDzLDZaapWF69nrq",
-    consumerSecret: "bEixX0AMS9JANn4ytlKxK3cUj2kNnILLiwE9felJY65MS2g3QT",
-  );
+//  final TwitterLogin _twitterSignIn = TwitterLogin(
+//    consumerKey: "nh0JWR84wnDzLDZaapWF69nrq",
+//    consumerSecret: "bEixX0AMS9JANn4ytlKxK3cUj2kNnILLiwE9felJY65MS2g3QT",
+//  );
 
   FirebaseAuth _auth = FirebaseAuth.instance;
   Firestore _db = Firestore.instance;
@@ -117,13 +116,13 @@ class AuthService {
           );
           break;
         case AuthenticationType.Twitter:
-          TwitterLoginResult result = await _twitterSignIn.authorize();
-
-          /// Signing in with Twitter currently doesn't work. Created Issue at firebase_auth repo
-          if (ResultHandler.handleTwitterResultError(result)) return null;
-
-          credential = TwitterAuthProvider.getCredential(authToken: result.session.token, authTokenSecret: result.session.secret);
-          break;
+//          TwitterLoginResult result = await _twitterSignIn.authorize();
+//
+//          /// Signing in with Twitter currently doesn't work. Created Issue at firebase_auth repo
+//          if (ResultHandler.handleTwitterResultError(result)) return null;
+//
+//          credential = TwitterAuthProvider.getCredential(authToken: result.session.token, authTokenSecret: result.session.secret);
+//          break;
       }
     } catch (e) {
       InfoOverlay.showInfoSnackBar("Es ist ein Fehler aufgetreten bei der Anmeldemethode die du gewählt hast. Versuche es erneut oder versuche eine andere Anmeldemethode aus.");
@@ -238,21 +237,21 @@ class ResultHandler {
     return true;
   }
 
-  static bool handleTwitterResultError(TwitterLoginResult result) {
-    authService.loading.add(false);
-
-    switch (result.status) {
-      case TwitterLoginStatus.loggedIn:
-        return false;
-      case TwitterLoginStatus.cancelledByUser:
-        InfoOverlay.showInfoSnackBar("Login abgebrochen, bitte versuchen Sie es erneut.");
-        break;
-      case TwitterLoginStatus.error:
-        showError(Text("Login fehlgeschlagen"), Text("Login fehlgeschlagen, bitte versuchen Sie es erneut."));
-        break;
-    }
-    return true;
-  }
+//  static bool handleTwitterResultError(TwitterLoginResult result) {
+//    authService.loading.add(false);
+//
+//    switch (result.status) {
+//      case TwitterLoginStatus.loggedIn:
+//        return false;
+//      case TwitterLoginStatus.cancelledByUser:
+//        InfoOverlay.showInfoSnackBar("Login abgebrochen, bitte versuchen Sie es erneut.");
+//        break;
+//      case TwitterLoginStatus.error:
+//        showError(Text("Login fehlgeschlagen"), Text("Login fehlgeschlagen, bitte versuchen Sie es erneut."));
+//        break;
+//    }
+//    return true;
+//  }
 
   static Future<void> showError(Text title, Text message) async {
     await showDialog(

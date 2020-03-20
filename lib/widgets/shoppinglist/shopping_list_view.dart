@@ -1,5 +1,6 @@
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
+import 'package:listassist/assets/custom_colors.dart';
 import 'package:listassist/main.dart';
 import 'package:listassist/models/CompletedShoppingList.dart' as model2;
 import 'package:listassist/models/ShoppingList.dart' as model;
@@ -25,14 +26,17 @@ class _ShoppingListView extends State<ShoppingListView> {
   Widget build(BuildContext context) {
     if(first) {
       User user = Provider.of<User>(context);
-      if(user.settings["ai_enabled"]) {
-        if(user.settings["ai_interval"] != null) {
-          if(user.lastAutomaticallyGenerated == null) {
-            _createAutomaticList();
-          }else {
-            DateTime nextList = user.lastAutomaticallyGenerated.toDate().add(Duration(days: user.settings["ai_interval"]));
-            if (DateTime.now().isAfter(nextList)) {
+      if(user.settings != null) {
+        if (user.settings["ai_enabled"]) {
+          if (user.settings["ai_interval"] != null) {
+            if (user.lastAutomaticallyGenerated == null) {
               _createAutomaticList();
+            } else {
+              DateTime nextList = user.lastAutomaticallyGenerated.toDate().add(
+                  Duration(days: user.settings["ai_interval"]));
+              if (DateTime.now().isAfter(nextList)) {
+                _createAutomaticList();
+              }
             }
           }
         }
@@ -67,8 +71,18 @@ class _ShoppingListView extends State<ShoppingListView> {
             },
           ),
           appBar: AppBar(
-            backgroundColor: Theme.of(context).colorScheme.primary,
+//            backgroundColor: Theme.of(context).colorScheme.primary,
             title: Text("Einkaufslisten"),
+            flexibleSpace: Container(
+                decoration: BoxDecoration(
+                gradient: LinearGradient(
+                    begin: Alignment.bottomLeft,
+                    end: Alignment.topRight,
+                    colors: <Color>[
+                      CustomColors.shoppyBlue,
+                      CustomColors.shoppyLightBlue,
+                    ])
+              )),
             bottom: TabBar(
               tabs: [
                 Tab(text: "Zu erledigen"),
@@ -105,7 +119,7 @@ class _ShoppingListView extends State<ShoppingListView> {
         InfoOverlay.showInfoSnackBar("Automatische Einkaufsliste wurde erstellt");
       }
     }catch(e) {
-      InfoOverlay.showErrorSnackBar("Fehler: ${e.message}");
+      //InfoOverlay.showErrorSnackBar("Fehler: ${e.message}");
     }
   }
 

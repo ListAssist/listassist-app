@@ -10,3 +10,4 @@ export { leaveGroup } from './onLeaveGroup';
 export { deleteGroup } from './deleteGroup';
 export { updateGroup } from './updateGroup';
 export { createAutomaticList } from './createAutomaticList';
+export { onCreateUser } from './onCreateUser';

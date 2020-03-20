@@ -116,7 +116,7 @@ class _ProfileSettingsView extends State<ProfileSettingsView> {
 
         ProgressDialog progressDialog = ProgressDialog(context, type: ProgressDialogType.Download, isDismissible: true);
         progressDialog.style(
-            message: "Profil wird aktualisiert...",
+            message: "Profilbild wird hochgeladen..",
             borderRadius: 10.0,
             backgroundColor: Theme
                 .of(context)

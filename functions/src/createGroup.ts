@@ -40,6 +40,11 @@ export const createGroup = functions.region("europe-west1").https.onCall(async (
                     settings: {
                         ai_enabled: true,
                         ai_interval: 7,
+                        msg_autolist: false,
+                        msg_general: false,
+                        msg_invite: false,
+                        msg_offer: false,
+                        scanner_manual: true,
                     }
                 })
                 .then((doc) => {
