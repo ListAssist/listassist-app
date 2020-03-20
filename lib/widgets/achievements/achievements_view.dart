@@ -3,8 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:listassist/models/Achievement.dart';
 import 'package:listassist/models/User.dart';
-import 'package:listassist/services/db.dart';
-import 'package:listassist/services/http.dart';
+import 'package:listassist/services/achievements.dart';
 import 'package:listassist/widgets/shimmer/shoppy_shimmer.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:provider/provider.dart';
@@ -22,7 +21,8 @@ class _AchievementsView extends State<AchievementsView> {
   @override
   Widget build(BuildContext context) {
     User user = Provider.of<User>(context);
-    initAchievements(user);
+    _achievements = user.achievements;
+    _achievements.sort((a, b) => a.compareTo(b));
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.primary,
@@ -41,11 +41,11 @@ class _AchievementsView extends State<AchievementsView> {
               padding: EdgeInsets.only(top: 10, bottom: 30),
               child: Column(
                 children: <Widget>[
-                  Text(_achievements.length.toString() + " / 20 Erfolge", style: TextStyle(fontSize: 20),),
+                  Text(_achievements.length.toString() + " / " + achievementsService.achievements.length.toString() + " Erfolge", style: TextStyle(fontSize: 20),),
                   LinearPercentIndicator(
                     padding: EdgeInsets.only(top: 20, left: 50, right: 50),
                     lineHeight: 8.0,
-                    percent: _achievements.length/20,
+                    percent: _achievements.length/achievementsService.achievements.length,
                     progressColor: Colors.blueAccent,
                   ),
                 ],
@@ -75,11 +75,5 @@ class _AchievementsView extends State<AchievementsView> {
         ),
       ) : ShoppyShimmer(),
     );
-  }
-
-  initAchievements(User user) async{
-    _achievements = await databaseService.getUsersUnlockedAchievements(user.uid);
-    setState(() {
-    });
   }
 }

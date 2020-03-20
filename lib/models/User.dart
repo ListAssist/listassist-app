@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:listassist/models/Achievement.dart';
 
 
 class User {
@@ -10,9 +11,11 @@ class User {
   final Map settings;
   final Timestamp lastAutomaticallyGenerated;
   final Timestamp lastLogin;
+  Map stats;
+  List<Achievement> achievements;
   bool hasUnlockedAchievements;
 
-  User({this.lastLogin, this.email, this.displayName, this.photoUrl, this.uid, this.type, this.settings, this.lastAutomaticallyGenerated, this.hasUnlockedAchievements});
+  User({this.lastLogin, this.email, this.displayName, this.photoUrl, this.uid, this.type, this.settings, this.lastAutomaticallyGenerated, this.stats, this.achievements, this.hasUnlockedAchievements});
 
   factory User.fromFirestore(DocumentSnapshot doc) {
     Map data = doc.data;
@@ -34,6 +37,8 @@ class User {
         "scanner_manual": true,
       },
       lastAutomaticallyGenerated: data["last_automatically_generated"] ?? null,
+      stats: Map.from(data["stats"] ?? []),
+      achievements: List.from(data["achievements"] ?? []).map((a) => Achievement.fromMap(a)).toList(),
       hasUnlockedAchievements: data["hasUnlockedAchievements"] ?? false,
     );
   }
@@ -57,6 +62,8 @@ class User {
         "scanner_manual": true,
       },
       lastAutomaticallyGenerated: data["last_automatically_generated"] ?? null,
+      stats: Map.from(data["stats"] ?? []),
+      achievements: List.from(data["achievements"] ?? []).map((a) => Achievement.fromMap(a)).toList(),
       hasUnlockedAchievements: data["hasUnlockedAchievements"] ?? false,
     );
   }

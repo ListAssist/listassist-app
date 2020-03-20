@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:listassist/models/Item.dart';
 import 'package:listassist/models/Recipe.dart';
 import 'package:listassist/models/ShoppingList.dart';
@@ -10,7 +11,7 @@ import 'package:listassist/services/info_overlay.dart';
 import 'package:listassist/widgets/recipe/create_recipe_view.dart';
 import 'package:listassist/widgets/shimmer/shoppy_shimmer.dart';
 import 'package:listassist/widgets/shoppinglist/search_items_view_new.dart';
-import 'package:progress_indicator_button/progress_button.dart';
+import 'package:progress_dialog/progress_dialog.dart';
 import 'package:provider/provider.dart';
 
 import '../../main.dart';
@@ -21,9 +22,15 @@ class RecipeView extends StatefulWidget {
 }
 
 class _RecipeView extends State<RecipeView> {
+  TextEditingController _nameController;
+  TextEditingController _descriptionController;
+  ProgressDialog progressDialog;
 
-  TextEditingController _nameController = new TextEditingController();
-  TextEditingController _descriptionController = new TextEditingController();
+  @override
+  void initState() {
+    _nameController = new TextEditingController();
+    _descriptionController = new TextEditingController();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,9 +70,22 @@ class _RecipeView extends State<RecipeView> {
                           child: Padding(
                             padding: EdgeInsets.only(top: 6.0, left: 6.0, right: 6.0, bottom: 6.0),
                             child: ExpansionTile(
-                              title: Text(
-                                recipes[index].name,
-                                style: TextStyle(fontWeight: FontWeight.bold),
+                              title: Row(
+                                children: <Widget>[
+                                  Text(
+                                    recipes[index].name,
+                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  Container(
+                                    width: 10,
+                                  ),
+                                  recipes[index].items.length > 0
+                                      ? Container()
+                                      : Icon(
+                                          Icons.warning,
+                                          color: Colors.red,
+                                        )
+                                ],
                               ),
                               children: <Widget>[
                                 recipes[index].description != null
@@ -123,7 +143,7 @@ class _RecipeView extends State<RecipeView> {
                                         icon: Icon(Icons.edit),
                                         color: Colors.blueGrey,
                                         onPressed: () {
-                                          _showEditDialog(recipes[index]);
+                                          _showEditDialog(user, recipes[index]);
                                         },
                                       ),
                                       FloatingActionButton.extended(
@@ -164,46 +184,72 @@ class _RecipeView extends State<RecipeView> {
     return erg.substring(2);
   }
 
-  _showEditDialog(Recipe recipe) {
+  _showEditDialog(User user, Recipe recipe) async {
     _nameController.text = recipe.name;
     _descriptionController.text = recipe.description;
-    return showDialog(
+    await showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
             title: Text("Rezept bearbeiten"),
-            content: Padding(
-              padding: EdgeInsets.all(8.0),
+            content: Container(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  TextFormField(
+                  TextField(
                     controller: _nameController,
                     decoration: InputDecoration(
                       labelText: "Name",
-                      //counterText: "Name",
                       hintText: 'Name',
-                      //errorText: _errorText.isNotEmpty ? _errorText : null,
-                      //icon: Icon(Icons.book),
                     ),
                   ),
                   TextField(
                     controller: _descriptionController,
                     keyboardType: TextInputType.multiline,
-                    maxLines: null,
+                    maxLines: 2,
+//                    maxLength: 100,
+//                    maxLengthEnforced: true,
                     decoration: InputDecoration(
                       labelText: "Beschreibung",
                       //counterText: "Beschreibung",
                       hintText: 'Beschreibung',
-
                       //errorText: _errorText.isNotEmpty ? _errorText : null,
                       //icon: Icon(Icons.description),
                     ),
                   ),
-
-                  ProgressButton(
+                  RaisedButton(
                     child: Text("Speichern"),
-                    onPressed: (AnimationController animation) {
+                    color: Theme.of(context).primaryColor,
+                    textColor: Colors.white,
+                    onPressed: () async {
+                      progressDialog = ProgressDialog(context, type: ProgressDialogType.Normal);
+                      progressDialog.style(
+                          message: "Rezept wird aktualisiert...",
+                          borderRadius: 10.0,
+                          backgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
+                          progressWidget: SpinKitDoubleBounce(
+                            color: Colors.blue,
+                          ),
+                          elevation: 10.0,
+                          insetAnimCurve: Curves.easeInOut,
+                          progress: 0.0,
+                          maxProgress: 100.0,
+                          progressTextStyle: TextStyle(color: Colors.black, fontSize: 12.0, fontWeight: FontWeight.w400),
+                          messageTextStyle: TextStyle(color: Colors.black, fontSize: 16.0, fontWeight: FontWeight.w600));
+                      progressDialog.show();
+                      recipe.name = _nameController.text;
+                      recipe.description = _descriptionController.text;
+                      await databaseService
+                          .updateRecipe(user.uid, recipe)
+                          .then((_) => {
+                            Navigator.pop(context),
+                            InfoOverlay.showInfoSnackBar("Rezept " + recipe.name + " gelöscht"),
+                            progressDialog.hide()
+                          })
+                          .catchError((_) => {
+                            InfoOverlay.showErrorSnackBar("Fehler beim aktualisieren des Rezepts"),
+                            progressDialog.dismiss()
+                          });
                     },
                   )
                 ],
@@ -216,7 +262,7 @@ class _RecipeView extends State<RecipeView> {
   Future<void> _showDeleteDialog(Recipe recipe) async {
     return showDialog<void>(
       context: context,
-      barrierDismissible: false, // user must tap button!
+      //barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text("Rezept löschen"),
@@ -247,11 +293,28 @@ class _RecipeView extends State<RecipeView> {
             FlatButton(
               child: Text("Löschen"),
               onPressed: () {
+                progressDialog = ProgressDialog(context, type: ProgressDialogType.Normal);
+                progressDialog.style(
+                    message: "Rezept wird gelöscht...",
+                    borderRadius: 10.0,
+                    backgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
+                    progressWidget: SpinKitDoubleBounce(
+                      color: Colors.blue,
+                    ),
+                    elevation: 10.0,
+                    insetAnimCurve: Curves.easeInOut,
+                    progress: 0.0,
+                    maxProgress: 100.0,
+                    progressTextStyle: TextStyle(color: Colors.black, fontSize: 12.0, fontWeight: FontWeight.w400),
+                    messageTextStyle: TextStyle(color: Colors.black, fontSize: 16.0, fontWeight: FontWeight.w600));
+                progressDialog.show();
                 print(recipe.id);
                 String name = recipe.name;
                 databaseService.deleteRecipe(Provider.of<User>(context).uid, recipe.id).catchError((_) {
                   InfoOverlay.showErrorSnackBar("Fehler beim Löschen des Rezepts");
+                  progressDialog.hide();
                 }).then((_) {
+                  progressDialog.dismiss();
                   InfoOverlay.showInfoSnackBar("Rezept $name gelöscht");
                   Navigator.of(context).pop();
                 });

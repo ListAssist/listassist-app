@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:listassist/main.dart';
 import 'package:listassist/models/Group.dart';
+import 'package:listassist/models/User.dart';
 import 'package:listassist/widgets/group/add_group.dart';
 import 'package:listassist/widgets/group/group_item.dart';
 import 'package:listassist/widgets/shimmer/shoppy_shimmer.dart';
@@ -10,6 +11,7 @@ class GroupView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    User _user = Provider.of<User>(context);
     List<Group> groups = Provider.of<List<Group>>(context);
     print(groups);
     return Scaffold(
@@ -39,7 +41,7 @@ class GroupView extends StatelessWidget {
         onPressed: () =>
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => AddGroup()),
+            MaterialPageRoute(builder: (context) => AddGroup(user: _user,)),
           )
       ),
     );

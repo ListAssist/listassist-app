@@ -34,7 +34,7 @@ class Item {
       category: data["category"],
       count: data["count"],
       bought: data["bought"],
-      price: data["price"].toDouble(),
+      price: data["price"]?.toDouble() ?? 0,
     );
   }
 
@@ -46,7 +46,7 @@ class Item {
       category: data["category"],
       count: data["count"],
       bought: data["bought"],
-      price: data["price"].toDouble(),
+      price: data["price"]?.toDouble() ?? 0,
     );
   }
 

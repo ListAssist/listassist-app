@@ -12,6 +12,7 @@ import 'package:listassist/models/Product.dart';
 import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
 import 'package:listassist/models/Recipe.dart';
+import 'package:listassist/services/info_overlay.dart';
 import 'package:rxdart/rxdart.dart';
 
 class DatabaseService {
@@ -168,14 +169,14 @@ class DatabaseService {
   }
 
   Future<void> updateRecipe(String uid, Recipe recipe) async {
-    var items = recipe.items.map((e) => e.toJson()).toList();
+    //var items = recipe.items.map((e) => e.toJson()).toList();
 
     return _db
         .collection("users")
         .document(uid)
         .collection("recipes")
         .document(recipe.id)
-        .setData({"name": recipe.name, "items" : items}, merge: true);
+        .setData({"name": recipe.name, "description": recipe.description}, merge: true);
   }
 
   Future<void> addItemToList(String uid, String listId, Item newItem) async{
@@ -305,18 +306,6 @@ class DatabaseService {
         .setData({'name': name});
   }
 
-  Future<List<Achievement>> getUsersUnlockedAchievements(String uid) async{
-    List<Achievement> achievements;
-
-    var document = _db
-        .collection("users")
-        .document(uid);
-    await document.get().then((value) => {
-      achievements = new List.from(value.data["achievements"].map((p) => Achievement.fromMap(p)).toList()),
-    });
-    return achievements;
-  }
-
 //
 //  Future<void> addToUserList(ShoppingList list, String downloadURL) {
 //    return _db
@@ -341,8 +330,32 @@ class DatabaseService {
         .document(listid)
         .setData({"pictureURLs": FieldValue.arrayUnion([path])}, merge: true);
   }
-}
 
+  Future<void> updateUserStats(String uid, Map stats) {
+    return _db
+        .collection('users')
+        .document(uid)
+        .updateData({'stats': stats});
+  }
+
+  Future<void> addAchievement(String uid, Achievement achievement) async{
+
+    List achievements = [];
+    await _db.collection('users').document(uid).get().then((value) => {
+      achievements.addAll(value["achievements"])
+    });
+    
+    if(!achievements.contains(achievement.toMap())){
+      achievements.add(achievement.toMap());
+      InfoOverlay.showAchievementSnackbar("Erfolg " + achievement.name + " freigeschaltet");
+    }
+
+    return _db
+        .collection('users')
+        .document(uid)
+        .setData({'achievements': achievements}, merge: true);
+  }
+}
 
 final databaseService = DatabaseService();
 final cloudFunctionInstance = CloudFunctions(app: FirebaseApp(name: "[DEFAULT]"), region: "europe-west1");

@@ -15,6 +15,15 @@ class InfoOverlay {
     );
   }
 
+  static void showAchievementSnackbar(String message, {Toast toastLength = Toast.LENGTH_LONG}) {
+    Fluttertoast.showToast(
+        msg: message,
+        textColor: Colors.white,
+        backgroundColor: Colors.green,
+        toastLength: toastLength
+    );
+  }
+
   static void showErrorSnackBar(String message, {Toast toastLength = Toast.LENGTH_LONG}) {
     Fluttertoast.showToast(
         msg: message,
