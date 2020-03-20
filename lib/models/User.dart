@@ -24,7 +24,15 @@ class User {
       displayName: data["displayName"] ?? '',
       lastLogin: data["lastLogin"] ?? null,
       type: data["type"] ?? null,
-      settings: data["settings"] ?? null,
+      settings: data["settings"] ?? {
+        "ai_enabled": true,
+        "ai_interval": 5,
+        "msg_autolist": false,
+        "msg_general": false,
+        "msg_invite": false,
+        "msg_offer": false,
+        "scanner_manual": true,
+      },
       lastAutomaticallyGenerated: data["last_automatically_generated"] ?? null,
       hasUnlockedAchievements: data["hasUnlockedAchievements"] ?? false,
     );
@@ -39,7 +47,15 @@ class User {
       displayName: data["displayName"] ?? "",
       lastLogin: data["lastLogin"] ?? null,
       type: data["type"] ?? null,
-      settings: data["settings"] ?? null,
+      settings: data["settings"] ?? {
+        "ai_enabled": true,
+        "ai_interval": 5,
+        "msg_autolist": false,
+        "msg_general": false,
+        "msg_invite": false,
+        "msg_offer": false,
+        "scanner_manual": true,
+      },
       lastAutomaticallyGenerated: data["last_automatically_generated"] ?? null,
       hasUnlockedAchievements: data["hasUnlockedAchievements"] ?? false,
     );

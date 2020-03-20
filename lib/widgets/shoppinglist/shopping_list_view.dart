@@ -25,14 +25,17 @@ class _ShoppingListView extends State<ShoppingListView> {
   Widget build(BuildContext context) {
     if(first) {
       User user = Provider.of<User>(context);
-      if(user.settings["ai_enabled"]) {
-        if(user.settings["ai_interval"] != null) {
-          if(user.lastAutomaticallyGenerated == null) {
-            _createAutomaticList();
-          }else {
-            DateTime nextList = user.lastAutomaticallyGenerated.toDate().add(Duration(days: user.settings["ai_interval"]));
-            if (DateTime.now().isAfter(nextList)) {
+      if(user.settings != null) {
+        if (user.settings["ai_enabled"]) {
+          if (user.settings["ai_interval"] != null) {
+            if (user.lastAutomaticallyGenerated == null) {
               _createAutomaticList();
+            } else {
+              DateTime nextList = user.lastAutomaticallyGenerated.toDate().add(
+                  Duration(days: user.settings["ai_interval"]));
+              if (DateTime.now().isAfter(nextList)) {
+                _createAutomaticList();
+              }
             }
           }
         }
@@ -105,7 +108,7 @@ class _ShoppingListView extends State<ShoppingListView> {
         InfoOverlay.showInfoSnackBar("Automatische Einkaufsliste wurde erstellt");
       }
     }catch(e) {
-      InfoOverlay.showErrorSnackBar("Fehler: ${e.message}");
+      //InfoOverlay.showErrorSnackBar("Fehler: ${e.message}");
     }
   }
 

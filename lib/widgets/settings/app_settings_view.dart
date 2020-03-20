@@ -37,7 +37,7 @@ class AppSettingsViewState extends State<AppSettingsView> {
   }
 
   Future initializeSettings () async {
-    _settings = await databaseService.getUserSettings(_user.uid);
+    _settings = _user.settings;
     setState(() {
       _initialized = true;
     });

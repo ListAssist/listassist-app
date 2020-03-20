@@ -37,7 +37,7 @@ class _SpeechDialog extends State<SpeechDialog> {
     _speechRecognition.setAvailabilityHandler((bool result) => setState(() => _isAvailable = result));
     _speechRecognition.setRecognitionStartedHandler(() => setState(() => _isListening = true));
     _speechRecognition.setRecognitionResultHandler((String speech) => setState(() => resultText = speech));
-    _speechRecognition.setRecognitionCompleteHandler(() => setState(() {
+    _speechRecognition.setRecognitionCompleteHandler((String _) => setState(() {
       _isListening = false;
       requestPop();
     }));

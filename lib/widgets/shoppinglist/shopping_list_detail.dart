@@ -145,7 +145,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
           )
         ],
       ),
-      body: list == null ? ShoppyShimmer() : list.items.isEmpty ? Center(child: Text("Die Einkaufsliste hat noch keine Produkte", style: Theme.of(context).textTheme.title)) : Column(
+      body: list == null ? ShoppyShimmer() : list.items.isEmpty ? Center(child: Text("Die Liste hat noch keine Produkte", style: Theme.of(context).textTheme.title)) : Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Container(
@@ -178,7 +178,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
                                         list.items[index].price = erg;
                                         itemChange(list.items[index].bought, index);
                                         setState(() {});
-                                        databaseService.updateList(uid, list).then((onUpdate) {
+                                        databaseService.updateList(uid, list, widget.isGroup).then((onUpdate) {
                                           print("Saved items");
                                         }).catchError((onError) {
                                           InfoOverlay.showErrorSnackBar("Fehler beim aktualisieren der Einkaufsliste");
