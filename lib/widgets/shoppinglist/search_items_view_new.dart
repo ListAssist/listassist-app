@@ -11,6 +11,7 @@ import 'package:listassist/models/ScannedShoppinglist.dart';
 import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
 import 'package:listassist/services/camera.dart';
+import 'package:listassist/services/category.dart';
 import 'package:listassist/services/connectivity.dart';
 import 'package:listassist/services/db.dart';
 import 'package:listassist/services/info_overlay.dart';
@@ -33,15 +34,17 @@ class SearchItemsViewNew extends StatefulWidget {
   _SearchItemsViewNew createState() => _SearchItemsViewNew();
 }
 
-class _SearchItemsViewNew extends State<SearchItemsViewNew>  with TickerProviderStateMixin{
+class _SearchItemsViewNew extends State<SearchItemsViewNew> with TickerProviderStateMixin {
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
   TextEditingController _searchController = TextEditingController();
   TabController _tabController;
+  ScrollController _scrollController = ScrollController();
 
   var _listOrRecipe;
   bool _isList;
 
   User _user;
+
   //TODO: keko Text wenn es keine popular products gibt durch sinnvollen text ersetzen
 
   Algolia algolia = Application.algolia;
@@ -115,7 +118,10 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew>  with TickerProvider
         print(_listOrRecipe.id);
 
         _isList
-            ? databaseService.updateList(widget.isGroup ? widget.groupid : _user.uid, _listOrRecipe, widget.isGroup).then((value) => {print("Liste wurde erfolgreich upgedated")}).catchError((_) => {print(_.toString())})
+            ? databaseService
+                .updateList(widget.isGroup ? widget.groupid : _user.uid, _listOrRecipe, widget.isGroup)
+                .then((value) => {print("Liste wurde erfolgreich upgedated")})
+                .catchError((_) => {print(_.toString())})
             : databaseService.updateRecipe(_user.uid, _listOrRecipe).then((value) => {print("Rezept wurde erfolgreich upgedated")}).catchError((_) => {print(_.toString())});
       }
     });
@@ -190,26 +196,29 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew>  with TickerProvider
                 backgroundColor: Colors.green,
               ),
             ),
-            _isList ? Align(
-              alignment: Alignment.bottomRight,
-              child: Padding(
-                padding: EdgeInsets.only(bottom: 60.0),
-                child: Transform.scale(
-                  scale: 0.75,
-                  child: FloatingActionButton(
-                    child: Icon(
-                      Icons.camera_alt,
-                      color: Colors.black,
+            _isList
+                ? Align(
+                    alignment: Alignment.bottomRight,
+                    child: Padding(
+                      padding: EdgeInsets.only(bottom: 60.0),
+                      child: Transform.scale(
+                        scale: 0.75,
+                        child: FloatingActionButton(
+                          child: Icon(
+                            Icons.camera_alt,
+                            color: Colors.black,
+                          ),
+                          onPressed: () async {
+                            await connectivityService.testInternetConnection()
+                                ? InfoOverlay.showSourceSelectionSheet(context, callback: _startCameraScanner, arg: _listOrRecipe)
+                                : InfoOverlay.showErrorSnackBar("Kein Internetzugriff");
+                          },
+                          backgroundColor: Colors.white,
+                        ),
+                      ),
                     ),
-                    onPressed: () async{
-                      await connectivityService.testInternetConnection() ? InfoOverlay.showSourceSelectionSheet(context, callback: _startCameraScanner, arg: _listOrRecipe)
-                          : InfoOverlay.showErrorSnackBar("Kein Internetzugriff");
-                    },
-                    backgroundColor: Colors.white,
-                  ),
-                ),
-              ),
-            ) : Container(),
+                  )
+                : Container(),
           ]),
           body: Column(children: <Widget>[
             Container(
@@ -290,38 +299,40 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew>  with TickerProvider
                       controller: _tabController,
                       children: <Widget>[
                         Container(
-                            child: _listOrRecipe.items.length > 0 ? MediaQuery.removePadding(
-                                removeTop: true,
-                                context: context,
-                                child: ListView.separated(
-                                  itemCount: _listOrRecipe.items.length,
-                                  separatorBuilder: (ctx, i) => Divider(
-                                    indent: 70,
-                                    endIndent: 10,
-                                    color: Colors.grey,
-                                  ),
-                                  itemBuilder: (context, index) {
-                                    _subtract() {
-                                      _subtractCount(_listOrRecipe.items[index].name);
-                                    }
-
-                                    return Container(
-                                      height: 65,
-                                      child: ListTile(
-                                        leading: Padding(
-                                          padding: EdgeInsets.all(8.0),
-                                          child: Icon(Icons.local_dining),
-                                        ),
-                                        title: Text(_listOrRecipe.items[index].name),
-                                        subtitle: Text(_listOrRecipe.items[index].category),
-                                        trailing: ItemCounter(count: _listOrRecipe.items[index].count, subtractCount: _subtract),
-                                        onTap: () {
-                                          _addCount(_listOrRecipe.items[index].name);
-                                        },
+                            child: _listOrRecipe.items.length > 0
+                                ? MediaQuery.removePadding(
+                                    removeTop: true,
+                                    context: context,
+                                    child: ListView.separated(
+                                      itemCount: _listOrRecipe.items.length,
+                                      separatorBuilder: (ctx, i) => Divider(
+                                        indent: 70,
+                                        endIndent: 10,
+                                        color: Colors.grey,
                                       ),
-                                    );
-                                  },
-                                )): Center(child: Text("Noch keine Produkte hinzugefügt", style: Theme.of(context).textTheme.title))), //erster tab
+                                      itemBuilder: (context, index) {
+                                        _subtract() {
+                                          _subtractCount(_listOrRecipe.items[index].name);
+                                        }
+
+                                        return Container(
+                                          height: 65,
+                                          child: ListTile(
+                                            leading: Padding(
+                                              padding: EdgeInsets.all(8.0),
+                                              child: Icon(Icons.local_dining),
+                                            ),
+                                            title: Text(_listOrRecipe.items[index].name),
+                                            subtitle: Text(_listOrRecipe.items[index].category),
+                                            trailing: ItemCounter(count: _listOrRecipe.items[index].count, subtractCount: _subtract),
+                                            onTap: () {
+                                              _addCount(_listOrRecipe.items[index].name);
+                                            },
+                                          ),
+                                        );
+                                      },
+                                    ))
+                                : Center(child: Text("Noch keine Produkte hinzugefügt", style: Theme.of(context).textTheme.title))), //erster tab
 
                         FutureBuilder(
                             future: databaseService.getPopularProducts(),
@@ -372,11 +383,72 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew>  with TickerProvider
                                     },
                                   ));
                             }),
-                        Column(
-                          children: <Widget>[
-                            Text(resultText),
-                          ],
-                        )
+
+                        MediaQuery.removePadding(
+                            removeTop: true,
+                            context: context,
+                            child: ListView.builder(
+                              itemCount: categoryService.categories.length,
+                              shrinkWrap: true,
+                              itemBuilder: (ctx, ind) {
+                                print(List.from(categoryService.categories[ind]["products"]).length);
+                                return Card(
+                                    elevation: 0,
+                                    child: ExpansionTile(
+                                      title: Row(
+                                        children: <Widget>[
+                                          Icon(Icons.ac_unit),
+                                          Container(width: 10,),
+                                          Text(categoryService.categories[ind]["category"]),
+                                        ],
+                                      ),
+                                      children: <Widget>[
+                                        ListView.separated(
+                                          itemCount: List.from(categoryService.categories[ind]["products"]).length,
+                                          controller: _scrollController,
+                                          shrinkWrap: true,
+                                          separatorBuilder: (ctx, i) => Divider(
+                                            indent: 70,
+                                            endIndent: 10,
+                                            color: Colors.grey,
+                                          ),
+
+                                          itemBuilder: (context, index) {
+                                            _subtract() {
+                                              _subtractCount(List.from(categoryService.categories[ind]["products"])[index]["name"]);
+                                            }
+
+                                            return Container(
+                                              height: 65,
+                                              child: ListTile(
+                                                leading: Padding(
+                                                  padding: EdgeInsets.all(8.0),
+                                                  child: Icon(Icons.local_dining),
+                                                ),
+                                                title: Text(List.from(categoryService.categories[ind]["products"])[index]["name"]),
+                                                subtitle: Text(List.from(categoryService.categories[ind]["products"])[index]["category"]),
+                                                trailing: _listOrRecipe.hasItem(List.from(categoryService.categories[ind]["products"])[index]["name"])
+                                                    ? ItemCounter(count: _listOrRecipe.items.firstWhere((i) => i.name == List.from(categoryService.categories[ind]["products"])[index]["name"]).count, subtractCount: _subtract)
+                                                    : Container(
+                                                  width: 0,
+                                                  height: 0,
+                                                ),
+                                                onTap: () {
+                                                  if (!_listOrRecipe.hasItem(List.from(categoryService.categories[ind]["products"])[index]["name"])) {
+                                                    _addItem(new Product(name: List.from(categoryService.categories[ind]["products"])[index]["name"], category: List.from(categoryService.categories[ind]["products"])[index]["category"]));
+                                                  } else {
+                                                    _addCount(List.from(categoryService.categories[ind]["products"])[index]["name"]);
+                                                  }
+                                                },
+                                              ),
+                                            );
+                                          },
+                                        )
+                                      ],
+                                    ));
+                              },
+                              physics: BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                            ))
                       ],
                     ),
                   )
@@ -484,7 +556,6 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew>  with TickerProvider
     );
   }
 
-
   /// Starts up the camera scanner and awaits output to process
   Future<void> _startCameraScanner(BuildContext context, ImageSource imageSource, ShoppingList list) async {
     ScannedShoppingList scannedShoppingList = await cameraService.getResultFromCameraScanner(context, imageSource, addToList: list);
@@ -497,5 +568,4 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew>  with TickerProvider
 
     Navigator.pop(context);
   }
-
 }

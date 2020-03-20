@@ -4,8 +4,10 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:listassist/models/Group.dart';
+import 'package:listassist/models/Item.dart';
 import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
+import 'package:listassist/services/achievements.dart';
 import 'package:listassist/services/connectivity.dart';
 import 'package:listassist/services/db.dart';
 import 'package:listassist/widgets/shimmer/shoppy_shimmer.dart';
@@ -28,6 +30,7 @@ class ShoppingListDetail extends StatefulWidget {
 
 class _ShoppingListDetail extends State<ShoppingListDetail> {
   ShoppingList list;
+  User _user;
   String uid = "";
   bool useCache = false;
 
@@ -108,6 +111,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
 
   @override
   Widget build(BuildContext context) {
+    _user = Provider.of<User>(context);
     if (!useCache) {
       if(widget.isGroup){
         list = Provider.of<ShoppingList>(context);
@@ -337,6 +341,10 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
                       _buttonsDisabled = false;
                     }).then((_) {
                       InfoOverlay.showInfoSnackBar("Einkaufsliste ${list.name} abgeschlossen");
+                      List<Item> boughtItems = List.from(list.items);
+                      boughtItems.removeWhere((item) => !item.bought);
+                      achievementsService.checkListItems(_user, boughtItems);
+                      achievementsService.checkListPrice(_user, boughtItems);
                       Navigator.of(context).pop();
                       Navigator.of(this.context).pop();
                     });
