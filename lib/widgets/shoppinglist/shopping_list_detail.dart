@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:listassist/assets/custom_colors.dart';
 import 'package:listassist/models/Group.dart';
 import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
@@ -32,6 +33,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
   bool useCache = false;
 
   //Spamschutz z.B. beim Löschen
+  //TODO: Getter length called on null bills
   //TODO: Check if buttonsDisabled is correctly implemented because it wasnt in the completed detail widget
   bool _buttonsDisabled = false;
 
@@ -79,7 +81,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
     _isVisible = true;
     _hideButtonController = ScrollController();
     _hideButtonController.addListener((){
-      print('scrolling = ${_hideButtonController.position.isScrollingNotifier.value}');
+//      print('scrolling = ${_hideButtonController.position.isScrollingNotifier.value}');
       if(_hideButtonController.position.userScrollDirection == ScrollDirection.reverse){
         if(_isVisible == true) {
           /* only set when the previous state is false
@@ -129,19 +131,41 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
         backgroundColor: Theme.of(context).colorScheme.primary,
         title: Text(list == null ? "" : list.name),
         actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.edit),
-            onPressed: () => Navigator.push(
-              context,
-              widget.isGroup ?
-              MaterialPageRoute(builder: (context) {
-                return StreamProvider<ShoppingList>.value(
-                  value: databaseService.streamListFromGroup(uid, list.id),
-                  child: EditShoppingList(index: widget.index, isGroup: true)
-                );
-              }) :
-              MaterialPageRoute(builder: (context) => EditShoppingList(index: widget.index)),
-            ),
+          PopupMenuButton<ListAction>(
+            onSelected: (ListAction result) async {
+            if (result == ListAction.edit) {
+              Navigator.push(
+                context,
+                widget.isGroup ?
+                MaterialPageRoute(builder: (context) {
+                  return StreamProvider<ShoppingList>.value(
+                      value: databaseService.streamListFromGroup(uid, list.id),
+                      child: EditShoppingList(index: widget.index, isGroup: true)
+                  );
+                }) :
+                MaterialPageRoute(builder: (context) => EditShoppingList(index: widget.index)),
+              );
+            } else if (result == ListAction.delete) {
+              _showDeleteDialog();
+            } else if (result == ListAction.complete) {
+              _showCompleteDialog();
+            }
+          },
+            itemBuilder: (BuildContext context) => <PopupMenuEntry<ListAction>>[
+              PopupMenuItem<ListAction>(
+                value: ListAction.complete,
+                enabled: _boughtItemCount > 0,
+                child: Text('Abschließen')
+              ),
+              PopupMenuItem<ListAction>(
+                value: ListAction.edit,
+                child: Text('Umbenennen')
+              ),
+              PopupMenuItem<ListAction>(
+                value: ListAction.delete,
+                child: Text('Löschen')
+              ),
+            ],
           )
         ],
       ),
@@ -199,70 +223,107 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
                   : Container()),
         ],
       ),
-      floatingActionButton: AnimatedOpacity(
-        opacity: _isVisible ? 1.0 : 0.0,
-        duration: Duration(milliseconds: 200),
-        child: Stack(
-          children: <Widget>[
-            Align(
-              alignment: Alignment.bottomRight,
-              child: FloatingActionButton(
-                child: Icon(Icons.add),
-                backgroundColor: Colors.green,
-                onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => SearchItemsViewNew(list: list, isGroup: widget.isGroup, groupid: uid,)));
-                },
+      floatingActionButton: Stack(
+        children: <Widget>[
+          Align(
+            alignment: Alignment.bottomRight,
+            child: Padding(
+              padding: EdgeInsets.only(bottom: 60),
+              child: Transform.scale(
+                scale: 0.75,
+                child: FloatingActionButton(
+                  onPressed: () async {
+                    bool connected = await connectivityService.testInternetConnection();
+                    if (!connected) {
+                      //I am NOT connected to the Internet
+                      InfoOverlay.showErrorSnackBar("Kein Internetzugriff");
+                      _buttonsDisabled = false;
+                    } else {
+                      InfoOverlay.showSourceSelectionSheet(context, callback: _startCameraScanner, arg: widget.index);
+                    }
+                  },
+                  backgroundColor: CustomColors.shoppyBlue,
+                  child: Icon(Icons.camera_alt, color: Colors.white),
+                ),
               ),
             ),
-            Padding(
-              padding: EdgeInsets.only(bottom: 75.0),
-              child: SpeedDial(
-                animatedIcon: AnimatedIcons.menu_close,
-                animatedIconTheme: IconThemeData(size: 22.0),
-                closeManually: false,
-                curve: Curves.easeIn,
-                overlayOpacity: 0.35,
-                backgroundColor: Theme.of(context).primaryColor,
-                elevation: 8.0,
-                shape: CircleBorder(),
-                children: [
-                  SpeedDialChild(
-                      child: Icon(Icons.check),
-                      backgroundColor: Colors.green,
-                      labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
-                      label: "Complete",
-                      labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
-                      onTap: _showCompleteDialog),
-                  SpeedDialChild(
-                      child: Icon(Icons.delete),
-                      backgroundColor: Colors.red,
-                      labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
-                      label: "Delete",
-                      labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
-                      onTap: _showDeleteDialog),
-                  SpeedDialChild(
-                    child: Icon(Icons.camera),
-                    backgroundColor: Colors.blue,
-                    label: "Image Check",
-                    labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
-                    labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
-                    onTap: () async {
-                      bool connected = await connectivityService.testInternetConnection();
-                      if (!connected) {
-                        //I am NOT connected to the Internet
-                        InfoOverlay.showErrorSnackBar("Kein Internetzugriff");
-                        _buttonsDisabled = false;
-                      } else {
-                        InfoOverlay.showSourceSelectionSheet(context, callback: _startCameraScanner, arg: widget.index);
-                      }
-                    },
-                  )
-                ],
-              ),
+          ),
+          Align(
+            alignment: Alignment.bottomRight,
+            child: FloatingActionButton(
+              onPressed: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => SearchItemsViewNew(list: list, isGroup: widget.isGroup, groupid: uid)));
+              },
+              backgroundColor: Colors.green,
+              child: Icon(Icons.add),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
+//      floatingActionButton: AnimatedOpacity(
+//        opacity: _isVisible ? 1.0 : 0.0,
+//        duration: Duration(milliseconds: 200),
+//        child: Stack(
+//          children: <Widget>[
+//            Align(
+//              alignment: Alignment.bottomRight,
+//              child: FloatingActionButton(
+//                child: Icon(Icons.add),
+//                backgroundColor: Colors.green,
+//                onPressed: () {
+//                  Navigator.push(context, MaterialPageRoute(builder: (context) => SearchItemsViewNew(list: list, isGroup: widget.isGroup, groupid: uid,)));
+//                },
+//              ),
+//            ),
+//            Padding(
+//              padding: EdgeInsets.only(bottom: 75.0),
+//              child: SpeedDial(
+//                animatedIcon: AnimatedIcons.menu_close,
+//                animatedIconTheme: IconThemeData(size: 22.0),
+//                closeManually: false,
+//                curve: Curves.easeIn,
+//                overlayOpacity: 0.35,
+//                backgroundColor: Theme.of(context).primaryColor,
+//                elevation: 8.0,
+//                shape: CircleBorder(),
+//                children: [
+//                  SpeedDialChild(
+//                      child: Icon(Icons.check),
+//                      backgroundColor: Colors.green,
+//                      labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
+//                      label: "Complete",
+//                      labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
+//                      onTap: _showCompleteDialog),
+//                  SpeedDialChild(
+//                      child: Icon(Icons.delete),
+//                      backgroundColor: Colors.red,
+//                      labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
+//                      label: "Delete",
+//                      labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
+//                      onTap: _showDeleteDialog),
+//                  SpeedDialChild(
+//                    child: Icon(Icons.camera),
+//                    backgroundColor: Colors.blue,
+//                    label: "Image Check",
+//                    labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
+//                    labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
+//                    onTap: () async {
+//                      bool connected = await connectivityService.testInternetConnection();
+//                      if (!connected) {
+//                        //I am NOT connected to the Internet
+//                        InfoOverlay.showErrorSnackBar("Kein Internetzugriff");
+//                        _buttonsDisabled = false;
+//                      } else {
+//                        InfoOverlay.showSourceSelectionSheet(context, callback: _startCameraScanner, arg: widget.index);
+//                      }
+//                    },
+//                  )
+//                ],
+//              ),
+//            ),
+//          ],
+//        ),
+//      ),
     );
   }
 
@@ -419,4 +480,8 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
       },
     );
   }
+}
+
+enum ListAction {
+  edit, delete, complete
 }

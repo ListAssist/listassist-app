@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:listassist/assets/custom_colors.dart';
 import 'package:listassist/models/current-screen.dart';
 import 'package:listassist/widgets/intro-slider/intro_slider.dart';
 import 'package:provider/provider.dart';
@@ -44,7 +45,7 @@ class MyApp extends StatelessWidget {
       ],
       child: ScopedModel<ScreenModel>(
         model: ScreenModel(),
-        child: MaterialApp(title: "ListAssist", theme: ThemeData(primarySwatch: Colors.indigo, brightness: Brightness.light), home: MainApp()),
+        child: MaterialApp(title: "ListAssist", theme: ThemeData(primarySwatch: CustomColors.shoppyBlue, brightness: Brightness.light), home: MainApp()),
       ),
     );
   }
