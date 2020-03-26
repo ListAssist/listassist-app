@@ -48,7 +48,7 @@ class _ShoppingListView extends State<ShoppingListView> {
         child: Scaffold(
           floatingActionButton: FloatingActionButton(
             child: Icon(Icons.add),
-            backgroundColor: Theme.of(context).colorScheme.primary,
+            backgroundColor: Provider.of<User>(context).settings["theme"] == "Grün" ? CustomColors.shoppyGreen : Theme.of(context).colorScheme.primary,
             onPressed: () async {
               Navigator.push(
                 context,
@@ -71,19 +71,20 @@ class _ShoppingListView extends State<ShoppingListView> {
             },
           ),
           appBar: AppBar(
-//            backgroundColor: Theme.of(context).colorScheme.primary,
+          backgroundColor: Provider.of<User>(context).settings["theme"] == "Blau" ? Theme.of(context).colorScheme.primary : CustomColors.shoppyGreen,
             title: Text("Einkaufslisten"),
-            flexibleSpace: Container(
-                decoration: BoxDecoration(
-                gradient: LinearGradient(
-                    begin: Alignment.bottomLeft,
-                    end: Alignment.topRight,
-                    colors: <Color>[
-                      CustomColors.shoppyBlue,
-                      CustomColors.shoppyLightBlue,
-                    ])
-              )),
+            flexibleSpace: Provider.of<User>(context).settings["theme"] == "Verlauf" ? Container(
+              decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                      begin: Alignment.bottomLeft,
+                      end: Alignment.topRight,
+                      colors: <Color>[
+                        CustomColors.shoppyBlue,
+                        CustomColors.shoppyLightBlue,
+                      ])
+              )) : Container(),
             bottom: TabBar(
+              indicatorColor: Colors.white,
               tabs: [
                 Tab(text: "Zu erledigen"),
                 Tab(text: "Erledigt")

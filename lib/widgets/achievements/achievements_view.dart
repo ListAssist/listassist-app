@@ -1,6 +1,7 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:listassist/assets/custom_colors.dart';
 import 'package:listassist/models/Achievement.dart';
 import 'package:listassist/models/User.dart';
 import 'package:listassist/services/achievements.dart';
@@ -25,8 +26,18 @@ class _AchievementsView extends State<AchievementsView> {
     _achievements.sort((a, b) => a.compareTo(b));
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        title: Text("Errungenschaften"),
+        backgroundColor: Provider.of<User>(context).settings["theme"] == "Blau" ? Theme.of(context).colorScheme.primary : CustomColors.shoppyGreen,
+        title: Text("Einkaufslisten"),
+        flexibleSpace: Provider.of<User>(context).settings["theme"] == "Verlauf" ? Container(
+            decoration: BoxDecoration(
+                gradient: LinearGradient(
+                    begin: Alignment.bottomLeft,
+                    end: Alignment.topRight,
+                    colors: <Color>[
+                      CustomColors.shoppyBlue,
+                      CustomColors.shoppyLightBlue,
+                    ])
+            )) : Container(),
         leading: IconButton(
           icon: Icon(Icons.menu),
           tooltip: "Open navigation menu",

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:listassist/assets/custom_colors.dart';
 import 'package:listassist/widgets/authentication/login.dart';
 import 'package:listassist/widgets/authentication/register.dart';
 

@@ -1,11 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:listassist/models/User.dart';
 import 'package:listassist/services/db.dart';
 import 'package:listassist/widgets/shimmer/shoppy_shimmer.dart';
-import 'package:numberpicker/numberpicker.dart';
 import 'package:provider/provider.dart';
 
 class AppSettingsView extends StatefulWidget{
@@ -25,7 +23,7 @@ class AppSettingsViewState extends State<AppSettingsView> {
   Timer _debounce;
   int _debounceTime = 2000;
 
-  String _themeValue = "Light";
+  String _themeValue;
 
   void requestSettingsUpdate() {
     if (_debounce?.isActive ?? false) _debounce.cancel();
@@ -84,15 +82,16 @@ class AppSettingsViewState extends State<AppSettingsView> {
                 leading: Icon(Icons.aspect_ratio),
                 title: Text("Theme"),
                 trailing: DropdownButton<String>(
-                  value: _themeValue,
+                  value: _settings["theme"],
                   icon: Icon(Icons.arrow_drop_down),
                   iconSize: 24,
                   onChanged: (String newValue) {
                     setState(() {
-                      _themeValue = newValue;
+                      _settings["theme"] = newValue;
                     });
-                  },
-                  items: <String>['Light', 'Dark']
+                      databaseService.updateUserSettings(_user.uid, _settings);
+                    },
+                  items: <String>['Verlauf', 'Blau', 'Grün']
                       .map<DropdownMenuItem<String>>((String value) {
                     return DropdownMenuItem<String>(
                       value: value,

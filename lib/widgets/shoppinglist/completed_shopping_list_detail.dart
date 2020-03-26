@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:listassist/assets/custom_colors.dart';
 import 'package:listassist/assets/custom_icons.dart';
 import 'package:listassist/models/Group.dart';
 import 'package:listassist/models/Item.dart';
@@ -53,7 +54,7 @@ class _CompletedShoppingListDetailState extends State<CompletedShoppingListDetai
     }
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.primary,
+          backgroundColor: Provider.of<User>(context).settings["theme"] == "Blau" ? Theme.of(context).colorScheme.primary : CustomColors.shoppyGreen,
         title: Text(list == null ? "" : list.name),
       ),
       body: list == null ? ShoppyShimmer() : Column(

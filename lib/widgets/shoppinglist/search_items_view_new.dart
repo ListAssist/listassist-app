@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:listassist/assets/custom_colors.dart';
 import 'package:listassist/models/Item.dart';
 import 'package:listassist/models/Product.dart';
 import 'package:listassist/models/Recipe.dart';
@@ -158,6 +159,12 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew> with TickerProviderS
     setState(() {});
   }
 
+  initPopularProducts() async {
+    _popularProducts = await databaseService.getPopularProducts();
+    setState(() {
+    });
+  }
+
   @override
   void initState() {
     if (widget.list != null) {
@@ -167,7 +174,7 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew> with TickerProviderS
       _listOrRecipe = widget.recipe;
       _isList = false;
     }
-
+    initPopularProducts();
     _tabController = new TabController(length: 3, initialIndex: _listOrRecipe.items.length > 0 ? 0 : 1, vsync: this);
   }
 
@@ -224,7 +231,16 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew> with TickerProviderS
               child: Stack(
                 children: <Widget>[
                   Container(
-                    color: Theme.of(context).primaryColor,
+                    color: _user.settings["theme"] != "Verlauf" ? _user.settings["theme"] == "Blau" ? Theme.of(context).primaryColor : CustomColors.shoppyGreen : null,
+                    decoration:  _user.settings["theme"] == "Verlauf" ? BoxDecoration(
+                        gradient: LinearGradient(
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                            colors: <Color>[
+                              CustomColors.shoppyBlue,
+                              CustomColors.shoppyLightBlue,
+                            ]),
+                    ) : null,
                     width: MediaQuery.of(context).size.width,
                     height: 120.0,
                   ),
@@ -283,7 +299,16 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew> with TickerProviderS
             ),
             _searchController.text.length == 0
                 ? Container(
-                    color: Theme.of(context).primaryColor,
+                    color: _user.settings["theme"] != "Verlauf" ? _user.settings["theme"] == "Blau" ? Theme.of(context).primaryColor : CustomColors.shoppyGreen : null,
+                    decoration:  _user.settings["theme"] == "Verlauf" ? BoxDecoration(
+                      gradient: LinearGradient(
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                          colors: <Color>[
+                            CustomColors.shoppyBlue,
+                            CustomColors.shoppyLightBlue,
+                          ]),
+                    ) : null,
                     child: TabBar(
                       controller: _tabController,
                       indicatorColor: Colors.white,
@@ -332,7 +357,7 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew> with TickerProviderS
                                     ))
                                 : Center(child: Text("Noch keine Produkte hinzugefügt", style: Theme.of(context).textTheme.title))), //erster tab
 
-                        FutureBuilder(
+                        /*FutureBuilder(
                             future: databaseService.getPopularProducts(),
                             builder: (context, snapshot) {
                               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -380,7 +405,64 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew> with TickerProviderS
                                       );
                                     },
                                   ));
-                            }),
+                            }),*/
+
+                        _popularProducts.length > 0 ? MediaQuery.removePadding(
+                            removeTop: true,
+                            context: context,
+                            child: ListView.separated(
+                              itemCount: _popularProducts.length,
+                              controller: _scrollController,
+                              shrinkWrap: true,
+                              separatorBuilder: (ctx, i) => Divider(
+                                indent: 70,
+                                endIndent: 10,
+                                color: Colors.grey,
+                              ),
+
+                              itemBuilder: (context, index) {
+                                _subtract() {
+                                  _subtractCount(_popularProducts[index].name);
+                                }
+                                String iconFileName = _popularProducts[index].category.toLowerCase()
+                                    .replaceAll(RegExp("ü"), "ue")
+                                    .replaceAll(RegExp("ö"), "oe")
+                                    .replaceAll(RegExp("ä"), "ae")
+                                    .replaceAll(RegExp("ß"), "ss")
+                                    .replaceAll(RegExp(" & "), "_")
+                                    .replaceAll(RegExp("allgemein"), "fisch") + ".png";
+
+                                return Container(
+                                  height: 65,
+                                  child: ListTile(
+                                    leading: Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Image(image: AssetImage("assets/icons/" + iconFileName)),
+                                    ),
+                                    title: Text(_popularProducts[index].name),
+                                    subtitle: Text(_popularProducts[index].category),
+                                    trailing: _listOrRecipe.hasItem(_popularProducts[index].name)
+                                        ? ItemCounter(count: _listOrRecipe.items.firstWhere((i) => i.name == _popularProducts[index].name).count, subtractCount: _subtract)
+                                        : Container(
+                                      width: 0,
+                                      height: 0,
+                                    ),
+                                    onTap: () {
+                                      if (!_listOrRecipe.hasItem(_popularProducts[index].name)) {
+                                        _addItem(new Product(name: _popularProducts[index].name, category: _popularProducts[index].category));
+                                      } else {
+                                        _addCount(_popularProducts[index].name);
+                                      }
+                                    },
+                                  ),
+                                );
+                              },
+                            )) : ShoppyShimmer(),
+
+
+
+
+
 
                         MediaQuery.removePadding(
                             removeTop: true,
@@ -415,13 +497,19 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew> with TickerProviderS
                                             _subtract() {
                                               _subtractCount(List.from(categoryService.categories[ind]["products"])[index]["name"]);
                                             }
+                                            String iconFileName = List.from(categoryService.categories[ind]["products"])[index]["category"].toString().toLowerCase()
+                                                .replaceAll(RegExp("ü"), "ue")
+                                                .replaceAll(RegExp("ö"), "oe")
+                                                .replaceAll(RegExp("ä"), "ae")
+                                                .replaceAll(RegExp("ß"), "ss")
+                                                .replaceAll(RegExp(" & "), "_") + ".png";
 
                                             return Container(
                                               height: 65,
                                               child: ListTile(
                                                 leading: Padding(
                                                   padding: EdgeInsets.all(8.0),
-                                                  child: Icon(Icons.local_dining),
+                                                  child: Image(image: AssetImage("assets/icons/" + iconFileName)),
                                                 ),
                                                 title: Text(List.from(categoryService.categories[ind]["products"])[index]["name"]),
                                                 subtitle: Text(List.from(categoryService.categories[ind]["products"])[index]["category"]),
@@ -563,7 +651,6 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew> with TickerProviderS
         _requestDatabaseUpdate();
       });
     }
-
     Navigator.pop(context);
   }
 }

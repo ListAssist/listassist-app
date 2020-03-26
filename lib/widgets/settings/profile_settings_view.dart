@@ -220,83 +220,85 @@ class _ProfileSettingsView extends State<ProfileSettingsView> {
       body: Container(
           padding: EdgeInsets.only(top: 10, left: 20, right: 20),
           decoration: BoxDecoration(),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.center, mainAxisAlignment: MainAxisAlignment.start, children: [
-            Container(
-              margin: EdgeInsets.only(bottom: 10.0),
-              child: GestureDetector(
-                  onTap: userIsSignedInWithEmailAndPassword() ? () {
-                    _showProfilePictureModal(user);
-                  } : null,
-                  child: Hero(
-                    tag: "profilePicture",
-                    child: CircleAvatar(
-                      backgroundImage: NetworkImage(user.photoUrl),
-                      radius: 50,
-                    ),
-                  )),
-            ),
-            userIsSignedInWithEmailAndPassword() ? Container(
-                margin: EdgeInsets.only(bottom: 50.0),
+          child: SingleChildScrollView(
+            child: Column(crossAxisAlignment: CrossAxisAlignment.center, mainAxisAlignment: MainAxisAlignment.start, children: [
+              Container(
+                margin: EdgeInsets.only(bottom: 10.0),
                 child: GestureDetector(
-                    onTap: () {
+                    onTap: userIsSignedInWithEmailAndPassword() ? () {
                       _showProfilePictureModal(user);
-                    },
-                    child: Text(
-                      "Foto ändern",
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                      textAlign: TextAlign.center,
-                    ))) : Container(height: 50, child: Text("Mit " + getAccountType() + " angemeldet"),),
-            Container(
-              margin: EdgeInsets.only(bottom: 20.0),
-              child: TextFormField(
-                initialValue: user.displayName,
-                onChanged: (text) {
-                  _checkName(text);
-                },
-                decoration: InputDecoration(labelText: 'Name', icon: Icon(Icons.account_circle)),
+                    } : null,
+                    child: Hero(
+                      tag: "profilePicture",
+                      child: CircleAvatar(
+                        backgroundImage: NetworkImage(user.photoUrl),
+                        radius: 50,
+                      ),
+                    )),
               ),
-            ),
-            Container(
-              margin: EdgeInsets.only(bottom: 20.0),
-              child: Row(children: <Widget>[
+              userIsSignedInWithEmailAndPassword() ? Container(
+                  margin: EdgeInsets.only(bottom: 50.0),
+                  child: GestureDetector(
+                      onTap: () {
+                        _showProfilePictureModal(user);
+                      },
+                      child: Text(
+                        "Foto ändern",
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                        textAlign: TextAlign.center,
+                      ))) : Container(height: 50, child: Text("Mit " + getAccountType() + " angemeldet"),),
+              Container(
+                margin: EdgeInsets.only(bottom: 20.0),
+                child: TextFormField(
+                  initialValue: user.displayName,
+                  onChanged: (text) {
+                    _checkName(text);
+                  },
+                  decoration: InputDecoration(labelText: 'Name', icon: Icon(Icons.account_circle)),
+                ),
+              ),
+              Container(
+                margin: EdgeInsets.only(bottom: 20.0),
+                child: Row(children: <Widget>[
+                  Expanded(
+                    child: TextFormField(
+                      controller: _emailController,
+                      decoration: InputDecoration(
+                        labelText: 'E-Mail',
+                        icon: Icon(Icons.email),
+                      ),
+                      enabled: false,
+                    ),
+                  ),
+                  userIsSignedInWithEmailAndPassword() ? IconButton(
+                    icon: Icon(Icons.edit),
+                    onPressed: () async {
+                      updateProfileDataDialog.showLoginDialog(context, firebaseUser, user, "email");
+                    },
+                  ) : Container()
+                ]),
+              ),
+              userIsSignedInWithEmailAndPassword() ? Row(children: <Widget>[
                 Expanded(
                   child: TextFormField(
-                    controller: _emailController,
+                    initialValue: "kekomat11",
                     decoration: InputDecoration(
-                      labelText: 'E-Mail',
-                      icon: Icon(Icons.email),
+                      labelText: 'Passwort',
+                      icon: Icon(Icons.lock_outline),
                     ),
+                    obscureText: true,
                     enabled: false,
                   ),
                 ),
-                userIsSignedInWithEmailAndPassword() ? IconButton(
+                IconButton(
                   icon: Icon(Icons.edit),
-                  onPressed: () async {
-                    updateProfileDataDialog.showLoginDialog(context, firebaseUser, user, "email");
+                  onPressed: () {
+                    updateProfileDataDialog.showLoginDialog(context, firebaseUser, user, "password");
                   },
-                ) : Container()
-              ]),
-            ),
-            userIsSignedInWithEmailAndPassword() ? Row(children: <Widget>[
-              Expanded(
-                child: TextFormField(
-                  initialValue: "kekomat11",
-                  decoration: InputDecoration(
-                    labelText: 'Passwort',
-                    icon: Icon(Icons.lock_outline),
-                  ),
-                  obscureText: true,
-                  enabled: false,
-                ),
-              ),
-              IconButton(
-                icon: Icon(Icons.edit),
-                onPressed: () {
-                  updateProfileDataDialog.showLoginDialog(context, firebaseUser, user, "password");
-                },
-              )
-            ]) : Container(),
-          ])),
+                )
+              ]) : Container(),
+            ]),
+          )),
 
       floatingActionButton: FloatingActionButton(
         onPressed: _nameChanged
