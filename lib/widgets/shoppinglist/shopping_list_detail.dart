@@ -187,40 +187,47 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
                   itemCount: list.items.length,
                       itemBuilder: (BuildContext context, int index) {
                         return Container(
-                            child: CheckboxListTile(
-                                value: list.items[index].bought,
-                                title: Text("${list.items[index].name}", style: list.items[index].bought ? TextStyle(decoration: TextDecoration.lineThrough, decorationThickness: 3) : null),
-                                //subtitle: list.items[index].count != null ? Text(list.items[index].count.toString() + "x") : Text("0x"),
-                                subtitle: list.items[index].count != null && list.items[index].count != 1 ? Text("${list.items[index].count.toString()}x | ${list.items[index].category}") : Text("${list.items[index].category}"),
-                                secondary: OutlineButton(
-                                  //decoration: BoxDecoration(border: Border.all(width: 2), borderRadius: BorderRadius.all(Radius.circular(5.0))),
-                                  onPressed: () async {
+                            child: Card(
+                              elevation: list.items[index].bought ? 0 : 1,
+                              color: list.items[index].bought ? Colors.transparent : Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(0.0),
+                              ),
+                              child: CheckboxListTile(
+                                  value: list.items[index].bought,
+                                  title: Text("${list.items[index].name}", style: list.items[index].bought ? TextStyle(decoration: TextDecoration.lineThrough, decorationThickness: 3) : null),
+                                  //subtitle: list.items[index].count != null ? Text(list.items[index].count.toString() + "x") : Text("0x"),
+                                  subtitle: list.items[index].count != null && list.items[index].count != 1 ? Text("${list.items[index].count.toString()}x | ${list.items[index].category}") : Text("${list.items[index].category}"),
+                                  secondary: OutlineButton(
+                                    //decoration: BoxDecoration(border: Border.all(width: 2), borderRadius: BorderRadius.all(Radius.circular(5.0))),
+                                    onPressed: () async {
 
-                                    if (_debounce == null || !_debounce.isActive) {
-                                      var erg = await showDialog(context: context, builder: (context) {
-                                        return PrizeDialog(name: list.items[index].name, prize: list.items[index].price != null ? list.items[index].price : 0);
-                                      });
-                                      if(erg != null) {
-                                        list.items[index].price = erg;
-                                        itemChange(list.items[index].bought, index);
-                                        setState(() {});
-                                        databaseService.updateList(uid, list, widget.isGroup).then((onUpdate) {
-                                          print("Saved items");
-                                        }).catchError((onError) {
-                                          InfoOverlay.showErrorSnackBar("Fehler beim aktualisieren der Einkaufsliste");
+                                      if (_debounce == null || !_debounce.isActive) {
+                                        var erg = await showDialog(context: context, builder: (context) {
+                                          return PrizeDialog(name: list.items[index].name, prize: list.items[index].price != null ? list.items[index].price : 0);
                                         });
+                                        if(erg != null) {
+                                          list.items[index].price = erg;
+                                          itemChange(list.items[index].bought, index);
+                                          setState(() {});
+                                          databaseService.updateList(uid, list, widget.isGroup).then((onUpdate) {
+                                            print("Saved items");
+                                          }).catchError((onError) {
+                                            InfoOverlay.showErrorSnackBar("Fehler beim aktualisieren der Einkaufsliste");
+                                          });
+                                        }
                                       }
-                                    }
-                                  },
-                                  child: Padding(
-                                    padding: EdgeInsets.all(9.0),
-                                    child: list.items[index].price != null && list.items[index].price != 0.0 ? Text(list.items[index].price.toString() + " €") : Text("0 €"),
+                                    },
+                                    child: Padding(
+                                      padding: EdgeInsets.all(9.0),
+                                      child: list.items[index].price != null && list.items[index].price != 0.0 ? Text(list.items[index].price.toString() + " €") : Text("0 €"),
+                                    ),
                                   ),
-                                ),
-                                controlAffinity: ListTileControlAffinity.leading,
-                                onChanged: (bool val) {
-                                  itemChange(val, index);
-                                }));
+                                  controlAffinity: ListTileControlAffinity.leading,
+                                  onChanged: (bool val) {
+                                    itemChange(val, index);
+                                  }),
+                            ));
                       })
                   : Container()),
         ],
