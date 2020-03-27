@@ -21,6 +21,7 @@ class ShoppingListView extends StatefulWidget {
 class _ShoppingListView extends State<ShoppingListView> {
 
   bool first = true;
+  //TODO: Invalid value: Not in range 0..1, inclusive: 2 on group delete
 
   @override
   Widget build(BuildContext context) {

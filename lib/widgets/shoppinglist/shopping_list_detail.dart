@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:listassist/assets/custom_colors.dart';
 import 'package:listassist/models/Group.dart';
 import 'package:listassist/models/Item.dart';
@@ -12,7 +11,6 @@ import 'package:listassist/services/achievements.dart';
 import 'package:listassist/services/connectivity.dart';
 import 'package:listassist/services/db.dart';
 import 'package:listassist/widgets/shimmer/shoppy_shimmer.dart';
-import 'package:listassist/widgets/shoppinglist/edit_shopping_list.dart';
 import 'package:listassist/widgets/shoppinglist/prize_dialog.dart';
 import 'package:listassist/widgets/shoppinglist/search_items_view_new.dart';
 import 'package:provider/provider.dart';
@@ -138,17 +136,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
           PopupMenuButton<ListAction>(
             onSelected: (ListAction result) async {
             if (result == ListAction.edit) {
-              Navigator.push(
-                context,
-                widget.isGroup ?
-                MaterialPageRoute(builder: (context) {
-                  return StreamProvider<ShoppingList>.value(
-                      value: databaseService.streamListFromGroup(uid, list.id),
-                      child: EditShoppingList(index: widget.index, isGroup: true)
-                  );
-                }) :
-                MaterialPageRoute(builder: (context) => EditShoppingList(index: widget.index)),
-              );
+              _showRenameDialog();
             } else if (result == ListAction.delete) {
               _showDeleteDialog();
             } else if (result == ListAction.complete) {
@@ -264,70 +252,6 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
           ),
         ],
       ),
-//      floatingActionButton: AnimatedOpacity(
-//        opacity: _isVisible ? 1.0 : 0.0,
-//        duration: Duration(milliseconds: 200),
-//        child: Stack(
-//          children: <Widget>[
-//            Align(
-//              alignment: Alignment.bottomRight,
-//              child: FloatingActionButton(
-//                child: Icon(Icons.add),
-//                backgroundColor: Colors.green,
-//                onPressed: () {
-//                  Navigator.push(context, MaterialPageRoute(builder: (context) => SearchItemsViewNew(list: list, isGroup: widget.isGroup, groupid: uid,)));
-//                },
-//              ),
-//            ),
-//            Padding(
-//              padding: EdgeInsets.only(bottom: 75.0),
-//              child: SpeedDial(
-//                animatedIcon: AnimatedIcons.menu_close,
-//                animatedIconTheme: IconThemeData(size: 22.0),
-//                closeManually: false,
-//                curve: Curves.easeIn,
-//                overlayOpacity: 0.35,
-//                backgroundColor: Theme.of(context).primaryColor,
-//                elevation: 8.0,
-//                shape: CircleBorder(),
-//                children: [
-//                  SpeedDialChild(
-//                      child: Icon(Icons.check),
-//                      backgroundColor: Colors.green,
-//                      labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
-//                      label: "Complete",
-//                      labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
-//                      onTap: _showCompleteDialog),
-//                  SpeedDialChild(
-//                      child: Icon(Icons.delete),
-//                      backgroundColor: Colors.red,
-//                      labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
-//                      label: "Delete",
-//                      labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
-//                      onTap: _showDeleteDialog),
-//                  SpeedDialChild(
-//                    child: Icon(Icons.camera),
-//                    backgroundColor: Colors.blue,
-//                    label: "Image Check",
-//                    labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
-//                    labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
-//                    onTap: () async {
-//                      bool connected = await connectivityService.testInternetConnection();
-//                      if (!connected) {
-//                        //I am NOT connected to the Internet
-//                        InfoOverlay.showErrorSnackBar("Kein Internetzugriff");
-//                        _buttonsDisabled = false;
-//                      } else {
-//                        InfoOverlay.showSourceSelectionSheet(context, callback: _startCameraScanner, arg: widget.index);
-//                      }
-//                    },
-//                  )
-//                ],
-//              ),
-//            ),
-//          ],
-//        ),
-//      ),
     );
   }
 
@@ -411,6 +335,56 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
                     });
                   }
                 }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _showRenameDialog() async {
+    TextEditingController _nameController = TextEditingController();
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Liste umbenennen"),
+          content: SingleChildScrollView(
+              child: TextField(
+                controller: _nameController,
+                keyboardType: TextInputType.text,
+                decoration: InputDecoration(
+                  border: UnderlineInputBorder(),
+                  contentPadding: EdgeInsets.all(3),
+                  labelText: "Neuer Name",
+                ),
+              )
+          ),
+          actions: <Widget>[
+            FlatButton(
+              textColor: Colors.red,
+              child: Text("Abbrechen"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            FlatButton(
+              child: Text("Umbenennen"),
+              onPressed: () {
+                databaseService.updateList(uid, ShoppingList(
+                    id: list.id,
+                    name: _nameController.text,
+                    items: list.items), widget.isGroup)
+                    .catchError((onError) {
+                      InfoOverlay.showErrorSnackBar("Fehler beim Aktualisieren");
+                      Navigator.of(context).pop();
+                    })
+                    .then((onSaved) {
+                      InfoOverlay.showInfoSnackBar("Name aktualisiert");
+                      Navigator.of(context).pop();
+                    });
               },
             ),
           ],
