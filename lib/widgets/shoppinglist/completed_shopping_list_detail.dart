@@ -56,6 +56,16 @@ class _CompletedShoppingListDetailState extends State<CompletedShoppingListDetai
       appBar: AppBar(
           backgroundColor: Provider.of<User>(context).settings["theme"] == "Blau" ? Theme.of(context).colorScheme.primary : CustomColors.shoppyGreen,
         title: Text(list == null ? "" : list.name),
+        flexibleSpace: Provider.of<User>(context).settings["theme"] == "Verlauf" ? Container(
+            decoration: BoxDecoration(
+                gradient: LinearGradient(
+                    begin: Alignment.bottomLeft,
+                    end: Alignment.topRight,
+                    colors: <Color>[
+                      CustomColors.shoppyBlue,
+                      CustomColors.shoppyLightBlue,
+                    ])
+            )) : Container(),
       ),
       body: list == null ? ShoppyShimmer() : Column(
         crossAxisAlignment: CrossAxisAlignment.start,
