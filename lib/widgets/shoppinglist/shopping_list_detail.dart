@@ -188,14 +188,14 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
                       itemBuilder: (BuildContext context, int index) {
                         return Container(
                             child: Card(
-                              elevation: list.items[index].bought ? 0 : 1,
+                              elevation: list.items[index].bought ? 0 : 2,
                               color: list.items[index].bought ? Colors.transparent : Colors.white,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(0.0),
                               ),
                               child: CheckboxListTile(
                                   value: list.items[index].bought,
-                                  title: Text("${list.items[index].name}", style: list.items[index].bought ? TextStyle(decoration: TextDecoration.lineThrough, decorationThickness: 3) : null),
+                                  title: Text("${list.items[index].name}", style: null),
                                   //subtitle: list.items[index].count != null ? Text(list.items[index].count.toString() + "x") : Text("0x"),
                                   subtitle: list.items[index].count != null && list.items[index].count != 1 ? Text("${list.items[index].count.toString()}x | ${list.items[index].category}") : Text("${list.items[index].category}"),
                                   secondary: OutlineButton(
