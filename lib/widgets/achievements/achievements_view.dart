@@ -27,7 +27,7 @@ class _AchievementsView extends State<AchievementsView> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Provider.of<User>(context).settings["theme"] == "Blau" ? Theme.of(context).colorScheme.primary : CustomColors.shoppyGreen,
-        title: Text("Einkaufslisten"),
+        title: Text("Erfolge"),
         flexibleSpace: Provider.of<User>(context).settings["theme"] == "Verlauf" ? Container(
             decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -52,7 +52,7 @@ class _AchievementsView extends State<AchievementsView> {
               padding: EdgeInsets.only(top: 10, bottom: 30),
               child: Column(
                 children: <Widget>[
-                  Text(_achievements.length.toString() + " / " + achievementsService.achievements.length.toString() + " Erfolge", style: TextStyle(fontSize: 20),),
+                  Text(_achievements.length.toString() + " / " + achievementsService.achievements.length.toString() + " Erfolge freigeschaltet", style: TextStyle(fontSize: 20),),
                   LinearPercentIndicator(
                     padding: EdgeInsets.only(top: 20, left: 50, right: 50),
                     lineHeight: 8.0,

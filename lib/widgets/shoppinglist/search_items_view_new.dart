@@ -337,13 +337,19 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew> with TickerProviderS
                                         _subtract() {
                                           _subtractCount(_listOrRecipe.items[index].name);
                                         }
-
+                                        String iconFileName = _listOrRecipe.items[index].category.toLowerCase()
+                                            .replaceAll(RegExp("ü"), "ue")
+                                            .replaceAll(RegExp("ö"), "oe")
+                                            .replaceAll(RegExp("ä"), "ae")
+                                            .replaceAll(RegExp("ß"), "ss")
+                                            .replaceAll(RegExp(" & "), "_")
+                                            .replaceAll(RegExp("allgemein"), "fisch") + ".png";
                                         return Container(
                                           height: 65,
                                           child: ListTile(
                                             leading: Padding(
                                               padding: EdgeInsets.all(8.0),
-                                              child: Icon(Icons.local_dining),
+                                              child: Image(image: AssetImage("assets/icons/" + iconFileName), width: 35,),
                                             ),
                                             title: Text(_listOrRecipe.items[index].name),
                                             subtitle: Text(_listOrRecipe.items[index].category),
@@ -436,8 +442,8 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew> with TickerProviderS
                                   height: 65,
                                   child: ListTile(
                                     leading: Padding(
-                                      padding: EdgeInsets.all(8.0),
-                                      child: Image(image: AssetImage("assets/icons/" + iconFileName)),
+                                      padding: EdgeInsets.all(4.0),
+                                      child: Image(image: AssetImage("assets/icons/" + iconFileName), width: 35,),
                                     ),
                                     title: Text(_popularProducts[index].name),
                                     subtitle: Text(_popularProducts[index].category),
@@ -472,12 +478,18 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew> with TickerProviderS
                               shrinkWrap: true,
                               itemBuilder: (ctx, ind) {
                                 print(List.from(categoryService.categories[ind]["products"]).length);
+                                String iconFileName = List.from(categoryService.categories[ind]["products"])[ind]["category"].toString().toLowerCase()
+                                    .replaceAll(RegExp("ü"), "ue")
+                                    .replaceAll(RegExp("ö"), "oe")
+                                    .replaceAll(RegExp("ä"), "ae")
+                                    .replaceAll(RegExp("ß"), "ss")
+                                    .replaceAll(RegExp(" & "), "_") + ".png";
                                 return Card(
                                     elevation: 0,
                                     child: ExpansionTile(
                                       title: Row(
                                         children: <Widget>[
-                                          Icon(Icons.ac_unit),
+                                          Image(image: AssetImage("assets/icons/" + iconFileName), width: 35,),
                                           Container(width: 10,),
                                           Text(categoryService.categories[ind]["category"]),
                                         ],
@@ -589,12 +601,20 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew> with TickerProviderS
                                               count = _listOrRecipe.items.firstWhere((i) => i.name == _products[index]["name"]).count;
                                             }
 
+                                            String iconFileName = _products[index]["category"].toLowerCase()
+                                                .replaceAll(RegExp("ü"), "ue")
+                                                .replaceAll(RegExp("ö"), "oe")
+                                                .replaceAll(RegExp("ä"), "ae")
+                                                .replaceAll(RegExp("ß"), "ss")
+                                                .replaceAll(RegExp(" & "), "_")
+                                                .replaceAll(RegExp("allgemein"), "fisch") + ".png";
+
                                             return Container(
                                               height: 65,
                                               child: ListTile(
                                                 leading: Padding(
                                                   padding: EdgeInsets.all(8.0),
-                                                  child: Icon(Icons.local_dining, color: _listOrRecipe.hasItem(_products[index]["name"]) ? Theme.of(context).primaryColor : null),
+                                                  child: Image(image: AssetImage("assets/icons/" + iconFileName), width: 35,),
                                                 ),
                                                 title: Text(_products[index]["name"]),
                                                 subtitle: Text(_products[index]["category"]),
