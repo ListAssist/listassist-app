@@ -12,6 +12,7 @@ export const onCreateUser = functions.region("europe-west1").firestore
                 ai_interval: 5,
                 msg_autolist: false,
                 msg_general: false,
+                theme: "transition",
                 msg_invite: false,
                 msg_offer: false,
                 scanner_manual: true,

@@ -4,10 +4,10 @@ import 'package:listassist/models/Group.dart';
 import 'package:listassist/models/User.dart';
 import 'package:listassist/services/db.dart';
 import 'package:listassist/services/info_overlay.dart';
+import 'package:listassist/widgets/shoppinglist/search_items_view_new.dart';
 import 'package:listassist/widgets/shoppinglist/shopping_list_detail.dart';
 import 'package:listassist/models/ShoppingList.dart' as model;
 import 'package:provider/provider.dart';
-import 'edit_shopping_list.dart';
 
 
 class ShoppingList extends StatefulWidget {
@@ -48,7 +48,6 @@ class _ShoppingListState extends State<ShoppingList> {
         }) :
         MaterialPageRoute(builder: (context) => ShoppingListDetail(index: widget.index)),
       ),
-      //TODO: Implement in completed shopping list
       onLongPressStart: (details) async {
         RenderBox overlay = Overlay.of(context).context.findRenderObject();
         dynamic picked = await showMenu(
@@ -84,11 +83,7 @@ class _ShoppingListState extends State<ShoppingList> {
             context,
             MaterialPageRoute(
               builder: (context) =>
-              widget.isGroup ? StreamProvider<model.ShoppingList>.value(
-                value: databaseService.streamListFromGroup(uid, list.id),
-                child: EditShoppingList(index: widget.groupIndex, isGroup: true)
-              )
-              : EditShoppingList(index: widget.index)
+                SearchItemsViewNew(list: list, isGroup: widget.isGroup, groupid: uid)
             )
           );
         // Delete
