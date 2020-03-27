@@ -132,8 +132,18 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.primary,
+          backgroundColor: _user.settings["theme"] == "Blau" ? Theme.of(context).colorScheme.primary : CustomColors.shoppyGreen,
         title: Text(list == null ? "" : list.name),
+        flexibleSpace: _user.settings["theme"] == "Verlauf" ? Container(
+              decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                      begin: Alignment.bottomLeft,
+                      end: Alignment.topRight,
+                      colors: <Color>[
+                        CustomColors.shoppyBlue,
+                        CustomColors.shoppyLightBlue,
+                      ])
+              )) : Container(),
         actions: <Widget>[
           PopupMenuButton<ListAction>(
             onSelected: (ListAction result) async {
@@ -246,7 +256,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
                       InfoOverlay.showSourceSelectionSheet(context, callback: _startCameraScanner, arg: widget.index);
                     }
                   },
-                  backgroundColor: CustomColors.shoppyBlue,
+                  backgroundColor: _user.settings["theme"] == "Grün" ? CustomColors.shoppyGreen : CustomColors.shoppyBlue,
                   child: Icon(Icons.camera_alt, color: Colors.white),
                 ),
               ),

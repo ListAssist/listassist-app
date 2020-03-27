@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:listassist/assets/custom_colors.dart';
 import 'package:listassist/main.dart';
 import 'package:listassist/models/Group.dart';
 import 'package:listassist/models/User.dart';
@@ -16,8 +17,18 @@ class GroupView extends StatelessWidget {
     print(groups);
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.primary,
+          backgroundColor: _user.settings["theme"] == "Blau" ? Theme.of(context).colorScheme.primary : CustomColors.shoppyGreen,
         title: Text("Gruppen"),
+        flexibleSpace: _user.settings["theme"] == "Verlauf" ? Container(
+              decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                      begin: Alignment.bottomLeft,
+                      end: Alignment.topRight,
+                      colors: <Color>[
+                        CustomColors.shoppyBlue,
+                        CustomColors.shoppyLightBlue,
+                      ])
+              )) : Container(),
         leading: IconButton(
           icon: Icon(Icons.menu),
           tooltip: "Open navigation menu",
@@ -38,11 +49,12 @@ class GroupView extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
         tooltip: "Neue Gruppe erstellen",
+        backgroundColor: _user.settings["theme"] == "Grün" ? CustomColors.shoppyGreen : Theme.of(context).primaryColor,
         onPressed: () =>
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => AddGroup(user: _user,)),
-          )
+          ),
       ),
     );
   }

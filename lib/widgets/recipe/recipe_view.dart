@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:listassist/assets/custom_colors.dart';
 import 'package:listassist/models/Item.dart';
 import 'package:listassist/models/Recipe.dart';
 import 'package:listassist/models/ShoppingList.dart';
@@ -40,13 +41,24 @@ class _RecipeView extends State<RecipeView> {
         //backgroundColor: Colors.transparent,
         floatingActionButton: FloatingActionButton(
           child: Icon(Icons.add),
+          backgroundColor: user.settings["theme"] == "Grün" ? CustomColors.shoppyGreen : Theme.of(context).primaryColor,
           onPressed: () {
             Navigator.push(context, MaterialPageRoute(builder: (context) => CreateRecipeView()));
           },
         ),
         appBar: AppBar(
-          backgroundColor: Theme.of(context).colorScheme.primary,
+          backgroundColor: user.settings["theme"] == "Blau" ? Theme.of(context).colorScheme.primary : CustomColors.shoppyGreen,
           title: Text("Rezepte"),
+          flexibleSpace: user.settings["theme"] == "Verlauf" ? Container(
+              decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                      begin: Alignment.bottomLeft,
+                      end: Alignment.topRight,
+                      colors: <Color>[
+                        CustomColors.shoppyBlue,
+                        CustomColors.shoppyLightBlue,
+                      ])
+              )) : Container(),
           leading: IconButton(
             icon: Icon(Icons.menu),
             tooltip: "Sidebar öffnen",

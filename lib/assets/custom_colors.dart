@@ -39,4 +39,20 @@ class CustomColors {
     },
   );
 
+  static const MaterialColor shoppyGreen = const MaterialColor(
+    _shoppyGreen,
+    const <int, Color>{
+      50:  const Color(_shoppyGreen),
+      100: const Color(_shoppyGreen),
+      200: const Color(_shoppyGreen),
+      300: const Color(_shoppyGreen),
+      400: const Color(_shoppyGreen),
+      500: const Color(_shoppyGreen),
+      600: const Color(_shoppyGreen),
+      700: const Color(_shoppyGreen),
+      800: const Color(_shoppyGreen),
+      900: const Color(_shoppyGreen),
+    },
+  );
+
 }

@@ -1,5 +1,6 @@
 import 'package:custom_navigator/custom_navigator.dart';
 import 'package:flutter/material.dart';
+import 'package:listassist/assets/custom_colors.dart';
 import 'package:listassist/models/Group.dart';
 import 'package:listassist/models/User.dart';
 import 'package:listassist/services/db.dart';
@@ -7,7 +8,6 @@ import 'package:listassist/widgets/achievements/achievements_view.dart';
 import 'package:listassist/widgets/group/group_view.dart';
 import 'package:listassist/models/current-screen.dart';
 import 'package:listassist/services/auth.dart';
-import 'package:listassist/widgets/intro-slider/intro_slider.dart';
 import 'package:listassist/widgets/recipe/recipe_view.dart';
 import 'package:listassist/widgets/settings/settings_view.dart';
 import 'package:listassist/widgets/invites/invite_view.dart';
@@ -31,7 +31,14 @@ class _Sidebar extends State<Sidebar> {
             children: <Widget>[
               UserAccountsDrawerHeader(
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary,
+                  color: user.settings["theme"] == "Blau" ? CustomColors.shoppyBlue : CustomColors.shoppyGreen,
+                  gradient: user.settings["theme"] == "Verlauf" ? LinearGradient(
+                      begin: Alignment.bottomLeft,
+                      end: Alignment.topRight,
+                      colors: <Color>[
+                        CustomColors.shoppyBlue,
+                        CustomColors.shoppyLightBlue,
+                      ]) : null,
                 ),
                 accountName: Text(user.displayName),
                 accountEmail: Text(user.email),

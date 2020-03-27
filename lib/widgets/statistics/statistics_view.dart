@@ -1,8 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:listassist/assets/custom_colors.dart';
 import 'package:listassist/models/CompletedShoppingList.dart';
 import 'package:listassist/models/Item.dart';
 import 'package:listassist/models/ShoppingList.dart';
+import 'package:listassist/models/User.dart';
 import 'package:listassist/widgets/shimmer/shoppy_shimmer.dart';
 import 'package:listassist/widgets/statistics/bar_chart.dart';
 import 'package:listassist/widgets/statistics/donut_pie_chart.dart';
@@ -25,56 +27,69 @@ class _StatisticsView extends State<StatisticsView> {
   Widget build(BuildContext context) {
     List<ShoppingList> lists = Provider.of<List<ShoppingList>>(context);
     List<CompletedShoppingList> completedLists = Provider.of<List<CompletedShoppingList>>(context);
+    User user = Provider.of<User>(context);
 
     return Scaffold(
         appBar: AppBar(
-          backgroundColor: Theme.of(context).colorScheme.primary,
+          backgroundColor: user.settings["theme"] == "Blau" ? Theme.of(context).colorScheme.primary : CustomColors.shoppyGreen,
           title: Text("Statistiken"),
+          flexibleSpace: user.settings["theme"] == "Verlauf" ? Container(
+              decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                      begin: Alignment.bottomLeft,
+                      end: Alignment.topRight,
+                      colors: <Color>[
+                        CustomColors.shoppyBlue,
+                        CustomColors.shoppyLightBlue,
+                      ])
+              )) : Container(),
           leading: IconButton(
             icon: Icon(Icons.menu),
             tooltip: "Open navigation menu",
             onPressed: () => mainScaffoldKey.currentState.openDrawer(),
           ),
         ),
-        body: Column(
-          children: <Widget>[
-            Padding(
-              padding: EdgeInsets.only(top: 20.0),
-              child: Text(
-                "Meistgekaufte Produkte",
-                style: TextStyle(fontSize: 18),
+        body: SingleChildScrollView(
+          child: Column(
+            children: <Widget>[
+              Padding(
+                padding: EdgeInsets.only(top: 20.0),
+                child: Text(
+                  "Meistgekaufte Produkte",
+                  style: TextStyle(fontSize: 18),
+                ),
               ),
-            ),
-            lists != null
-                ? Container(
-                    height: 250,
-                    padding: EdgeInsets.only(left: 20, right: 20, bottom: 20),
-                    //width: MediaQuery.of(context).size.width/1.5,
-                    child: BarChart(
-                      _getMostBoughtProductData(lists, completedLists),
-                      animate: true,
-                    ),
-                  )
-                : ShoppyShimmer(),
-            Divider(),
-            Padding(
-              padding: EdgeInsets.only(top: 15.0, bottom: 10),
-              child: Text(
-                "Ausgaben pro Kategorie",
-                style: TextStyle(fontSize: 18),
+              lists != null
+                  ? Container(
+                      height: 250,
+                      padding: EdgeInsets.only(left: 20, right: 20, bottom: 20),
+                      //width: MediaQuery.of(context).size.width/1.5,
+                      child: BarChart(
+                        _getMostBoughtProductData(lists, completedLists),
+                        animate: true,
+                      ),
+                    )
+                  : ShoppyShimmer(),
+              Divider(),
+              Padding(
+                padding: EdgeInsets.only(top: 15.0, bottom: 10),
+                child: Text(
+                  "Ausgaben pro Kategorie",
+                  style: TextStyle(fontSize: 18),
+                ),
               ),
-            ),
-            lists != null
-                ? Container(
-                    height: 300,
-                    padding: EdgeInsets.only(left: 20, right: 20),
-                    child: DonutPieChart(
-                      _getMoneyPerCategoryData(lists, completedLists),
-                      animate: true,
-                    ),
-                  )
-                : Container(),
-          ],
+              lists != null
+                  ? Container(
+                      height: 300,
+                      padding: EdgeInsets.only(left: 20, right: 20),
+                      child: DonutPieChart(
+                        _getMoneyPerCategoryData(lists, completedLists),
+                        animate: true,
+                      ),
+                    )
+                  : Container(),
+            ],
+          ),
         ));
   }
 
@@ -180,6 +195,9 @@ class _StatisticsView extends State<StatisticsView> {
         }
         return b.value > a.value ? 1 : -1;
       });
+
+      //remove categories with 0€
+      data.removeWhere((a) => a.value == 0);
 
       return [
         new charts.Series<CategoryMoney, String>(
