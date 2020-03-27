@@ -174,7 +174,7 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew> with TickerProviderS
       _listOrRecipe = widget.recipe;
       _isList = false;
     }
-    initPopularProducts();
+    //initPopularProducts();
     _tabController = new TabController(length: 3, initialIndex: _listOrRecipe.items.length > 0 ? 0 : 1, vsync: this);
   }
 
@@ -185,6 +185,7 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew> with TickerProviderS
 //    if(widget.isGroup) {
 //      _groupid = Provider.of<ShoppingList>(context);
 //    }else {
+    initPopularProducts();
 
     return DefaultTabController(
       length: 3,
@@ -413,6 +414,21 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew> with TickerProviderS
                                   ));
                             }),*/
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                         _popularProducts.length > 0 ? MediaQuery.removePadding(
                             removeTop: true,
                             context: context,
@@ -464,6 +480,17 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew> with TickerProviderS
                                 );
                               },
                             )) : ShoppyShimmer(),
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -561,7 +588,7 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew> with TickerProviderS
                               child: ListTile(
                                 leading: Padding(
                                   padding: EdgeInsets.all(8.0),
-                                  child: Icon(Icons.shopping_cart, color: _listOrRecipe.hasItem(_searchController.text) ? Theme.of(context).primaryColor : null),
+                                  child: Icon(Icons.shopping_cart, size: 35, color: _listOrRecipe.hasItem(_searchController.text) ? Theme.of(context).primaryColor : null),
                                 ),
                                 title: Text(_searchController.text),
                                 subtitle: Text("Selbst erstellt"),
