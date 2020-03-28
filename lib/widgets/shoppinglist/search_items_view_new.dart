@@ -114,7 +114,7 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew> with TickerProviderS
     if (_debounce?.isActive ?? false) _debounce.cancel();
     _debounce = Timer(Duration(milliseconds: _debounceTime), () {
       if (_listOrRecipe != null && _user.uid != null || _user.uid.length > 0) {
-        print(_listOrRecipe.id);
+        print(_listOrRecipe.items);
 
         _isList
             ? databaseService

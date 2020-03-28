@@ -17,6 +17,7 @@ import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:listassist/services/camera.dart';
 import 'package:listassist/services/info_overlay.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ShoppingListDetail extends StatefulWidget {
   final int index;
@@ -42,6 +43,15 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
   int _debounceTime = 1000;
 
   int _boughtItemCount = 0;
+
+  var prefs;
+  bool showPrices = false;
+
+  initSharedPreferences() async{
+    prefs = await SharedPreferences.getInstance();
+    showPrices = prefs.getBool("showPrices");
+    if(showPrices == null) showPrices = false;
+  }
 
   void itemChange(bool val, int index) {
     setState(() {
@@ -79,6 +89,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
 
   @override
   initState(){
+    initSharedPreferences();
     _isVisible = true;
     _hideButtonController = ScrollController();
     _hideButtonController.addListener((){
@@ -151,6 +162,11 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
               _showDeleteDialog();
             } else if (result == ListAction.complete) {
               _showCompleteDialog();
+            } else if (result == ListAction.showPrices) {
+              setState(() {
+                showPrices = !showPrices;
+              });
+              prefs.setBool("showPrices", !showPrices);
             }
           },
             itemBuilder: (BuildContext context) => <PopupMenuEntry<ListAction>>[
@@ -158,6 +174,10 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
                 value: ListAction.complete,
                 enabled: _boughtItemCount > 0,
                 child: Text('Abschließen')
+              ),
+              PopupMenuItem<ListAction>(
+                  value: ListAction.showPrices,
+                  child: Text(showPrices ? 'Preise ausbleden' : 'Preise anzeigen')
               ),
               PopupMenuItem<ListAction>(
                 value: ListAction.edit,
@@ -186,6 +206,14 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
                   physics: BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
                   itemCount: list.items.length,
                       itemBuilder: (BuildContext context, int index) {
+                        String iconFileName = list.items[index].category.toLowerCase()
+                            .replaceAll(RegExp("ü"), "ue")
+                            .replaceAll(RegExp("ö"), "oe")
+                            .replaceAll(RegExp("ä"), "ae")
+                            .replaceAll(RegExp("ß"), "ss")
+                            .replaceAll(RegExp(" & "), "_")
+                            .replaceAll(RegExp("allgemein"), "fisch") + ".png";
+
                         return Container(
                             child: Card(
                               elevation: list.items[index].bought ? 0 : 1,
@@ -198,7 +226,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
                                   title: Text("${list.items[index].name}", style: list.items[index].bought ? TextStyle(decoration: TextDecoration.lineThrough, decorationThickness: 3) : null),
                                   //subtitle: list.items[index].count != null ? Text(list.items[index].count.toString() + "x") : Text("0x"),
                                   subtitle: list.items[index].count != null && list.items[index].count != 1 ? Text("${list.items[index].count.toString()}x | ${list.items[index].category}") : Text("${list.items[index].category}"),
-                                  secondary: OutlineButton(
+                                  secondary: showPrices ? OutlineButton(
                                     //decoration: BoxDecoration(border: Border.all(width: 2), borderRadius: BorderRadius.all(Radius.circular(5.0))),
                                     onPressed: () async {
 
@@ -222,7 +250,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
                                       padding: EdgeInsets.all(9.0),
                                       child: list.items[index].price != null && list.items[index].price != 0.0 ? Text(list.items[index].price.toString() + " €") : Text("0 €"),
                                     ),
-                                  ),
+                                  ) : Image(image: AssetImage("assets/icons/" + iconFileName), width: 35,),
                                   controlAffinity: ListTileControlAffinity.leading,
                                   onChanged: (bool val) {
                                     itemChange(val, index);
@@ -482,5 +510,5 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
 }
 
 enum ListAction {
-  edit, delete, complete
+  edit, delete, complete, showPrices
 }

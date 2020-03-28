@@ -23,6 +23,9 @@ class StatisticsView extends StatefulWidget {
 //TODO: Screen falls noch nichts gekauft wurde
 
 class _StatisticsView extends State<StatisticsView> {
+
+  bool nothingBought = false;
+
   @override
   Widget build(BuildContext context) {
     List<ShoppingList> lists = Provider.of<List<ShoppingList>>(context);
@@ -49,7 +52,7 @@ class _StatisticsView extends State<StatisticsView> {
             onPressed: () => mainScaffoldKey.currentState.openDrawer(),
           ),
         ),
-        body: SingleChildScrollView(
+        body: nothingBought ? SingleChildScrollView(
           child: Column(
             children: <Widget>[
               Padding(
@@ -90,7 +93,8 @@ class _StatisticsView extends State<StatisticsView> {
                   : Container(),
             ],
           ),
-        ));
+        ) : Center(child: Text("Noch keine Einkäufe abgeschlossen", style: Theme.of(context).textTheme.title,))
+    );
   }
 
   List<charts.Series<Item, String>> _getMostBoughtProductData(List<ShoppingList> lists, List<CompletedShoppingList> completedLists) {
@@ -132,6 +136,13 @@ class _StatisticsView extends State<StatisticsView> {
       }
     });
     items.remove(helper);
+
+    if(items.length == 0) {
+      setState(() {
+        nothingBought = true;
+      });
+      return [];
+    }
 
     items.sort((a, b) => b.count - a.count);
     if (items.length > 3) items = items.sublist(0, 3);

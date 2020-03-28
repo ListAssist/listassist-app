@@ -169,14 +169,14 @@ class DatabaseService {
   }
 
   Future<void> updateRecipe(String uid, Recipe recipe) async {
-    //var items = recipe.items.map((e) => e.toJson()).toList();
+    var items = recipe.items.map((e) => e.toJson()).toList();
 
     return _db
         .collection("users")
         .document(uid)
         .collection("recipes")
         .document(recipe.id)
-        .setData({"name": recipe.name, "description": recipe.description}, merge: true);
+        .setData({"name": recipe.name, "description": recipe.description, "items": items}, merge: true);
   }
 
   Future<void> addItemToList(String uid, String listId, Item newItem) async{
