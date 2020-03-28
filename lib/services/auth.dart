@@ -69,7 +69,7 @@ class AuthService {
   /// Create a session for an user with email and password
   Future<FirebaseUser> signInWithMail(String email, String password) async {
     try {
-      AuthResult res = await _auth.signInWithEmailAndPassword(email: email, password: password);
+      AuthResult res = await _auth.signInWithEmailAndPassword(email: email.trim(), password: password);
       FirebaseUser user = res.user;
 
       //TODO: Email verify error
