@@ -50,7 +50,9 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
   initSharedPreferences() async{
     prefs = await SharedPreferences.getInstance();
     showPrices = prefs.getBool("showPrices");
+    print(showPrices.toString() + " aus SharedPrefs ausgelesen [showPrices]");
     if(showPrices == null) showPrices = false;
+    setState(() {});
   }
 
   void itemChange(bool val, int index) {
@@ -166,7 +168,8 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
               setState(() {
                 showPrices = !showPrices;
               });
-              prefs.setBool("showPrices", !showPrices);
+              prefs.setBool("showPrices", showPrices);
+              print(showPrices.toString() + " in SharedPrefs geschrieben");
             }
           },
             itemBuilder: (BuildContext context) => <PopupMenuEntry<ListAction>>[
@@ -177,7 +180,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
               ),
               PopupMenuItem<ListAction>(
                   value: ListAction.showPrices,
-                  child: Text(showPrices ? 'Preise ausbleden' : 'Preise anzeigen')
+                  child: Text(showPrices ? 'Preise ausblenden' : 'Preise anzeigen')
               ),
               PopupMenuItem<ListAction>(
                 value: ListAction.edit,
