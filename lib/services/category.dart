@@ -1,12 +1,12 @@
 class CategoryService {
   var categories = [
 
-    {
-      "category": "Fleisch",
-      "products": [
-        {"name":"Rindfleisch","category":"Fleisch"},{"name":"Faschiertes Fleisch","category":"Fleisch"},{"name":"Schweinefleisch","category":"Fleisch"},{"name":"Schnitzel","category":"Fleisch"},{"name":"Rindfleisch","category":"Fleisch"},{"name":"Hühnerfleisch","category":"Fleisch"},{"name":"Geflügel","category":"Fleisch"},{"name":"Schinken","category":"Fleisch"},{"name":"Salami","category":"Fleisch"},{"name":"Filet","category":"Fleisch"},{"name":"Dry Aged Beef","category":"Fleisch"},{"name":"Steak","category":"Fleisch"},{"name":"Beef","category":"Fleisch"},{"name":"Speck","category":"Fleisch"},{"name":"Hähnchenbrust","category":"Fleisch"},{"name":"Parmaschinken","category":"Fleisch"},{"name":"Gelbwurst","category":"Fleisch"},{"name":"Weißwurst","category":"Fleisch"},{"name":"Käsekrainer","category":"Fleisch"},{"name":"Leberkäse","category":"Fleisch"},{"name":"Käseleberkäse","category":"Fleisch"},{"name":"Extrawurst","category":"Fleisch"},{"name":"Putensalami","category":"Fleisch"},{"name":"Ungarische Salami","category":"Fleisch"},{"name":"Cabanossi","category":"Fleisch"}
-      ]
-    },
+//    {
+//      "category": "Fleisch",
+//      "products": [
+//        {"name":"Rindfleisch","category":"Fleisch"},{"name":"Faschiertes Fleisch","category":"Fleisch"},{"name":"Schweinefleisch","category":"Fleisch"},{"name":"Schnitzel","category":"Fleisch"},{"name":"Rindfleisch","category":"Fleisch"},{"name":"Hühnerfleisch","category":"Fleisch"},{"name":"Geflügel","category":"Fleisch"},{"name":"Schinken","category":"Fleisch"},{"name":"Salami","category":"Fleisch"},{"name":"Filet","category":"Fleisch"},{"name":"Dry Aged Beef","category":"Fleisch"},{"name":"Steak","category":"Fleisch"},{"name":"Beef","category":"Fleisch"},{"name":"Speck","category":"Fleisch"},{"name":"Hähnchenbrust","category":"Fleisch"},{"name":"Parmaschinken","category":"Fleisch"},{"name":"Gelbwurst","category":"Fleisch"},{"name":"Weißwurst","category":"Fleisch"},{"name":"Käsekrainer","category":"Fleisch"},{"name":"Leberkäse","category":"Fleisch"},{"name":"Käseleberkäse","category":"Fleisch"},{"name":"Extrawurst","category":"Fleisch"},{"name":"Putensalami","category":"Fleisch"},{"name":"Ungarische Salami","category":"Fleisch"},{"name":"Cabanossi","category":"Fleisch"}
+//      ]
+//    },
 //    {
 //      "category": "Gebäck",
 //      "products":
@@ -98,9 +98,9 @@ class CategoryService {
       "products": [{"name":"Ananasstücke","category":"Konserven"},{"name":"Champignons","category":"Konserven"},{"name":"Mais","category":"Konserven"},{"name":"Kichererbsen","category":"Konserven"},{"name":"Erbsen","category":"Konserven"},{"name":"Linsen","category":"Konserven"},{"name":"Käferbohnen","category":"Konserven"},{"name":"Pizzasauce","category":"Konserven"},{"name":"Mandarin Orange","category":"Konserven"},{"name":"5-Frucht Cocktail","category":"Konserven"},{"name":"Tomaten","category":"Konserven"},{"name":"Pfirsiche","category":"Konserven"},{"name":"Rote Bohnen","category":"Konserven"},{"name":"Tomatensuppe","category":"Konserven"},{"name":"Thunfisch","category":"Konserven"},{"name":"Heringsfilet","category":"Konserven"},{"name":"Gefüllte Paprika","category":"Konserven"},{"name":"Chili Con Carne","category":"Konserven"},{"name":"Leberaufstrich","category":"Konserven"},{"name":"Pasteta Argeta","category":"Konserven"},{"name":"Fleischschmalz","category":"Konserven"},{"name":"Rindsgulasch","category":"Konserven"},{"name":"Leberknödelsuppe","category":"Konserven"},{"name":"Gulaschsuppe","category":"Konserven"},{"name":"Hühnersuppe","category":"Konserven"},{"name":"Linsensuppe","category":"Konserven"},{"name":"Reisfleisch","category":"Konserven"},{"name":"Hühnercurry","category":"Konserven"},{"name":"Linsen","category":"Konserven"},{"name":"Rindsuppe","category":"Konserven"},{"name":"Weiße Bohnen","category":"Konserven"}]
     },
     {
-      "category": "Konserven",
+      "category": "Milchprodukte",
       "products":
-      [{"name":"Milch","category":"Milchprodukte"},{"name":"Milchschnitte","category":"Milchprodukte"},{"name":"Kingerpingui","category":"Milchprodukte"},{"name":"Butter","category":"Milchprodukte"},{"name":"Käse","category":"Milchprodukte"},{"name":"Joghurt","category":"Milchprodukte"},{"name":"Frischkäse","category":"Milchprodukte"},{"name":"Topfen","category":"Milchprodukte"},{"name":"Rahm","category":"Milchprodukte"},{"name":"Sahne","category":"Milchprodukte"},{"name":"Sauerrahm","category":"Milchprodukte"},{"name":"Gouda","category":"Milchprodukte"},{"name":"Cheddar","category":"Milchprodukte"},{"name":"Schmelzkäse","category":"Milchprodukte"},{"name":"Toastkäse","category":"Milchprodukte"},{"name":"Frischmilch","category":"Milchprodukte"},{"name":"Vollmilch","category":"Milchprodukte"},{"name":"Fruchtjoghurt","category":"Milchprodukte"},{"name":"Buttermilch","category":"Milchprodukte"},{"name":"Ayran","category":"Milchprodukte"},{"name":"Babybelle","category":"Milchprodukte"},{"name":"Cheesesticks","category":"Milchprodukte"},{"name":"Schlagobers","category":"Milchprodukte"},{"name":"Biomilch","category":"Milchprodukte"},{"name":"Milchreis","category":"Milchprodukte"},{"name":"Emmentaler","category":"Milchprodukte"},{"name":"Parmesan","category":"Milchprodukte"},{"name":"Mozzarella","category":"Milchprodukte"},{"name":"Schafskäse","category":"Milchprodukte"}]
+      [{"name":"Milch","category":"Milchprodukte"},{"name":"Vanilletraum","category":"Milchprodukte"},{"name":"Milchschnitte","category":"Milchprodukte"},{"name":"Kingerpingui","category":"Milchprodukte"},{"name":"Butter","category":"Milchprodukte"},{"name":"Käse","category":"Milchprodukte"},{"name":"Joghurt","category":"Milchprodukte"},{"name":"Frischkäse","category":"Milchprodukte"},{"name":"Topfen","category":"Milchprodukte"},{"name":"Rahm","category":"Milchprodukte"},{"name":"Sahne","category":"Milchprodukte"},{"name":"Sauerrahm","category":"Milchprodukte"},{"name":"Gouda","category":"Milchprodukte"},{"name":"Cheddar","category":"Milchprodukte"},{"name":"Schmelzkäse","category":"Milchprodukte"},{"name":"Toastkäse","category":"Milchprodukte"},{"name":"Frischmilch","category":"Milchprodukte"},{"name":"Vollmilch","category":"Milchprodukte"},{"name":"Fruchtjoghurt","category":"Milchprodukte"},{"name":"Buttermilch","category":"Milchprodukte"},{"name":"Ayran","category":"Milchprodukte"},{"name":"Babybelle","category":"Milchprodukte"},{"name":"Cheesesticks","category":"Milchprodukte"},{"name":"Schlagobers","category":"Milchprodukte"},{"name":"Biomilch","category":"Milchprodukte"},{"name":"Milchreis","category":"Milchprodukte"},{"name":"Emmentaler","category":"Milchprodukte"},{"name":"Parmesan","category":"Milchprodukte"},{"name":"Mozzarella","category":"Milchprodukte"},{"name":"Schafskäse","category":"Milchprodukte"}]
     },
     {
       "category": "Obst & Gemüse",
@@ -108,38 +108,38 @@ class CategoryService {
         {"name":"Zwiebel","category":"Obst & Gemüse"},{"name":"Roter Zwiebel","category":"Obst & Gemüse"},{"name":"Apfel","category":"Obst & Gemüse"},{"name":"Orange","category":"Obst & Gemüse"},{"name":"Mango","category":"Obst & Gemüse"},{"name":"Maracuja","category":"Obst & Gemüse"},{"name":"Banane","category":"Obst & Gemüse"},{"name":"Pfirsich","category":"Obst & Gemüse"},{"name":"Dattel","category":"Obst & Gemüse"},{"name":"Mandarine","category":"Obst & Gemüse"},{"name":"Blutorange","category":"Obst & Gemüse"},{"name":"Paprika","category":"Obst & Gemüse"},{"name":"Birne","category":"Obst & Gemüse"},{"name":"Weintrauben","category":"Obst & Gemüse"},{"name":"Granatapfel","category":"Obst & Gemüse"},{"name":"Himbeeren","category":"Obst & Gemüse"},{"name":"Erdbeeren","category":"Obst & Gemüse"},{"name":"Brombeeren","category":"Obst & Gemüse"},{"name":"Heidelbeeren","category":"Obst & Gemüse"},{"name":"Nekterine","category":"Obst & Gemüse"},{"name":"Erbsen","category":"Obst & Gemüse"},{"name":"Karotte","category":"Obst & Gemüse"},{"name":"Zitrone","category":"Obst & Gemüse"},{"name":"Limette","category":"Obst & Gemüse"},{"name":"Frühlingszwiebel","category":"Obst & Gemüse"},{"name":"Erdäpfel","category":"Obst & Gemüse"},{"name":"Paradeiser","category":"Obst & Gemüse"},{"name":"Gurke","category":"Obst & Gemüse"},{"name":"Zucchini","category":"Obst & Gemüse"},{"name":"Karfiol","category":"Obst & Gemüse"},{"name":"Kiwi","category":"Obst & Gemüse"},{"name":"Eisbergsalat","category":"Obst & Gemüse"},{"name":"China Kohl","category":"Obst & Gemüse"},{"name":"Grüner Salat","category":"Obst & Gemüse"},{"name":"Vogerlsalat","category":"Obst & Gemüse"},{"name":"Roter Rüben Salat","category":"Obst & Gemüse"},{"name":"Rote Rüben","category":"Obst & Gemüse"},{"name":"Aubergine","category":"Obst & Gemüse"},{"name":"Kohl","category":"Obst & Gemüse"},{"name":"Rotkraut","category":"Obst & Gemüse"},{"name":"Avocado","category":"Obst & Gemüse"},{"name":"Litschi","category":"Obst & Gemüse"},{"name":"Artischocke","category":"Obst & Gemüse"}
       ]
     },
-    {
-      "category": "Soßen",
-      "products": [
-        { "name": "Käsesoße", "category": "Soßen" },
-        { "name": "Tabasco", "category": "Soßen" },
-        { "name": "Senf", "category": "Soßen" },
-        { "name": "Scharfer Senf", "category": "Soßen" },
-        { "name": "Milder Senf", "category": "Soßen" },
-        { "name": "Kremser Senf", "category": "Soßen" },
-        { "name": "Ketchup", "category": "Soßen" },
-        { "name": "BBQ Soße", "category": "Soßen" },
-        { "name": "Knoblauch Soße", "category": "Soßen" },
-        { "name": "Cocktail Soße", "category": "Soßen" },
-        { "name": "Mayonnaise 80%", "category": "Soßen" },
-        { "name": "Mayonnaise 25%", "category": "Soßen" },
-        { "name": "Mayonnaise 50%", "category": "Soßen" },
-        { "name": "Mayonnaise", "category": "Soßen" },
-        { "name": "Süß-Sauer Soße", "category": "Soßen" },
-        { "name": "Sauce Tartare", "category": "Soßen" },
-        { "name": "Sweet Chili Soße", "category": "Soßen" },
-        { "name": "Sour Cream Soße", "category": "Soßen" },
-        { "name": "Curry Soße", "category": "Soßen" },
-        { "name": "Curry Mango Soße", "category": "Soßen" },
-        { "name": "Pommes Frites Soße", "category": "Soßen" },
-        { "name": "Honig-Senf Soße", "category": "Soßen" },
-        { "name": "Karibik Soße", "category": "Soßen" },
-        { "name": "Kräuter Knoblauch Soße", "category": "Soßen" },
-        { "name": "Steak Soße", "category": "Soßen" },
-        { "name": "Burger Soße", "category": "Soßen" },
-        { "name": "Potato Wedges Soße", "category": "Soßen" }
-      ]
-    },
+//    {
+//      "category": "Soßen",
+//      "products": [
+//        { "name": "Käsesoße", "category": "Soßen" },
+//        { "name": "Tabasco", "category": "Soßen" },
+//        { "name": "Senf", "category": "Soßen" },
+//        { "name": "Scharfer Senf", "category": "Soßen" },
+//        { "name": "Milder Senf", "category": "Soßen" },
+//        { "name": "Kremser Senf", "category": "Soßen" },
+//        { "name": "Ketchup", "category": "Soßen" },
+//        { "name": "BBQ Soße", "category": "Soßen" },
+//        { "name": "Knoblauch Soße", "category": "Soßen" },
+//        { "name": "Cocktail Soße", "category": "Soßen" },
+//        { "name": "Mayonnaise 80%", "category": "Soßen" },
+//        { "name": "Mayonnaise 25%", "category": "Soßen" },
+//        { "name": "Mayonnaise 50%", "category": "Soßen" },
+//        { "name": "Mayonnaise", "category": "Soßen" },
+//        { "name": "Süß-Sauer Soße", "category": "Soßen" },
+//        { "name": "Sauce Tartare", "category": "Soßen" },
+//        { "name": "Sweet Chili Soße", "category": "Soßen" },
+//        { "name": "Sour Cream Soße", "category": "Soßen" },
+//        { "name": "Curry Soße", "category": "Soßen" },
+//        { "name": "Curry Mango Soße", "category": "Soßen" },
+//        { "name": "Pommes Frites Soße", "category": "Soßen" },
+//        { "name": "Honig-Senf Soße", "category": "Soßen" },
+//        { "name": "Karibik Soße", "category": "Soßen" },
+//        { "name": "Kräuter Knoblauch Soße", "category": "Soßen" },
+//        { "name": "Steak Soße", "category": "Soßen" },
+//        { "name": "Burger Soße", "category": "Soßen" },
+//        { "name": "Potato Wedges Soße", "category": "Soßen" }
+//      ]
+//    },
     {
       "category": "Spirituosen",
       "products": [

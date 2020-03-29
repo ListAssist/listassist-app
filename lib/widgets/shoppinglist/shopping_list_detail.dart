@@ -257,6 +257,12 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
                                   controlAffinity: ListTileControlAffinity.leading,
                                   onChanged: (bool val) {
                                     itemChange(val, index);
+                                    list.items.sort((a, b) {
+                                      if(a.bought && !b.bought) return 1;
+                                      if(!a.bought && b.bought) return -1;
+                                      return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+                                    });
+
                                   }),
                             ));
                       })
