@@ -15,12 +15,15 @@ import 'package:listassist/widgets/shoppinglist/shopping_list_view.dart';
 import 'package:listassist/widgets/statistics/statistics_view.dart';
 import 'package:provider/provider.dart';
 
+import '../main.dart';
+
 class Sidebar extends StatefulWidget {
   @override
   _Sidebar createState() => _Sidebar();
 }
 
 class _Sidebar extends State<Sidebar> {
+
   @override
   Widget build(BuildContext context) {
     User user = Provider.of<User>(context);
@@ -143,6 +146,7 @@ class _Sidebar extends State<Sidebar> {
                 leading: Icon(Icons.settings),
                 title: Text("Einstellungen"),
                 onTap: () {
+                  Navigator.pop(context);
                   Navigator.push(context, MaterialPageRoute(builder: (context) => SettingsView()));
                 },
               ),

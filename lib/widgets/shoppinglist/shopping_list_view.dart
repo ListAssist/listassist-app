@@ -27,6 +27,8 @@ class _ShoppingListView extends State<ShoppingListView> {
   Widget build(BuildContext context) {
     if(first) {
       User user = Provider.of<User>(context);
+      print(user.settings);
+      print(user.lastAutomaticallyGenerated.toDate());
       if(user.settings != null) {
         if (user.settings["ai_enabled"]) {
           if (user.settings["ai_interval"] != null) {
@@ -72,17 +74,17 @@ class _ShoppingListView extends State<ShoppingListView> {
             },
           ),
           appBar: AppBar(
-          backgroundColor: Provider.of<User>(context).settings["theme"] == "Blau" ? Theme.of(context).colorScheme.primary : CustomColors.shoppyGreen,
+            backgroundColor: Provider.of<User>(context).settings["theme"] == "Blau" ? Theme.of(context).colorScheme.primary : CustomColors.shoppyGreen,
             title: Text("Einkaufslisten"),
             flexibleSpace: Provider.of<User>(context).settings["theme"] == "Verlauf" ? Container(
               decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                      begin: Alignment.bottomLeft,
-                      end: Alignment.topRight,
-                      colors: <Color>[
-                        CustomColors.shoppyBlue,
-                        CustomColors.shoppyLightBlue,
-                      ])
+                gradient: LinearGradient(
+                  begin: Alignment.bottomLeft,
+                  end: Alignment.topRight,
+                  colors: <Color>[
+                    CustomColors.shoppyBlue,
+                    CustomColors.shoppyLightBlue,
+                  ])
               )) : Container(),
             bottom: TabBar(
               indicatorColor: Colors.white,
@@ -107,6 +109,7 @@ class _ShoppingListView extends State<ShoppingListView> {
   }
 
   _createAutomaticList() async {
+    print("Creating automatic list");
     final HttpsCallable autoList = cloudFunctionInstance.getHttpsCallable(
         functionName: "createAutomaticList"
     );
