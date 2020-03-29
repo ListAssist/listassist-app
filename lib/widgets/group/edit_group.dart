@@ -1,8 +1,10 @@
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:listassist/assets/custom_colors.dart';
 import 'package:listassist/models/Group.dart';
 import 'package:listassist/models/PublicUser.dart';
+import 'package:listassist/models/User.dart';
 import 'package:listassist/services/db.dart';
 import 'package:listassist/services/info_overlay.dart';
 import 'package:provider/provider.dart';
@@ -37,8 +39,17 @@ class _EditGroupState extends State<EditGroup> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Gruppe bearbeiten"),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-      ),
+        backgroundColor: Provider.of<User>(context).settings["theme"] == "Blau" ? Theme.of(context).colorScheme.primary : CustomColors.shoppyGreen,
+        flexibleSpace: Provider.of<User>(context).settings["theme"] == "Verlauf" ? Container(
+            decoration: BoxDecoration(
+                gradient: LinearGradient(
+                    begin: Alignment.bottomLeft,
+                    end: Alignment.topRight,
+                    colors: <Color>[
+                      CustomColors.shoppyBlue,
+                      CustomColors.shoppyLightBlue,
+                    ])
+            )) : Container(),),
       body: Container(
           child: ListView(
             children: <Widget>[
