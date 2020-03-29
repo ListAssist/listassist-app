@@ -117,7 +117,7 @@ function recommend(lists: object[]) {
                     bought: false,
                     price: 0,
                     //TODO: Richtige Kategorie einfügen
-                    category: "Generated"
+                    category: "Generiert"
                 }
             );
         }

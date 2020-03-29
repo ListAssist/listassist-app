@@ -3,7 +3,9 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:listassist/assets/custom_colors.dart';
 import 'package:listassist/models/CompletedShoppingList.dart';
+import 'package:listassist/models/User.dart';
 import 'package:listassist/services/storage.dart';
 import 'package:listassist/widgets/shoppinglist/bill_details.dart';
 import 'package:provider/provider.dart';
@@ -74,6 +76,17 @@ class _BillsState extends State<Bills> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Rechnungen von ${list.name}"),
+        backgroundColor: Provider.of<User>(context).settings["theme"] == "Blau" ? Theme.of(context).colorScheme.primary : CustomColors.shoppyGreen,
+        flexibleSpace: Provider.of<User>(context).settings["theme"] == "Verlauf" ? Container(
+            decoration: BoxDecoration(
+                gradient: LinearGradient(
+                    begin: Alignment.bottomLeft,
+                    end: Alignment.topRight,
+                    colors: <Color>[
+                      CustomColors.shoppyBlue,
+                      CustomColors.shoppyLightBlue,
+                    ])
+            )) : Container(),
       ),
       body: urls != null ? Column(
         mainAxisAlignment: MainAxisAlignment.center,
