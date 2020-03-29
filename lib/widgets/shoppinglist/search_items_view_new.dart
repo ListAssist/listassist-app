@@ -504,7 +504,7 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew> with TickerProviderS
                               itemCount: categoryService.categories.length,
                               shrinkWrap: true,
                               itemBuilder: (ctx, ind) {
-//                                print(List.from(categoryService.categories[ind]["products"]).length);
+                                //print(List.from(categoryService.categories[ind]["products"]).length);
                                 String iconFileName = List.from(categoryService.categories[ind]["products"])[ind]["category"].toString().toLowerCase()
                                     .replaceAll(RegExp("ü"), "ue")
                                     .replaceAll(RegExp("ö"), "oe")
