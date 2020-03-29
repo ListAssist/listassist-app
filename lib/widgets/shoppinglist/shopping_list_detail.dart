@@ -288,8 +288,8 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
                       InfoOverlay.showSourceSelectionSheet(context, callback: _startCameraScanner, arg: widget.index);
                     }
                   },
-                  backgroundColor: _user.settings["theme"] == "Grün" ? CustomColors.shoppyGreen : CustomColors.shoppyBlue,
-                  child: Icon(Icons.camera_alt, color: Colors.white),
+                  backgroundColor: Colors.white,
+                  child: Icon(Icons.camera_alt, color: Colors.black),
                 ),
               ),
             ),
