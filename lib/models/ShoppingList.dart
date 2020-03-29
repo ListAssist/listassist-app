@@ -14,12 +14,7 @@ class ShoppingList {
     Map data = doc.data ?? { };
 
     List<Item> sortedItems = List.from(data["items"] ?? []).map((x) => Item.fromMap(x)).toList();
-    sortedItems.sort((a, b) {
-
-      if(a.bought && !b.bought) return 1;
-      if(!a.bought && b.bought) return -1;
-      return a.name.toLowerCase().compareTo(b.name.toLowerCase());
-    });
+    sortedItems.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
 
     return ShoppingList(
       id: doc.documentID,
