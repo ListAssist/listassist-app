@@ -66,7 +66,7 @@ class _CompletedShoppingListState extends State<CompletedShoppingList> {
                 value: 0,
                 child: Row(
                   children: <Widget>[
-                    Icon(Icons.edit),
+                    Icon(Icons.content_copy),
                     Text("Kopieren"),
                   ],
                 ),

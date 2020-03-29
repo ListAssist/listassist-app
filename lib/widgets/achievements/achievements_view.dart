@@ -17,12 +17,13 @@ class AchievementsView extends StatefulWidget {
 }
 
 class _AchievementsView extends State<AchievementsView> {
-  List<Achievement> _achievements = [];
+  List<Achievement> _achievements;
 
   @override
   Widget build(BuildContext context) {
     User user = Provider.of<User>(context);
     _achievements = user.achievements;
+    print(_achievements);
     _achievements.sort((a, b) => a.compareTo(b));
     return Scaffold(
       appBar: AppBar(
@@ -44,7 +45,7 @@ class _AchievementsView extends State<AchievementsView> {
           onPressed: () => mainScaffoldKey.currentState.openDrawer(),
         ),
       ),
-      body: _achievements.length != 0 ? Container(
+      body: Container(
         padding: EdgeInsets.all(8),
         child: Column(
           children: <Widget>[
@@ -62,7 +63,7 @@ class _AchievementsView extends State<AchievementsView> {
                 ],
               ),
             ),
-            Expanded(
+            _achievements.length != 0 ? Expanded(
               child: ListView.builder(
                 itemCount: _achievements.length,
                 itemBuilder: (BuildContext context, int index) {
@@ -81,10 +82,10 @@ class _AchievementsView extends State<AchievementsView> {
                   );
                 },
               ),
-            ),
+            ) : Container(),
           ],
         ),
-      ) : ShoppyShimmer(),
+      ),
     );
   }
 }

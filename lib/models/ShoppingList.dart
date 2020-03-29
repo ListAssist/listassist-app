@@ -13,23 +13,29 @@ class ShoppingList {
   factory ShoppingList.fromFirestore(DocumentSnapshot doc) {
     Map data = doc.data ?? { };
 
+    List<Item> sortedItems = List.from(data["items"] ?? []).map((x) => Item.fromMap(x)).toList();
+    sortedItems.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+
     return ShoppingList(
       id: doc.documentID,
       created: data["created"],
       name: data["name"],
       type: data["type"],
-      items: List.from(data["items"] ?? []).map((x) => Item.fromMap(x)).toList(),
+      items: sortedItems,
     );
   }
 
   factory ShoppingList.fromMap(Map data) {
     data = data ?? { };
 
+    List<Item> sortedItems = List.from(data["items"] ?? []).map((x) => Item.fromMap(x)).toList();
+    sortedItems.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+
     return ShoppingList(
         created: data["created"],
         name: data["name"],
         type: data["type"],
-        items: List.from(data["items"] ?? []).map((x) => Item.fromMap(x)).toList()
+        items: sortedItems
     );
   }
 

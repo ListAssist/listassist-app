@@ -17,6 +17,7 @@ import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:listassist/services/camera.dart';
 import 'package:listassist/services/info_overlay.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ShoppingListDetail extends StatefulWidget {
   final int index;
@@ -42,6 +43,17 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
   int _debounceTime = 1000;
 
   int _boughtItemCount = 0;
+
+  var prefs;
+  bool showPrices = false;
+
+  initSharedPreferences() async{
+    prefs = await SharedPreferences.getInstance();
+    showPrices = prefs.getBool("showPrices");
+    print(showPrices.toString() + " aus SharedPrefs ausgelesen [showPrices]");
+    if(showPrices == null) showPrices = false;
+    setState(() {});
+  }
 
   void itemChange(bool val, int index) {
     setState(() {
@@ -79,6 +91,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
 
   @override
   initState(){
+    initSharedPreferences();
     _isVisible = true;
     _hideButtonController = ScrollController();
     _hideButtonController.addListener((){
@@ -151,6 +164,12 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
               _showDeleteDialog();
             } else if (result == ListAction.complete) {
               _showCompleteDialog();
+            } else if (result == ListAction.showPrices) {
+              setState(() {
+                showPrices = !showPrices;
+              });
+              prefs.setBool("showPrices", showPrices);
+              print(showPrices.toString() + " in SharedPrefs geschrieben");
             }
           },
             itemBuilder: (BuildContext context) => <PopupMenuEntry<ListAction>>[
@@ -158,6 +177,10 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
                 value: ListAction.complete,
                 enabled: _boughtItemCount > 0,
                 child: Text('Abschließen')
+              ),
+              PopupMenuItem<ListAction>(
+                  value: ListAction.showPrices,
+                  child: Text(showPrices ? 'Preise ausblenden' : 'Preise anzeigen')
               ),
               PopupMenuItem<ListAction>(
                 value: ListAction.edit,
@@ -186,41 +209,56 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
                   physics: BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
                   itemCount: list.items.length,
                       itemBuilder: (BuildContext context, int index) {
-                        return Container(
-                            child: CheckboxListTile(
-                                value: list.items[index].bought,
-                                title: Text("${list.items[index].name}", style: list.items[index].bought ? TextStyle(decoration: TextDecoration.lineThrough, decorationThickness: 3) : null),
-                                //subtitle: list.items[index].count != null ? Text(list.items[index].count.toString() + "x") : Text("0x"),
-                                subtitle: list.items[index].count != null && list.items[index].count != 1 ? Text("${list.items[index].count.toString()}x | ${list.items[index].category}") : Text("${list.items[index].category}"),
-                                secondary: OutlineButton(
-                                  //decoration: BoxDecoration(border: Border.all(width: 2), borderRadius: BorderRadius.all(Radius.circular(5.0))),
-                                  onPressed: () async {
+                        String iconFileName = list.items[index].category.toLowerCase()
+                            .replaceAll(RegExp("ü"), "ue")
+                            .replaceAll(RegExp("ö"), "oe")
+                            .replaceAll(RegExp("ä"), "ae")
+                            .replaceAll(RegExp("ß"), "ss")
+                            .replaceAll(RegExp(" & "), "_")
+                            .replaceAll(RegExp("allgemein"), "fisch") + ".png";
 
-                                    if (_debounce == null || !_debounce.isActive) {
-                                      var erg = await showDialog(context: context, builder: (context) {
-                                        return PrizeDialog(name: list.items[index].name, prize: list.items[index].price != null ? list.items[index].price : 0);
-                                      });
-                                      if(erg != null) {
-                                        list.items[index].price = erg;
-                                        itemChange(list.items[index].bought, index);
-                                        setState(() {});
-                                        databaseService.updateList(uid, list, widget.isGroup).then((onUpdate) {
-                                          print("Saved items");
-                                        }).catchError((onError) {
-                                          InfoOverlay.showErrorSnackBar("Fehler beim aktualisieren der Einkaufsliste");
+                        return Container(
+                            child: Card(
+                              elevation: list.items[index].bought ? 0 : 2,
+                              color: list.items[index].bought ? Colors.transparent : Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(0.0),
+                              ),
+                              child: CheckboxListTile(
+                                  value: list.items[index].bought,
+                                  title: Text("${list.items[index].name}", style: null),
+                                  //subtitle: list.items[index].count != null ? Text(list.items[index].count.toString() + "x") : Text("0x"),
+                                  subtitle: list.items[index].count != null && list.items[index].count != 1 ? Text("${list.items[index].count.toString()}x | ${list.items[index].category}") : Text("${list.items[index].category}"),
+                                  secondary: showPrices ? OutlineButton(
+                                    //decoration: BoxDecoration(border: Border.all(width: 2), borderRadius: BorderRadius.all(Radius.circular(5.0))),
+                                    onPressed: () async {
+
+                                      if (_debounce == null || !_debounce.isActive) {
+                                        var erg = await showDialog(context: context, builder: (context) {
+                                          return PrizeDialog(name: list.items[index].name, prize: list.items[index].price != null ? list.items[index].price : 0);
                                         });
+                                        if(erg != null) {
+                                          list.items[index].price = erg;
+                                          itemChange(list.items[index].bought, index);
+                                          setState(() {});
+                                          databaseService.updateList(uid, list, widget.isGroup).then((onUpdate) {
+                                            print("Saved items");
+                                          }).catchError((onError) {
+                                            InfoOverlay.showErrorSnackBar("Fehler beim aktualisieren der Einkaufsliste");
+                                          });
+                                        }
                                       }
-                                    }
-                                  },
-                                  child: Padding(
-                                    padding: EdgeInsets.all(9.0),
-                                    child: list.items[index].price != null && list.items[index].price != 0.0 ? Text(list.items[index].price.toString() + " €") : Text("0 €"),
-                                  ),
-                                ),
-                                controlAffinity: ListTileControlAffinity.leading,
-                                onChanged: (bool val) {
-                                  itemChange(val, index);
-                                }));
+                                    },
+                                    child: Padding(
+                                      padding: EdgeInsets.all(9.0),
+                                      child: list.items[index].price != null && list.items[index].price != 0.0 ? Text(list.items[index].price.toString() + " €") : Text("0 €"),
+                                    ),
+                                  ) : Image(image: AssetImage("assets/icons/" + iconFileName), width: 35,),
+                                  controlAffinity: ListTileControlAffinity.leading,
+                                  onChanged: (bool val) {
+                                    itemChange(val, index);
+                                  }),
+                            ));
                       })
                   : Container()),
         ],
@@ -475,5 +513,5 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
 }
 
 enum ListAction {
-  edit, delete, complete
+  edit, delete, complete, showPrices
 }

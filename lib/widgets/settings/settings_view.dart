@@ -159,19 +159,7 @@ class Test extends StatelessWidget {
                       )
                     },
                   ),
-                  ListTile(
-                    leading: Icon(Icons.notifications),
-                    title: Text('Benachrichtigungen'),
-                    trailing: Icon(Icons.keyboard_arrow_right),
-                    onTap: () => {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => Keko()
-                          )
-                      )
-                    },
-                  ),
+                 
                   ListTile(
                     leading: Icon(Icons.security),
                     title: Text('Datenschutz'),
