@@ -145,7 +145,7 @@ function calculateFrequency(lastLists: object[], days: number) {
 
     for (const key in itemFrequency) {
         //@ts-ignore
-        itemFrequency[key] = Math.round(days / itemFrequency[key]);
+        itemFrequency[key] = Math.round(days / itemFrequency[key]) || 1;
     }
 
     return itemFrequency;
