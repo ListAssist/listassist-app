@@ -35,10 +35,10 @@ class User {
         "msg_invite": false,
         "msg_offer": false,
         "scanner_manual": true,
-        "theme": "theme",
+        "theme": "Verlauf",
       },
       lastAutomaticallyGenerated: data["last_automatically_generated"] ?? null,
-      stats: Map.from(data["stats"] ?? []),
+      stats: data["stats"] ?? {},
       achievements: List.from(data["achievements"] ?? []).map((a) => Achievement.fromMap(a)).toList(),
       hasUnlockedAchievements: data["hasUnlockedAchievements"] ?? false,
     );
@@ -46,6 +46,8 @@ class User {
 
   factory User.fromMap(Map data) {
     data = data ?? { };
+    print(data);
+    print(data["settings"].runtimeType);
     return User(
       uid: data["uid"],
       email: data["email"],
@@ -61,10 +63,10 @@ class User {
         "msg_invite": false,
         "msg_offer": false,
         "scanner_manual": true,
-        "theme": "theme",
+        "theme": "Verlauf",
       },
       lastAutomaticallyGenerated: data["last_automatically_generated"] ?? null,
-      stats: Map.from(data["stats"] ?? []),
+      stats: data["stats"] ?? {},
       achievements: List.from(data["achievements"] ?? []).map((a) => Achievement.fromMap(a)).toList(),
       hasUnlockedAchievements: data["hasUnlockedAchievements"] ?? false,
     );
