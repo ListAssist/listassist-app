@@ -41,7 +41,7 @@ class _AuthenticationPageState extends State<AuthenticationPage> with SingleTick
         child: Scaffold(
           appBar: AppBar(
             backgroundColor: Theme.of(context).colorScheme.primary,
-            title: Text("Authentizierung"),
+            title: Text("Authentifizierung"),
             bottom: TabBar(
               controller: _tabController,
               tabs: tabs

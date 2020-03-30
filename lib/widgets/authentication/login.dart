@@ -133,11 +133,11 @@ class SocialSignInButtons extends StatelessWidget {
           onPressed: () => authService.signIn(AuthenticationType.Facebook),
           text: "$prependedString mit Facebook",
         ),
-        SignInButton(
-          Buttons.Twitter,
-          onPressed: () => authService.signIn(AuthenticationType.Twitter),
-          text: "$prependedString mit Twitter",
-        ),
+//        SignInButton(
+//          Buttons.Twitter,
+//          onPressed: () => authService.signIn(AuthenticationType.Twitter),
+//          text: "$prependedString mit Twitter",
+//        ),
       ],
     );
   }
