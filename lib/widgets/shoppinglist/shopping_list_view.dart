@@ -27,8 +27,6 @@ class _ShoppingListView extends State<ShoppingListView> {
   Widget build(BuildContext context) {
     if(first) {
       User user = Provider.of<User>(context);
-      print(user.settings);
-      print(user.lastAutomaticallyGenerated.toDate());
       if(user.settings != null) {
         if (user.settings["ai_enabled"]) {
           if (user.settings["ai_interval"] != null) {
