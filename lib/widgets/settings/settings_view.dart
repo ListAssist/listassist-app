@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:listassist/models/User.dart';
-import 'package:listassist/services/db.dart';
-import 'package:listassist/widgets/settings/notification_settings_view.dart';
 import 'package:listassist/services/auth.dart';
 import 'package:listassist/widgets/settings/profile_settings_view.dart';
 import 'package:listassist/widgets/settings/app_settings_view.dart';
-import 'package:listassist/widgets/shoppinglist/item_counter.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -15,7 +12,6 @@ class SettingsView extends StatefulWidget {
 }
 
 class _SettingsViewState extends State<SettingsView> {
-  String img = "https://www.indiewire.com/wp-content/uploads/2019/05/shutterstock_8999492b.jpg?w=780";
 
   void _showDialog(BuildContext context) {
     // flutter defined function
@@ -48,7 +44,7 @@ class _SettingsViewState extends State<SettingsView> {
               onPressed: () {
                 authService.signOut();
                 Navigator.pop(context);
-                Navigator.pop(context);
+                Navigator.pop(this.context);
               },
             ),
           ],
@@ -89,7 +85,7 @@ class Test extends StatelessWidget {
 
     User user  = Provider.of<User>(context);
 
-    return Container(
+    return user == null ? Container() : Container(
       width: MediaQuery.of(context).size.width,
       padding: EdgeInsets.all(10),
       decoration: BoxDecoration(),
@@ -159,19 +155,7 @@ class Test extends StatelessWidget {
                       )
                     },
                   ),
-                  ListTile(
-                    leading: Icon(Icons.notifications),
-                    title: Text('Benachrichtigungen'),
-                    trailing: Icon(Icons.keyboard_arrow_right),
-                    onTap: () => {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => Keko()
-                          )
-                      )
-                    },
-                  ),
+                 
                   ListTile(
                     leading: Icon(Icons.security),
                     title: Text('Datenschutz'),

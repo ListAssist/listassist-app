@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:listassist/models/Group.dart';
 import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
+import 'package:listassist/services/achievements.dart';
 import 'package:listassist/services/connectivity.dart';
 import 'package:listassist/services/db.dart';
 import 'package:listassist/services/info_overlay.dart';
@@ -24,14 +25,16 @@ class _CreateShoppingListView extends State<CreateShoppingListView> {
   bool buttonDisabled = false;
 
   List<ShoppingList> _lists;
+  User _user;
   String _uid;
 
   @override
   Widget build(BuildContext context) {
     Color _backgroundColor = /*Colors.blueAccent[400];*/ Theme.of(context).primaryColor;
+    _user = Provider.of<User>(context);
 
     if(!widget.isGroup) {
-      _uid = Provider.of<User>(context).uid;
+      _uid = _user.uid;
       _lists = Provider.of<List<ShoppingList>>(context);
     }else {
       _uid = Provider.of<List<Group>>(context)[widget.groupIndex].id;
@@ -126,6 +129,8 @@ class _CreateShoppingListView extends State<CreateShoppingListView> {
 
                           DocumentReference docRef = await databaseService.createList(_uid, _newShoppingList, widget.isGroup);
                           InfoOverlay.showInfoSnackBar("Einkaufsliste ${_newShoppingList.name} erstellt");
+                          achievementsService.checkListName(_user, _newShoppingList.name);
+                          achievementsService.listCreated(_user);
                           controller.reverse();
                           Navigator.pop(context);
 

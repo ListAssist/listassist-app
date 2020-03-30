@@ -2,20 +2,22 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:listassist/assets/custom_colors.dart';
 import 'package:listassist/models/Group.dart';
+import 'package:listassist/models/Item.dart';
 import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
+import 'package:listassist/services/achievements.dart';
 import 'package:listassist/services/connectivity.dart';
 import 'package:listassist/services/db.dart';
 import 'package:listassist/widgets/shimmer/shoppy_shimmer.dart';
-import 'package:listassist/widgets/shoppinglist/edit_shopping_list.dart';
 import 'package:listassist/widgets/shoppinglist/prize_dialog.dart';
 import 'package:listassist/widgets/shoppinglist/search_items_view_new.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:listassist/services/camera.dart';
 import 'package:listassist/services/info_overlay.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ShoppingListDetail extends StatefulWidget {
   final int index;
@@ -28,10 +30,12 @@ class ShoppingListDetail extends StatefulWidget {
 
 class _ShoppingListDetail extends State<ShoppingListDetail> {
   ShoppingList list;
+  User _user;
   String uid = "";
   bool useCache = false;
 
   //Spamschutz z.B. beim Löschen
+  //TODO: Getter length called on null bills
   //TODO: Check if buttonsDisabled is correctly implemented because it wasnt in the completed detail widget
   bool _buttonsDisabled = false;
 
@@ -39,6 +43,17 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
   int _debounceTime = 1000;
 
   int _boughtItemCount = 0;
+
+  var prefs;
+  bool showPrices = false;
+
+  initSharedPreferences() async{
+    prefs = await SharedPreferences.getInstance();
+    showPrices = prefs.getBool("showPrices");
+    print(showPrices.toString() + " aus SharedPrefs ausgelesen [showPrices]");
+    if(showPrices == null) showPrices = false;
+    setState(() {});
+  }
 
   void itemChange(bool val, int index) {
     setState(() {
@@ -76,10 +91,11 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
 
   @override
   initState(){
+    initSharedPreferences();
     _isVisible = true;
     _hideButtonController = ScrollController();
     _hideButtonController.addListener((){
-      print('scrolling = ${_hideButtonController.position.isScrollingNotifier.value}');
+//      print('scrolling = ${_hideButtonController.position.isScrollingNotifier.value}');
       if(_hideButtonController.position.userScrollDirection == ScrollDirection.reverse){
         if(_isVisible == true) {
           /* only set when the previous state is false
@@ -108,6 +124,7 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
 
   @override
   Widget build(BuildContext context) {
+    _user = Provider.of<User>(context);
     if (!useCache) {
       if(widget.isGroup){
         list = Provider.of<ShoppingList>(context);
@@ -126,22 +143,54 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.primary,
+          backgroundColor: _user.settings["theme"] == "Blau" ? Theme.of(context).colorScheme.primary : CustomColors.shoppyGreen,
         title: Text(list == null ? "" : list.name),
+        flexibleSpace: _user.settings["theme"] == "Verlauf" ? Container(
+              decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                      begin: Alignment.bottomLeft,
+                      end: Alignment.topRight,
+                      colors: <Color>[
+                        CustomColors.shoppyBlue,
+                        CustomColors.shoppyLightBlue,
+                      ])
+              )) : Container(),
         actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.edit),
-            onPressed: () => Navigator.push(
-              context,
-              widget.isGroup ?
-              MaterialPageRoute(builder: (context) {
-                return StreamProvider<ShoppingList>.value(
-                  value: databaseService.streamListFromGroup(uid, list.id),
-                  child: EditShoppingList(index: widget.index, isGroup: true)
-                );
-              }) :
-              MaterialPageRoute(builder: (context) => EditShoppingList(index: widget.index)),
-            ),
+          PopupMenuButton<ListAction>(
+            onSelected: (ListAction result) async {
+            if (result == ListAction.edit) {
+              _showRenameDialog();
+            } else if (result == ListAction.delete) {
+              _showDeleteDialog();
+            } else if (result == ListAction.complete) {
+              _showCompleteDialog();
+            } else if (result == ListAction.showPrices) {
+              setState(() {
+                showPrices = !showPrices;
+              });
+              prefs.setBool("showPrices", showPrices);
+              print(showPrices.toString() + " in SharedPrefs geschrieben");
+            }
+          },
+            itemBuilder: (BuildContext context) => <PopupMenuEntry<ListAction>>[
+              PopupMenuItem<ListAction>(
+                value: ListAction.complete,
+                enabled: _boughtItemCount > 0,
+                child: Text('Abschließen')
+              ),
+              PopupMenuItem<ListAction>(
+                  value: ListAction.showPrices,
+                  child: Text(showPrices ? 'Preise ausblenden' : 'Preise anzeigen')
+              ),
+              PopupMenuItem<ListAction>(
+                value: ListAction.edit,
+                child: Text('Umbenennen')
+              ),
+              PopupMenuItem<ListAction>(
+                value: ListAction.delete,
+                child: Text('Löschen')
+              ),
+            ],
           )
         ],
       ),
@@ -160,108 +209,96 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
                   physics: BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
                   itemCount: list.items.length,
                       itemBuilder: (BuildContext context, int index) {
-                        return Container(
-                            child: CheckboxListTile(
-                                value: list.items[index].bought,
-                                title: Text("${list.items[index].name}", style: list.items[index].bought ? TextStyle(decoration: TextDecoration.lineThrough, decorationThickness: 3) : null),
-                                //subtitle: list.items[index].count != null ? Text(list.items[index].count.toString() + "x") : Text("0x"),
-                                subtitle: list.items[index].count != null && list.items[index].count != 1 ? Text("${list.items[index].count.toString()}x | ${list.items[index].category}") : Text("${list.items[index].category}"),
-                                secondary: OutlineButton(
-                                  //decoration: BoxDecoration(border: Border.all(width: 2), borderRadius: BorderRadius.all(Radius.circular(5.0))),
-                                  onPressed: () async {
+                        String iconFileName = list.items[index].category.toLowerCase()
+                            .replaceAll(RegExp("ü"), "ue")
+                            .replaceAll(RegExp("ö"), "oe")
+                            .replaceAll(RegExp("ä"), "ae")
+                            .replaceAll(RegExp("ß"), "ss")
+                            .replaceAll(RegExp(" & "), "_")
+                            .replaceAll(RegExp("allgemein"), "fisch") + ".png";
 
-                                    if (_debounce == null || !_debounce.isActive) {
-                                      var erg = await showDialog(context: context, builder: (context) {
-                                        return PrizeDialog(name: list.items[index].name, prize: list.items[index].price != null ? list.items[index].price : 0);
-                                      });
-                                      if(erg != null) {
-                                        list.items[index].price = erg;
-                                        itemChange(list.items[index].bought, index);
-                                        setState(() {});
-                                        databaseService.updateList(uid, list, widget.isGroup).then((onUpdate) {
-                                          print("Saved items");
-                                        }).catchError((onError) {
-                                          InfoOverlay.showErrorSnackBar("Fehler beim aktualisieren der Einkaufsliste");
+                        return Container(
+                            child: Card(
+                              elevation: list.items[index].bought ? 0 : 2,
+                              color: list.items[index].bought ? Colors.transparent : Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(0.0),
+                              ),
+                              child: CheckboxListTile(
+                                  value: list.items[index].bought,
+                                  title: Text("${list.items[index].name}", style: null),
+                                  //subtitle: list.items[index].count != null ? Text(list.items[index].count.toString() + "x") : Text("0x"),
+                                  subtitle: list.items[index].count != null && list.items[index].count != 1 ? Text("${list.items[index].count.toString()}x | ${list.items[index].category}") : Text("${list.items[index].category}"),
+                                  secondary: showPrices ? OutlineButton(
+                                    //decoration: BoxDecoration(border: Border.all(width: 2), borderRadius: BorderRadius.all(Radius.circular(5.0))),
+                                    onPressed: () async {
+
+                                      if (_debounce == null || !_debounce.isActive) {
+                                        var erg = await showDialog(context: context, builder: (context) {
+                                          return PrizeDialog(name: list.items[index].name, prize: list.items[index].price != null ? list.items[index].price : 0);
                                         });
+                                        if(erg != null) {
+                                          list.items[index].price = erg;
+                                          itemChange(list.items[index].bought, index);
+                                          setState(() {});
+                                          databaseService.updateList(uid, list, widget.isGroup).then((onUpdate) {
+                                            print("Saved items");
+                                          }).catchError((onError) {
+                                            InfoOverlay.showErrorSnackBar("Fehler beim aktualisieren der Einkaufsliste");
+                                          });
+                                        }
                                       }
-                                    }
-                                  },
-                                  child: Padding(
-                                    padding: EdgeInsets.all(9.0),
-                                    child: list.items[index].price != null && list.items[index].price != 0.0 ? Text(list.items[index].price.toString() + " €") : Text("0 €"),
-                                  ),
-                                ),
-                                controlAffinity: ListTileControlAffinity.leading,
-                                onChanged: (bool val) {
-                                  itemChange(val, index);
-                                }));
+                                    },
+                                    child: Padding(
+                                      padding: EdgeInsets.all(9.0),
+                                      child: list.items[index].price != null && list.items[index].price != 0.0 ? Text(list.items[index].price.toString() + " €") : Text("0 €"),
+                                    ),
+                                  ) : Image(image: AssetImage("assets/icons/" + iconFileName), width: 35,),
+                                  controlAffinity: ListTileControlAffinity.leading,
+                                  onChanged: (bool val) {
+                                    itemChange(val, index);
+                                  }),
+                            ));
                       })
                   : Container()),
         ],
       ),
-      floatingActionButton: AnimatedOpacity(
-        opacity: _isVisible ? 1.0 : 0.0,
-        duration: Duration(milliseconds: 200),
-        child: Stack(
-          children: <Widget>[
-            Align(
-              alignment: Alignment.bottomRight,
-              child: FloatingActionButton(
-                child: Icon(Icons.add),
-                backgroundColor: Colors.green,
-                onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => SearchItemsViewNew(list: list, isGroup: widget.isGroup, groupid: uid,)));
-                },
+      floatingActionButton: Stack(
+        children: <Widget>[
+          Align(
+            alignment: Alignment.bottomRight,
+            child: Padding(
+              padding: EdgeInsets.only(bottom: 60),
+              child: Transform.scale(
+                scale: 0.75,
+                child: FloatingActionButton(
+                  onPressed: () async {
+                    bool connected = await connectivityService.testInternetConnection();
+                    if (!connected) {
+                      //I am NOT connected to the Internet
+                      InfoOverlay.showErrorSnackBar("Kein Internetzugriff");
+                      _buttonsDisabled = false;
+                    } else {
+                      InfoOverlay.showSourceSelectionSheet(context, callback: _startCameraScanner, arg: widget.index);
+                    }
+                  },
+                  backgroundColor: Colors.white,
+                  child: Icon(Icons.camera_alt, color: Colors.black),
+                ),
               ),
             ),
-            Padding(
-              padding: EdgeInsets.only(bottom: 75.0),
-              child: SpeedDial(
-                animatedIcon: AnimatedIcons.menu_close,
-                animatedIconTheme: IconThemeData(size: 22.0),
-                closeManually: false,
-                curve: Curves.easeIn,
-                overlayOpacity: 0.35,
-                backgroundColor: Theme.of(context).primaryColor,
-                elevation: 8.0,
-                shape: CircleBorder(),
-                children: [
-                  SpeedDialChild(
-                      child: Icon(Icons.check),
-                      backgroundColor: Colors.green,
-                      labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
-                      label: "Complete",
-                      labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
-                      onTap: _showCompleteDialog),
-                  SpeedDialChild(
-                      child: Icon(Icons.delete),
-                      backgroundColor: Colors.red,
-                      labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
-                      label: "Delete",
-                      labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
-                      onTap: _showDeleteDialog),
-                  SpeedDialChild(
-                    child: Icon(Icons.camera),
-                    backgroundColor: Colors.blue,
-                    label: "Image Check",
-                    labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
-                    labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
-                    onTap: () async {
-                      bool connected = await connectivityService.testInternetConnection();
-                      if (!connected) {
-                        //I am NOT connected to the Internet
-                        InfoOverlay.showErrorSnackBar("Kein Internetzugriff");
-                        _buttonsDisabled = false;
-                      } else {
-                        InfoOverlay.showSourceSelectionSheet(context, callback: _startCameraScanner, arg: widget.index);
-                      }
-                    },
-                  )
-                ],
-              ),
+          ),
+          Align(
+            alignment: Alignment.bottomRight,
+            child: FloatingActionButton(
+              onPressed: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => SearchItemsViewNew(list: list, isGroup: widget.isGroup, groupid: uid)));
+              },
+              backgroundColor: Colors.green,
+              child: Icon(Icons.add),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -337,11 +374,65 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
                       _buttonsDisabled = false;
                     }).then((_) {
                       InfoOverlay.showInfoSnackBar("Einkaufsliste ${list.name} abgeschlossen");
+                      List<Item> boughtItems = List.from(list.items);
+                      boughtItems.removeWhere((item) => !item.bought);
+                      achievementsService.checkListItems(_user, boughtItems);
+                      achievementsService.checkListPrice(_user, boughtItems);
                       Navigator.of(context).pop();
                       Navigator.of(this.context).pop();
                     });
                   }
                 }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _showRenameDialog() async {
+    TextEditingController _nameController = TextEditingController();
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Liste umbenennen"),
+          content: SingleChildScrollView(
+              child: TextField(
+                controller: _nameController,
+                keyboardType: TextInputType.text,
+                decoration: InputDecoration(
+                  border: UnderlineInputBorder(),
+                  contentPadding: EdgeInsets.all(3),
+                  labelText: "Neuer Name",
+                ),
+              )
+          ),
+          actions: <Widget>[
+            FlatButton(
+              textColor: Colors.red,
+              child: Text("Abbrechen"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            FlatButton(
+              child: Text("Umbenennen"),
+              onPressed: () {
+                databaseService.updateList(uid, ShoppingList(
+                    id: list.id,
+                    name: _nameController.text,
+                    items: list.items), widget.isGroup)
+                    .catchError((onError) {
+                      InfoOverlay.showErrorSnackBar("Fehler beim Aktualisieren");
+                      Navigator.of(context).pop();
+                    })
+                    .then((onSaved) {
+                      InfoOverlay.showInfoSnackBar("Name aktualisiert");
+                      Navigator.of(context).pop();
+                    });
               },
             ),
           ],
@@ -419,4 +510,8 @@ class _ShoppingListDetail extends State<ShoppingListDetail> {
       },
     );
   }
+}
+
+enum ListAction {
+  edit, delete, complete, showPrices
 }

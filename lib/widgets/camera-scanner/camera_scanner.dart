@@ -112,38 +112,56 @@ class CameraScannerState extends State<CameraScanner> with AfterInitMixin<Camera
     final User user = Provider.of<User>(context);
 
     return Scaffold(
-      floatingActionButton: SpeedDial(
-        marginBottom: 60,
-        animatedIcon: AnimatedIcons.menu_close,
-        animatedIconTheme: IconThemeData(size: 22.0),
-        closeManually: false,
-        curve: Curves.easeIn,
-        overlayOpacity: 0,
-        elevation: 8.0,
-        shape: CircleBorder(),
-        children: [
-          SpeedDialChild(
-              child: Icon(Icons.check),
-              backgroundColor: Colors.green,
-              label: "Complete",
-              labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
-              labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
-              onTap: () async {
-                /// Show dialog while execution is made
-                await detect(context, user);
-              }
-          ),
-          SpeedDialChild(
-            child: Icon(Icons.delete),
-            backgroundColor: Colors.red,
-            label: "Delete",
-            labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
-            labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
-            onTap: () {
-                _clearPicture();
+//      floatingActionButton: SpeedDial(
+//        marginBottom: 60,
+//        animatedIcon: AnimatedIcons.menu_close,
+//        animatedIconTheme: IconThemeData(size: 22.0),
+//        closeManually: false,
+//        curve: Curves.easeIn,
+//        overlayOpacity: 0,
+//        elevation: 8.0,
+//        shape: CircleBorder(),
+//        children: [
+//          SpeedDialChild(
+//              child: Icon(Icons.check),
+//              backgroundColor: Colors.green,
+//              label: "Complete",
+//              labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
+//              labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
+//              onTap: () async {
+//                /// Show dialog while execution is made
+//                await detect(context, user);
+//              }
+//          ),
+//          SpeedDialChild(
+//            child: Icon(Icons.delete),
+//            backgroundColor: Colors.red,
+//            label: "Delete",
+//            labelBackgroundColor: Theme.of(context).brightness == Brightness.dark ? Theme.of(context).primaryColor : Colors.white,
+//            labelStyle: TextStyle(fontSize: 18.0, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
+//            onTap: () {
+//                _clearPicture();
+//            },
+//          )
+//        ],
+//      ),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        leading: IconButton(
+            onPressed: () {
+              _clearPicture();
             },
-          )
-        ],
+            icon: Icon(Icons.close),
+//            backgroundColor: Colors.green
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          /// Show dialog while execution is made
+          await detect(context, user);
+        },
+        child: Icon(Icons.check),
+        backgroundColor: Colors.green,
       ),
       bottomNavigationBar: FancyBottomNavigation(
         key: bottomNavKey,
@@ -171,6 +189,7 @@ class CameraScannerState extends State<CameraScanner> with AfterInitMixin<Camera
               _currentlyDraggedIndex = -1;
             });
           },
+          //TODO: Bilder verschoben
           child: CustomPaint(
             size: Size(MediaQuery.of(context).size.width, MediaQuery.of(context).size.height - 60),
             painter: PolygonPainter(points: _points, overflow: _overflow, radius: radius, image: _image, currentType: _currentEditorType, boundingBox: boundingBox, inputRect: inputRect),

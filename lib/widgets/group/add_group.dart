@@ -1,11 +1,19 @@
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:listassist/assets/custom_colors.dart';
+import 'package:listassist/models/User.dart';
+import 'package:listassist/services/achievements.dart';
 import 'package:listassist/services/db.dart';
 import 'package:listassist/services/info_overlay.dart';
 import 'package:listassist/validators/email.dart';
+import 'package:provider/provider.dart';
 
 class AddGroup extends StatefulWidget {
+  final User user;
+
+  const AddGroup({this.user});
+
   @override
   _AddGroup createState() => _AddGroup();
 }
@@ -51,6 +59,7 @@ class _AddGroup extends State<AddGroup> {
         InfoOverlay.showErrorSnackBar("Fehler beim Erstellen der Gruppe");
       }else {
         InfoOverlay.showInfoSnackBar("Gruppe ${_nameTextController.text} erstellt");
+        achievementsService.groupCreated(widget.user);
         if(_members.length == 0) {
           Navigator.pop(context);
           return;
@@ -92,8 +101,18 @@ class _AddGroup extends State<AddGroup> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        title: Text("Neue Gruppe erstellen"),
+        backgroundColor: Provider.of<User>(context).settings["theme"] == "Blau" ? Theme.of(context).colorScheme.primary : CustomColors.shoppyGreen,
+        flexibleSpace: Provider.of<User>(context).settings["theme"] == "Verlauf" ? Container(
+            decoration: BoxDecoration(
+                gradient: LinearGradient(
+                    begin: Alignment.bottomLeft,
+                    end: Alignment.topRight,
+                    colors: <Color>[
+                      CustomColors.shoppyBlue,
+                      CustomColors.shoppyLightBlue,
+                    ])
+            )) : Container(),
+            title: Text("Neue Gruppe erstellen"),
       ),
       body: ListView(
         children: <Widget>[

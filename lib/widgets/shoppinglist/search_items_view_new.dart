@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:listassist/assets/custom_colors.dart';
 import 'package:listassist/models/Item.dart';
 import 'package:listassist/models/Product.dart';
 import 'package:listassist/models/Recipe.dart';
@@ -11,6 +12,7 @@ import 'package:listassist/models/ScannedShoppinglist.dart';
 import 'package:listassist/models/ShoppingList.dart';
 import 'package:listassist/models/User.dart';
 import 'package:listassist/services/camera.dart';
+import 'package:listassist/services/category.dart';
 import 'package:listassist/services/connectivity.dart';
 import 'package:listassist/services/db.dart';
 import 'package:listassist/services/info_overlay.dart';
@@ -33,16 +35,16 @@ class SearchItemsViewNew extends StatefulWidget {
   _SearchItemsViewNew createState() => _SearchItemsViewNew();
 }
 
-class _SearchItemsViewNew extends State<SearchItemsViewNew>  with TickerProviderStateMixin{
+class _SearchItemsViewNew extends State<SearchItemsViewNew> with TickerProviderStateMixin {
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
   TextEditingController _searchController = TextEditingController();
   TabController _tabController;
+  ScrollController _scrollController = ScrollController();
 
   var _listOrRecipe;
   bool _isList;
 
   User _user;
-  //TODO: keko Text wenn es keine popular products gibt durch sinnvollen text ersetzen
 
   Algolia algolia = Application.algolia;
   bool _searching = false;
@@ -112,10 +114,13 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew>  with TickerProvider
     if (_debounce?.isActive ?? false) _debounce.cancel();
     _debounce = Timer(Duration(milliseconds: _debounceTime), () {
       if (_listOrRecipe != null && _user.uid != null || _user.uid.length > 0) {
-        print(_listOrRecipe.id);
+        print(_listOrRecipe.items);
 
         _isList
-            ? databaseService.updateList(widget.isGroup ? widget.groupid : _user.uid, _listOrRecipe, widget.isGroup).then((value) => {print("Liste wurde erfolgreich upgedated")}).catchError((_) => {print(_.toString())})
+            ? databaseService
+                .updateList(widget.isGroup ? widget.groupid : _user.uid, _listOrRecipe, widget.isGroup)
+                .then((value) => {print("Liste wurde erfolgreich upgedated")})
+                .catchError((_) => {print(_.toString())})
             : databaseService.updateRecipe(_user.uid, _listOrRecipe).then((value) => {print("Rezept wurde erfolgreich upgedated")}).catchError((_) => {print(_.toString())});
       }
     });
@@ -154,6 +159,12 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew>  with TickerProvider
     setState(() {});
   }
 
+  initPopularProducts() async {
+    _popularProducts = await databaseService.getPopularProducts();
+    setState(() {
+    });
+  }
+
   @override
   void initState() {
     if (widget.list != null) {
@@ -163,7 +174,7 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew>  with TickerProvider
       _listOrRecipe = widget.recipe;
       _isList = false;
     }
-
+    //initPopularProducts();
     _tabController = new TabController(length: 3, initialIndex: _listOrRecipe.items.length > 0 ? 0 : 1, vsync: this);
   }
 
@@ -174,6 +185,7 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew>  with TickerProvider
 //    if(widget.isGroup) {
 //      _groupid = Provider.of<ShoppingList>(context);
 //    }else {
+    initPopularProducts();
 
     return DefaultTabController(
       length: 3,
@@ -190,26 +202,29 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew>  with TickerProvider
                 backgroundColor: Colors.green,
               ),
             ),
-            _isList ? Align(
-              alignment: Alignment.bottomRight,
-              child: Padding(
-                padding: EdgeInsets.only(bottom: 60.0),
-                child: Transform.scale(
-                  scale: 0.75,
-                  child: FloatingActionButton(
-                    child: Icon(
-                      Icons.camera_alt,
-                      color: Colors.black,
+            _isList
+                ? Align(
+                    alignment: Alignment.bottomRight,
+                    child: Padding(
+                      padding: EdgeInsets.only(bottom: 60.0),
+                      child: Transform.scale(
+                        scale: 0.75,
+                        child: FloatingActionButton(
+                          child: Icon(
+                            Icons.camera_alt,
+                            color: Colors.black,
+                          ),
+                          onPressed: () async {
+                            await connectivityService.testInternetConnection()
+                                ? InfoOverlay.showSourceSelectionSheet(context, callback: _startCameraScanner, arg: _listOrRecipe)
+                                : InfoOverlay.showErrorSnackBar("Kein Internetzugriff");
+                          },
+                          backgroundColor: Colors.white,
+                        ),
+                      ),
                     ),
-                    onPressed: () async{
-                      await connectivityService.testInternetConnection() ? InfoOverlay.showSourceSelectionSheet(context, callback: _startCameraScanner, arg: _listOrRecipe)
-                          : InfoOverlay.showErrorSnackBar("Kein Internetzugriff");
-                    },
-                    backgroundColor: Colors.white,
-                  ),
-                ),
-              ),
-            ) : Container(),
+                  )
+                : Container(),
           ]),
           body: Column(children: <Widget>[
             Container(
@@ -217,7 +232,16 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew>  with TickerProvider
               child: Stack(
                 children: <Widget>[
                   Container(
-                    color: Theme.of(context).primaryColor,
+                    color: _user.settings["theme"] != "Verlauf" ? _user.settings["theme"] == "Blau" ? Theme.of(context).primaryColor : CustomColors.shoppyGreen : null,
+                    decoration:  _user.settings["theme"] == "Verlauf" ? BoxDecoration(
+                        gradient: LinearGradient(
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                            colors: <Color>[
+                              CustomColors.shoppyBlue,
+                              CustomColors.shoppyLightBlue,
+                            ]),
+                    ) : null,
                     width: MediaQuery.of(context).size.width,
                     height: 120.0,
                   ),
@@ -276,7 +300,16 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew>  with TickerProvider
             ),
             _searchController.text.length == 0
                 ? Container(
-                    color: Theme.of(context).primaryColor,
+                    color: _user.settings["theme"] != "Verlauf" ? _user.settings["theme"] == "Blau" ? Theme.of(context).primaryColor : CustomColors.shoppyGreen : null,
+                    decoration:  _user.settings["theme"] == "Verlauf" ? BoxDecoration(
+                      gradient: LinearGradient(
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                          colors: <Color>[
+                            CustomColors.shoppyBlue,
+                            CustomColors.shoppyLightBlue,
+                          ]),
+                    ) : null,
                     child: TabBar(
                       controller: _tabController,
                       indicatorColor: Colors.white,
@@ -290,40 +323,48 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew>  with TickerProvider
                       controller: _tabController,
                       children: <Widget>[
                         Container(
-                            child: _listOrRecipe.items.length > 0 ? MediaQuery.removePadding(
-                                removeTop: true,
-                                context: context,
-                                child: ListView.separated(
-                                  itemCount: _listOrRecipe.items.length,
-                                  separatorBuilder: (ctx, i) => Divider(
-                                    indent: 70,
-                                    endIndent: 10,
-                                    color: Colors.grey,
-                                  ),
-                                  itemBuilder: (context, index) {
-                                    _subtract() {
-                                      _subtractCount(_listOrRecipe.items[index].name);
-                                    }
-
-                                    return Container(
-                                      height: 65,
-                                      child: ListTile(
-                                        leading: Padding(
-                                          padding: EdgeInsets.all(8.0),
-                                          child: Icon(Icons.local_dining),
-                                        ),
-                                        title: Text(_listOrRecipe.items[index].name),
-                                        subtitle: Text(_listOrRecipe.items[index].category),
-                                        trailing: ItemCounter(count: _listOrRecipe.items[index].count, subtractCount: _subtract),
-                                        onTap: () {
-                                          _addCount(_listOrRecipe.items[index].name);
-                                        },
+                            child: _listOrRecipe.items.length > 0
+                                ? MediaQuery.removePadding(
+                                    removeTop: true,
+                                    context: context,
+                                    child: ListView.separated(
+                                      itemCount: _listOrRecipe.items.length,
+                                      separatorBuilder: (ctx, i) => Divider(
+                                        indent: 70,
+                                        endIndent: 10,
+                                        color: Colors.grey,
                                       ),
-                                    );
-                                  },
-                                )): Center(child: Text("Noch keine Produkte hinzugefügt", style: Theme.of(context).textTheme.title))), //erster tab
+                                      itemBuilder: (context, index) {
+                                        _subtract() {
+                                          _subtractCount(_listOrRecipe.items[index].name);
+                                        }
+                                        String iconFileName = _listOrRecipe.items[index].category.toLowerCase()
+                                            .replaceAll(RegExp("ü"), "ue")
+                                            .replaceAll(RegExp("ö"), "oe")
+                                            .replaceAll(RegExp("ä"), "ae")
+                                            .replaceAll(RegExp("ß"), "ss")
+                                            .replaceAll(RegExp(" & "), "_")
+                                            .replaceAll(RegExp("allgemein"), "fisch") + ".png";
+                                        return Container(
+                                          height: 65,
+                                          child: ListTile(
+                                            leading: Padding(
+                                              padding: EdgeInsets.all(8.0),
+                                              child: Image(image: AssetImage("assets/icons/" + iconFileName), width: 35,),
+                                            ),
+                                            title: Text(_listOrRecipe.items[index].name),
+                                            subtitle: Text(_listOrRecipe.items[index].category),
+                                            trailing: ItemCounter(count: _listOrRecipe.items[index].count, subtractCount: _subtract),
+                                            onTap: () {
+                                              _addCount(_listOrRecipe.items[index].name);
+                                            },
+                                          ),
+                                        );
+                                      },
+                                    ))
+                                : Center(child: Text("Noch keine Produkte hinzugefügt", style: Theme.of(context).textTheme.title))), //erster tab
 
-                        FutureBuilder(
+                        /*FutureBuilder(
                             future: databaseService.getPopularProducts(),
                             builder: (context, snapshot) {
                               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -371,12 +412,168 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew>  with TickerProvider
                                       );
                                     },
                                   ));
-                            }),
-                        Column(
-                          children: <Widget>[
-                            Text(resultText),
-                          ],
-                        )
+                            }),*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        _popularProducts.length > 0 ? MediaQuery.removePadding(
+                            removeTop: true,
+                            context: context,
+                            child: ListView.separated(
+                              itemCount: _popularProducts.length,
+                              controller: _scrollController,
+                              shrinkWrap: true,
+                              separatorBuilder: (ctx, i) => Divider(
+                                indent: 70,
+                                endIndent: 10,
+                                color: Colors.grey,
+                              ),
+
+                              itemBuilder: (context, index) {
+                                _subtract() {
+                                  _subtractCount(_popularProducts[index].name);
+                                }
+                                String iconFileName = _popularProducts[index].category.toLowerCase()
+                                    .replaceAll(RegExp("ü"), "ue")
+                                    .replaceAll(RegExp("ö"), "oe")
+                                    .replaceAll(RegExp("ä"), "ae")
+                                    .replaceAll(RegExp("ß"), "ss")
+                                    .replaceAll(RegExp(" & "), "_")
+                                    .replaceAll(RegExp("allgemein"), "fisch") + ".png";
+
+                                return Container(
+                                  height: 65,
+                                  child: ListTile(
+                                    leading: Padding(
+                                      padding: EdgeInsets.all(4.0),
+                                      child: Image(image: AssetImage("assets/icons/" + iconFileName), width: 35,),
+                                    ),
+                                    title: Text(_popularProducts[index].name),
+                                    subtitle: Text(_popularProducts[index].category),
+                                    trailing: _listOrRecipe.hasItem(_popularProducts[index].name)
+                                        ? ItemCounter(count: _listOrRecipe.items.firstWhere((i) => i.name == _popularProducts[index].name).count, subtractCount: _subtract)
+                                        : Container(
+                                      width: 0,
+                                      height: 0,
+                                    ),
+                                    onTap: () {
+                                      if (!_listOrRecipe.hasItem(_popularProducts[index].name)) {
+                                        _addItem(new Product(name: _popularProducts[index].name, category: _popularProducts[index].category));
+                                      } else {
+                                        _addCount(_popularProducts[index].name);
+                                      }
+                                    },
+                                  ),
+                                );
+                              },
+                            )) : ShoppyShimmer(),
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        MediaQuery.removePadding(
+                            removeTop: true,
+                            context: context,
+                            child: ListView.builder(
+                              itemCount: categoryService.categories.length,
+                              shrinkWrap: true,
+                              itemBuilder: (ctx, ind) {
+                                //print(List.from(categoryService.categories[ind]["products"]).length);
+                                String iconFileName = List.from(categoryService.categories[ind]["products"])[ind]["category"].toString().toLowerCase()
+                                    .replaceAll(RegExp("ü"), "ue")
+                                    .replaceAll(RegExp("ö"), "oe")
+                                    .replaceAll(RegExp("ä"), "ae")
+                                    .replaceAll(RegExp("ß"), "ss")
+                                    .replaceAll(RegExp(" & "), "_") + ".png";
+                                return Card(
+                                    elevation: 0,
+                                    child: ExpansionTile(
+                                      title: Row(
+                                        children: <Widget>[
+                                          Image(image: AssetImage("assets/icons/" + iconFileName), width: 35,),
+                                          Container(width: 10,),
+                                          Text(categoryService.categories[ind]["category"]),
+                                        ],
+                                      ),
+                                      children: <Widget>[
+                                        ListView.separated(
+                                          itemCount: List.from(categoryService.categories[ind]["products"]).length,
+                                          controller: _scrollController,
+                                          shrinkWrap: true,
+                                          separatorBuilder: (ctx, i) => Divider(
+                                            indent: 70,
+                                            endIndent: 10,
+                                            color: Colors.grey,
+                                          ),
+
+                                          itemBuilder: (context, index) {
+                                            _subtract() {
+                                              _subtractCount(List.from(categoryService.categories[ind]["products"])[index]["name"]);
+                                            }
+                                            String iconFileName = List.from(categoryService.categories[ind]["products"])[index]["category"].toString().toLowerCase()
+                                                .replaceAll(RegExp("ü"), "ue")
+                                                .replaceAll(RegExp("ö"), "oe")
+                                                .replaceAll(RegExp("ä"), "ae")
+                                                .replaceAll(RegExp("ß"), "ss")
+                                                .replaceAll(RegExp(" & "), "_") + ".png";
+
+                                            return Container(
+                                              height: 65,
+                                              child: ListTile(
+                                                leading: Padding(
+                                                  padding: EdgeInsets.all(8.0),
+                                                  child: Image(image: AssetImage("assets/icons/" + iconFileName)),
+                                                ),
+                                                title: Text(List.from(categoryService.categories[ind]["products"])[index]["name"]),
+                                                subtitle: Text(List.from(categoryService.categories[ind]["products"])[index]["category"]),
+                                                trailing: _listOrRecipe.hasItem(List.from(categoryService.categories[ind]["products"])[index]["name"])
+                                                    ? ItemCounter(count: _listOrRecipe.items.firstWhere((i) => i.name == List.from(categoryService.categories[ind]["products"])[index]["name"]).count, subtractCount: _subtract)
+                                                    : Container(
+                                                  width: 0,
+                                                  height: 0,
+                                                ),
+                                                onTap: () {
+                                                  if (!_listOrRecipe.hasItem(List.from(categoryService.categories[ind]["products"])[index]["name"])) {
+                                                    _addItem(new Product(name: List.from(categoryService.categories[ind]["products"])[index]["name"], category: List.from(categoryService.categories[ind]["products"])[index]["category"]));
+                                                  } else {
+                                                    _addCount(List.from(categoryService.categories[ind]["products"])[index]["name"]);
+                                                  }
+                                                },
+                                              ),
+                                            );
+                                          },
+                                        )
+                                      ],
+                                    ));
+                              },
+                              physics: BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                            ))
                       ],
                     ),
                   )
@@ -391,7 +588,7 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew>  with TickerProvider
                               child: ListTile(
                                 leading: Padding(
                                   padding: EdgeInsets.all(8.0),
-                                  child: Icon(Icons.shopping_cart, color: _listOrRecipe.hasItem(_searchController.text) ? Theme.of(context).primaryColor : null),
+                                  child: Icon(Icons.shopping_cart, size: 35, color: _listOrRecipe.hasItem(_searchController.text) ? Theme.of(context).primaryColor : null),
                                 ),
                                 title: Text(_searchController.text),
                                 subtitle: Text("Selbst erstellt"),
@@ -431,12 +628,20 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew>  with TickerProvider
                                               count = _listOrRecipe.items.firstWhere((i) => i.name == _products[index]["name"]).count;
                                             }
 
+                                            String iconFileName = _products[index]["category"].toLowerCase()
+                                                .replaceAll(RegExp("ü"), "ue")
+                                                .replaceAll(RegExp("ö"), "oe")
+                                                .replaceAll(RegExp("ä"), "ae")
+                                                .replaceAll(RegExp("ß"), "ss")
+                                                .replaceAll(RegExp(" & "), "_")
+                                                .replaceAll(RegExp("allgemein"), "fisch") + ".png";
+
                                             return Container(
                                               height: 65,
                                               child: ListTile(
                                                 leading: Padding(
                                                   padding: EdgeInsets.all(8.0),
-                                                  child: Icon(Icons.local_dining, color: _listOrRecipe.hasItem(_products[index]["name"]) ? Theme.of(context).primaryColor : null),
+                                                  child: Image(image: AssetImage("assets/icons/" + iconFileName), width: 35,),
                                                 ),
                                                 title: Text(_products[index]["name"]),
                                                 subtitle: Text(_products[index]["category"]),
@@ -484,7 +689,6 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew>  with TickerProvider
     );
   }
 
-
   /// Starts up the camera scanner and awaits output to process
   Future<void> _startCameraScanner(BuildContext context, ImageSource imageSource, ShoppingList list) async {
     ScannedShoppingList scannedShoppingList = await cameraService.getResultFromCameraScanner(context, imageSource, addToList: list);
@@ -494,8 +698,6 @@ class _SearchItemsViewNew extends State<SearchItemsViewNew>  with TickerProvider
         _requestDatabaseUpdate();
       });
     }
-
     Navigator.pop(context);
   }
-
 }

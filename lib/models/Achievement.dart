@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class Achievement {
+class Achievement implements Comparable{
   final String name;
   final String description;
   final int points;
@@ -25,5 +25,28 @@ class Achievement {
       description: data["description"],
       points: data["points"],
     );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'name': name,
+      'description': description,
+      'points': points,
+    };
+  }
+
+  @override
+  int compareTo(other) {
+    if(this.points > other.points) {
+      return -1;
+    }
+
+    if(this.points < other.points) {
+      return 1;
+    }
+
+    if(this.points == other.points) {
+      return this.name.compareTo(other.name);
+    }
   }
 }

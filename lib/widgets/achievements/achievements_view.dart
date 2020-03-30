@@ -1,10 +1,10 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:listassist/assets/custom_colors.dart';
 import 'package:listassist/models/Achievement.dart';
 import 'package:listassist/models/User.dart';
-import 'package:listassist/services/db.dart';
-import 'package:listassist/services/http.dart';
+import 'package:listassist/services/achievements.dart';
 import 'package:listassist/widgets/shimmer/shoppy_shimmer.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:provider/provider.dart';
@@ -17,23 +17,35 @@ class AchievementsView extends StatefulWidget {
 }
 
 class _AchievementsView extends State<AchievementsView> {
-  List<Achievement> _achievements = [];
+  List<Achievement> _achievements;
 
   @override
   Widget build(BuildContext context) {
     User user = Provider.of<User>(context);
-    initAchievements(user);
+    _achievements = user.achievements;
+    print(_achievements);
+    _achievements.sort((a, b) => a.compareTo(b));
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        title: Text("Errungenschaften"),
+        backgroundColor: Provider.of<User>(context).settings["theme"] == "Blau" ? Theme.of(context).colorScheme.primary : CustomColors.shoppyGreen,
+        title: Text("Erfolge"),
+        flexibleSpace: Provider.of<User>(context).settings["theme"] == "Verlauf" ? Container(
+            decoration: BoxDecoration(
+                gradient: LinearGradient(
+                    begin: Alignment.bottomLeft,
+                    end: Alignment.topRight,
+                    colors: <Color>[
+                      CustomColors.shoppyBlue,
+                      CustomColors.shoppyLightBlue,
+                    ])
+            )) : Container(),
         leading: IconButton(
           icon: Icon(Icons.menu),
           tooltip: "Open navigation menu",
           onPressed: () => mainScaffoldKey.currentState.openDrawer(),
         ),
       ),
-      body: _achievements.length != 0 ? Container(
+      body: Container(
         padding: EdgeInsets.all(8),
         child: Column(
           children: <Widget>[
@@ -41,17 +53,17 @@ class _AchievementsView extends State<AchievementsView> {
               padding: EdgeInsets.only(top: 10, bottom: 30),
               child: Column(
                 children: <Widget>[
-                  Text(_achievements.length.toString() + " / 20 Erfolge", style: TextStyle(fontSize: 20),),
+                  Text(_achievements.length.toString() + " / " + achievementsService.achievements.length.toString() + " Erfolge freigeschaltet", style: TextStyle(fontSize: 20),),
                   LinearPercentIndicator(
                     padding: EdgeInsets.only(top: 20, left: 50, right: 50),
                     lineHeight: 8.0,
-                    percent: _achievements.length/20,
+                    percent: _achievements.length/achievementsService.achievements.length,
                     progressColor: Colors.blueAccent,
                   ),
                 ],
               ),
             ),
-            Expanded(
+            _achievements.length != 0 ? Expanded(
               child: ListView.builder(
                 itemCount: _achievements.length,
                 itemBuilder: (BuildContext context, int index) {
@@ -70,16 +82,10 @@ class _AchievementsView extends State<AchievementsView> {
                   );
                 },
               ),
-            ),
+            ) : Container(),
           ],
         ),
-      ) : ShoppyShimmer(),
+      ),
     );
-  }
-
-  initAchievements(User user) async{
-    _achievements = await databaseService.getUsersUnlockedAchievements(user.uid);
-    setState(() {
-    });
   }
 }

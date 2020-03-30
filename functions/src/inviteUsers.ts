@@ -34,7 +34,7 @@ export const inviteUsers = functions.region("europe-west1").https.onCall(async (
             //TODO: If User already has an invitation or is in group dont send another one
             return Promise.all(
                     targetemails.map((target: string) => db.collection("users")
-                        .where("email", "==", target)
+                        .where("email", "==", target.trim())
                         .get()
                         .then((sn) => {
                             if(!sn.docs && !sn.docs[0]) return null;

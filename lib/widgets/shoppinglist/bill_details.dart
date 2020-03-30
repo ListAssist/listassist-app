@@ -2,8 +2,11 @@ import 'dart:convert';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:listassist/assets/custom_colors.dart';
+import 'package:listassist/models/User.dart';
 import 'package:listassist/services/date_formatter.dart';
 import 'package:photo_view/photo_view.dart';
+import 'package:provider/provider.dart';
 
 class BillDetails extends StatefulWidget {
   final StorageReference image;
@@ -33,7 +36,17 @@ class _BillDetailsState extends State<BillDetails> {
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          backgroundColor: Theme.of(context).colorScheme.primary,
+          backgroundColor: Provider.of<User>(context).settings["theme"] == "Blau" ? Theme.of(context).colorScheme.primary : CustomColors.shoppyGreen,
+          flexibleSpace: Provider.of<User>(context).settings["theme"] == "Verlauf" ? Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.bottomLeft,
+                end: Alignment.topRight,
+                colors: <Color>[
+                  CustomColors.shoppyBlue,
+                  CustomColors.shoppyLightBlue,
+                ])
+            )) : Container(),
           title: Text("Details"),
           bottom: TabBar(
             tabs: [

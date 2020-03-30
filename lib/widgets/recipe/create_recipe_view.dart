@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:listassist/models/ScannedShoppinglist.dart';
 import 'package:listassist/models/User.dart';
 import 'package:listassist/models/Recipe.dart';
+import 'package:listassist/services/achievements.dart';
 import 'package:listassist/services/connectivity.dart';
 import 'package:listassist/services/db.dart';
 import 'package:listassist/services/info_overlay.dart';
@@ -120,6 +121,7 @@ class _CreateRecipeView extends State<CreateRecipeView> {
 
                             DocumentReference docRef = await databaseService.createRecipe(_user.uid, _newRecipe);
                             InfoOverlay.showInfoSnackBar("Rezept ${_newRecipe.name} erstellt");
+                            achievementsService.recipeCreated(_user);
                             controller.reverse();
                             Navigator.pop(context);
 

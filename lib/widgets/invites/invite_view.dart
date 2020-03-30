@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:listassist/assets/custom_colors.dart';
 import 'package:listassist/main.dart';
 import 'package:listassist/models/Invite.dart' as model;
 import 'package:listassist/models/User.dart';
@@ -14,8 +14,18 @@ class InviteView extends StatelessWidget {
     User user = Provider.of<User>(context);
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.primary,
+          backgroundColor: user.settings["theme"] == "Blau" ? Theme.of(context).colorScheme.primary : CustomColors.shoppyGreen,
         title: Text("Einladungen"),
+        flexibleSpace: user.settings["theme"] == "Verlauf" ? Container(
+              decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                      begin: Alignment.bottomLeft,
+                      end: Alignment.topRight,
+                      colors: <Color>[
+                        CustomColors.shoppyBlue,
+                        CustomColors.shoppyLightBlue,
+                      ])
+              )) : Container(),
         leading: IconButton(
           icon: Icon(Icons.menu),
           tooltip: "Open navigation menu",

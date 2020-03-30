@@ -1,5 +1,6 @@
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
+import 'package:listassist/assets/custom_colors.dart';
 import 'package:listassist/main.dart';
 import 'package:listassist/models/CompletedShoppingList.dart' as model2;
 import 'package:listassist/models/ShoppingList.dart' as model;
@@ -20,13 +21,15 @@ class ShoppingListView extends StatefulWidget {
 class _ShoppingListView extends State<ShoppingListView> {
 
   bool first = true;
+  //TODO: Invalid value: Not in range 0..1, inclusive: 2 on group delete
 
   @override
   Widget build(BuildContext context) {
     if(first) {
       User user = Provider.of<User>(context);
+      print(user.settings);
+      print(user.lastAutomaticallyGenerated.toDate());
       if(user.settings != null) {
-        //TODO: Default settings speichern
         if (user.settings["ai_enabled"]) {
           if (user.settings["ai_interval"] != null) {
             if (user.lastAutomaticallyGenerated == null) {
@@ -48,7 +51,7 @@ class _ShoppingListView extends State<ShoppingListView> {
         child: Scaffold(
           floatingActionButton: FloatingActionButton(
             child: Icon(Icons.add),
-            backgroundColor: Theme.of(context).colorScheme.primary,
+            backgroundColor: Provider.of<User>(context).settings["theme"] == "Grün" ? CustomColors.shoppyGreen : Theme.of(context).colorScheme.primary,
             onPressed: () async {
               Navigator.push(
                 context,
@@ -71,9 +74,20 @@ class _ShoppingListView extends State<ShoppingListView> {
             },
           ),
           appBar: AppBar(
-            backgroundColor: Theme.of(context).colorScheme.primary,
+            backgroundColor: Provider.of<User>(context).settings["theme"] == "Blau" ? Theme.of(context).colorScheme.primary : CustomColors.shoppyGreen,
             title: Text("Einkaufslisten"),
+            flexibleSpace: Provider.of<User>(context).settings["theme"] == "Verlauf" ? Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.bottomLeft,
+                  end: Alignment.topRight,
+                  colors: <Color>[
+                    CustomColors.shoppyBlue,
+                    CustomColors.shoppyLightBlue,
+                  ])
+              )) : Container(),
             bottom: TabBar(
+              indicatorColor: Colors.white,
               tabs: [
                 Tab(text: "Zu erledigen"),
                 Tab(text: "Erledigt")
@@ -95,6 +109,7 @@ class _ShoppingListView extends State<ShoppingListView> {
   }
 
   _createAutomaticList() async {
+    print("Creating automatic list");
     final HttpsCallable autoList = cloudFunctionInstance.getHttpsCallable(
         functionName: "createAutomaticList"
     );
@@ -109,7 +124,7 @@ class _ShoppingListView extends State<ShoppingListView> {
         InfoOverlay.showInfoSnackBar("Automatische Einkaufsliste wurde erstellt");
       }
     }catch(e) {
-      InfoOverlay.showErrorSnackBar("Fehler: ${e.message}");
+      //InfoOverlay.showErrorSnackBar("Fehler: ${e.message}");
     }
   }
 

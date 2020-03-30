@@ -19,6 +19,7 @@ export const createAutomaticList = functions.region("europe-west1").https.onCall
         }
     }
 
+    //TODO: was wenn es keine settings gibt?
     const days = doc.data()["settings"]["ai_interval"] || 0;
     const last = doc.data()["last_automatically_generated"] ?
         doc.data()["last_automatically_generated"].toDate() :
@@ -51,7 +52,7 @@ export const createAutomaticList = functions.region("europe-west1").https.onCall
 
     const newList = {
         created: Timestamp.now(),
-        name: `Autogenerierte Liste ${("00" + today.getDate()).substr(-2)}.${("00" + (today.getDate() + 1)).substr(-2)}.${today.getFullYear()}`,
+        name: `Autogenerierte Liste ${("00" + today.getDate()).substr(-2)}.${("00" + (today.getMonth() + 1)).substr(-2)}.${today.getFullYear()}`,
         type: "pending",
         items: recommendedItems
     };
@@ -116,7 +117,7 @@ function recommend(lists: object[]) {
                     bought: false,
                     price: 0,
                     //TODO: Richtige Kategorie einfügen
-                    category: "Generated"
+                    category: "Generiert"
                 }
             );
         }
@@ -144,7 +145,7 @@ function calculateFrequency(lastLists: object[], days: number) {
 
     for (const key in itemFrequency) {
         //@ts-ignore
-        itemFrequency[key] = Math.round(1 / (itemFrequency[key] / days));
+        itemFrequency[key] = Math.round(days / itemFrequency[key]) || 1;
     }
 
     return itemFrequency;
