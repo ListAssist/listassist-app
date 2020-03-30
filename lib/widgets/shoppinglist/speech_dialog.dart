@@ -21,13 +21,11 @@ class _SpeechDialog extends State<SpeechDialog> {
   bool _isListening = false;
   String resultText = "";
 
-
-  BuildContext thisContext;
-
   requestPop() {
 
     Timer(Duration(milliseconds: 1000), () {
-      Navigator.of(widget.dialogContext, rootNavigator: false).pop(resultText);
+      //Navigator.of(widget.dialogContext, rootNavigator: false).pop(resultText);
+      Navigator.of(this.context).pop(resultText);
     });
   }
 
@@ -39,16 +37,17 @@ class _SpeechDialog extends State<SpeechDialog> {
     _speechRecognition.setRecognitionResultHandler((String speech) => setState(() => resultText = speech));
     _speechRecognition.setRecognitionCompleteHandler((String _) => setState(() {
       _isListening = false;
+      _speechRecognition.cancel();
       requestPop();
     }));
     _speechRecognition.activate().then((result) => setState(() => _isAvailable = result));
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-    //_speechRecognition.cancel();
-  }
+//  @override
+//  void dispose() {
+//    super.dispose();
+//    //_speechRecognition.cancel();
+//  }
 
   @override
   void initState() {
@@ -58,7 +57,6 @@ class _SpeechDialog extends State<SpeechDialog> {
 
   @override
   Widget build(BuildContext context) {
-    thisContext = context;
     if(_isAvailable && !_isListening){
       _speechRecognition.listen(locale: "de_AT").then((result) {
         print("$result");

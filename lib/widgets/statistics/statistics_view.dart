@@ -52,7 +52,7 @@ class _StatisticsView extends State<StatisticsView> {
             onPressed: () => mainScaffoldKey.currentState.openDrawer(),
           ),
         ),
-        body: nothingBought ? SingleChildScrollView(
+        body: !nothingBought ? SingleChildScrollView(
           child: Column(
             children: <Widget>[
               Padding(
@@ -136,12 +136,15 @@ class _StatisticsView extends State<StatisticsView> {
       }
     });
     items.remove(helper);
+    print(items);
 
     if(items.length == 0) {
       setState(() {
         nothingBought = true;
       });
       return [];
+    } else {
+      nothingBought = false;
     }
 
     items.sort((a, b) => b.count - a.count);
