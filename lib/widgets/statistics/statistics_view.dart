@@ -52,7 +52,7 @@ class _StatisticsView extends State<StatisticsView> {
             onPressed: () => mainScaffoldKey.currentState.openDrawer(),
           ),
         ),
-        body: nothingBought ? SingleChildScrollView(
+        body: !nothingBought ? SingleChildScrollView(
           child: Column(
             children: <Widget>[
               Padding(
@@ -102,17 +102,18 @@ class _StatisticsView extends State<StatisticsView> {
     List<Item> items = [helper];
     lists.forEach((shoppingList) {
       for (var i = 0; i < shoppingList.items.length; i++) {
-        if (shoppingList.items[i].bought == false) break;
-        for (var j = 0; j < items.length; j++) {
-          if (shoppingList.items[i].name == items[j].name) {
-            //Wenn dieses Item bereits in items ist
-            items[j].count += shoppingList.items[i].count;
-            break;
-          }
-          if (j == items.length - 1) {
-            //Wenn dieses Item noch nicht in items ist
-            items.add(new Item(name: shoppingList.items[i].name, count: shoppingList.items[i].count, bought: true));
-            break;
+        if (shoppingList.items[i].bought) {
+          for (var j = 0; j < items.length; j++) {
+            if (shoppingList.items[i].name == items[j].name) {
+              //Wenn dieses Item bereits in items ist
+              items[j].count += shoppingList.items[i].count;
+              break;
+            }
+            if (j == items.length - 1) {
+              //Wenn dieses Item noch nicht in items ist
+              items.add(new Item(name: shoppingList.items[i].name, count: shoppingList.items[i].count, bought: true));
+              break;
+            }
           }
         }
       }
@@ -136,12 +137,18 @@ class _StatisticsView extends State<StatisticsView> {
       }
     });
     items.remove(helper);
+    print(items.length);
 
     if(items.length == 0) {
+      print("Jo");
       setState(() {
         nothingBought = true;
       });
       return [];
+    } else {
+      setState(() {
+        nothingBought = false;
+      });
     }
 
     items.sort((a, b) => b.count - a.count);
